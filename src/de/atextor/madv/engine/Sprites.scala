@@ -6,12 +6,6 @@ import de.atextor.madv.engine.Util._
 import org.newdawn.slick.SpriteSheet
 import org.newdawn.slick.Animation
 
-sealed abstract class Direction(val id: Int)
-case object Up    extends Direction(0)
-case object Left  extends Direction(1)
-case object Down  extends Direction(2)
-case object Right extends Direction(3)
-
 sealed abstract class Action(
   val frames: Int,
   val delay: Duration,
@@ -36,9 +30,9 @@ sealed abstract class Part(name: String) {
   import Memoize._
   val getAnimation = memoize(animation _)
     
-  def draw(d: Direction, a: Action, x: Int, y: Int) {
+  def draw(d: Direction, a: Action, position: Vec2d) {
     val ani = getAnimation(d, a)
-    ani.draw(x, y)
+    ani.draw(position.x, position.y)
   }
 }
 case class Weapon(name: String) extends Part("weapon_" + name)
@@ -62,17 +56,17 @@ case class EntitySkin(
     feet: List[Feet] = Nil,
     body: List[Body] = Nil,
     behind: List[Behind] = Nil) {
-  def draw(d: Direction, a: Action, x: Int, y: Int) {
+  def draw(d: Direction, a: Action, position: Vec2d) {
     // optimal drawing order taken from artists readme :)
-    behind foreach (_.draw(d, a, x, y))
-    body foreach (_.draw(d, a, x, y))
-    feet foreach (_.draw(d, a, x, y))
-    legs foreach (_.draw(d, a, x, y))
-    torso foreach (_.draw(d, a, x, y))
-    belt foreach (_.draw(d, a, x, y))
-    head foreach (_.draw(d, a, x, y))
-    hands foreach (_.draw(d, a, x, y))
-    weapon foreach (_.draw(d, a, x, y))
+    behind foreach (_.draw(d, a, position))
+    body foreach (_.draw(d, a, position))
+    feet foreach (_.draw(d, a, position))
+    legs foreach (_.draw(d, a, position))
+    torso foreach (_.draw(d, a, position))
+    belt foreach (_.draw(d, a, position))
+    head foreach (_.draw(d, a, position))
+    hands foreach (_.draw(d, a, position))
+    weapon foreach (_.draw(d, a, position))
   }
 }
   

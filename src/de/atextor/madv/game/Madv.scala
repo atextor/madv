@@ -7,7 +7,18 @@ import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
 
-import de.atextor.madv.engine._
+import de.atextor.madv.engine.Belt
+import de.atextor.madv.engine.Body
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.EntitySkin
+import de.atextor.madv.engine.Feet
+import de.atextor.madv.engine.Head
+import de.atextor.madv.engine.Hurt
+import de.atextor.madv.engine.Slash
+import de.atextor.madv.engine.Spellcast
+import de.atextor.madv.engine.Torso
+import de.atextor.madv.engine.Vec2d
+import de.atextor.madv.engine.Walk
 
 class Madv extends BasicGame("Madv") {
   var container: GameContainer = null
@@ -36,7 +47,7 @@ class Madv extends BasicGame("Madv") {
   
   def render(container: GameContainer, g: Graphics) {
     g.scale(2, 2)
-    test.draw(Down, Walk, 160, 50)
+    test.draw(Down, Walk, Vec2d(160, 50))
   }
   
   override def keyPressed(key: Int, c: Char) {
