@@ -7,17 +7,7 @@ import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
 
-import de.atextor.madv.engine.Belt
-import de.atextor.madv.engine.Body
-import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.Feet
-import de.atextor.madv.engine.Head
-import de.atextor.madv.engine.Hurt
-import de.atextor.madv.engine.Slash
-import de.atextor.madv.engine.Spellcast
-import de.atextor.madv.engine.Torso
-import de.atextor.madv.engine.Walk
+import de.atextor.madv.engine._
 
 class Madv extends BasicGame("Madv") {
   var container: GameContainer = null
@@ -32,6 +22,10 @@ class Madv extends BasicGame("Madv") {
   
   def init(container: GameContainer) {
     this.container = container
+//    test = EntitySkin(List(Hurt, Slash, Spellcast, Walk),
+//        body = List(Body("skeleton")),
+//        head = List(Head("chain_armor_hood")),
+//        torso = List(Torso("plate_armor_arms_shoulders")))
     test = EntitySkin(List(Hurt, Slash, Spellcast, Walk),
         body = List(Body("female")),
         head = List(Head("female_darkblondehair")),
