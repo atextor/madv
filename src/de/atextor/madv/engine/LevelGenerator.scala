@@ -24,24 +24,24 @@ case class Cell(x: Int, y: Int) {
   def +(c: Cell) = Cell(x + c.x, y + c.y)
 }
 
-case class CellularAutomaton(val width: Int, val height: Int, val cells: Set[Cell] = Set()) {
+case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set[Cell] = Set()) {
   def allCells = (for (x <- 0 until width; y <- 0 until height) yield Cell(x, y))
-  def isAlive(c: Cell) = cells contains c
+  def isAlive(c: Cell) = liveCells contains c
   def inGrid(c: Cell) = c.x >= 0 && c.y >= 0 && c.x < width && c.y < height
   def isDead(c: Cell) = !isAlive(c)
   def neighborCount(c: Cell) = c.neighbors filter inGrid map isAlive filter identity size
   def randomCell = Cell(Random.nextInt(width - 1), Random.nextInt(height - 1))
   def randomDeadCell = Stream continually randomCell find isDead get
-  def randomFill(density: Double) = copy(cells =
+  def randomFill(density: Double) = copy(liveCells =
     Stream.continually(randomDeadCell).take((width * height * density).toInt).toSet)
-  def addBorder = copy(cells = (cells ++
+  def addBorder = copy(liveCells = (liveCells ++
     (0 until height).map(Cell(0, _)).toSet ++
     (0 until height).map(Cell(width - 1, _)).toSet ++
     (0 until width).map(Cell(_, 0)).toSet ++
     (0 until width).map(Cell(_, height - 1)).toSet))
-  def apply(r: Rule) = copy(cells = (allCells.toSet.filter(c => neighborCount(c).
+  def apply(r: Rule) = copy(liveCells = (allCells.toSet.filter(c => neighborCount(c).
     |> (nc => (isAlive(c) && r.survive.contains(nc)) || (isDead(c) && r.born.contains(nc))))))
-  def upscale = copy(width * 2, height * 2, cells.map(c => Cell(c.x * 2, c.y * 2)).flatMap(c =>
+  def upscale = copy(width * 2, height * 2, liveCells.map(c => Cell(c.x * 2, c.y * 2)).flatMap(c =>
     Set(c, Cell(c.x + 1, c.y), Cell(c.x, c.y + 1), Cell(c.x + 1, c.y + 1)))) 
     
   // Returns a set of connected areas of live cells
@@ -60,7 +60,7 @@ case class CellularAutomaton(val width: Int, val height: Int, val cells: Set[Cel
     def allAreas(a: Area, areas: Set[Area] = Set()): Set[Area] = if (a isEmpty) areas else
       fill(a head, a, Set()) |> (filled => allAreas(filled._1, areas + filled._2))
     
-    allAreas(cells)
+    allAreas(liveCells)
   }
   
   def border(a: Area) = a filter(neighborCount(_) < 8)

@@ -15,7 +15,7 @@ case class Humanoid(
     behavior: (Int => Unit),
     direction: Direction,
     action: Action,
-    position: Vec2d) extends Entity(skin) {
+    position: Vec) extends Entity(skin) {
   def tick(delta: Int) = behavior(delta)
   def draw = skin.draw(direction, action, position)
 }

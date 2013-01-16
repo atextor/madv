@@ -30,10 +30,7 @@ sealed abstract class Part(name: String) {
   import Memoize._
   val getAnimation = memoize(animation _)
     
-  def draw(d: Direction, a: Action, position: Vec2d) {
-    val ani = getAnimation(d, a)
-    ani.draw(position.x, position.y)
-  }
+  def draw(d: Direction, a: Action, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
 }
 case class Weapon(name: String) extends Part("weapon_" + name)
 case class Hands(name: String) extends Part("hands_" + name)
@@ -56,7 +53,7 @@ case class EntitySkin(
     feet: List[Feet] = Nil,
     body: List[Body] = Nil,
     behind: List[Behind] = Nil) {
-  def draw(d: Direction, a: Action, position: Vec2d) {
+  def draw(d: Direction, a: Action, position: Vec) {
     // optimal drawing order taken from artists readme :)
     behind foreach (_.draw(d, a, position))
     body foreach (_.draw(d, a, position))

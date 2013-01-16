@@ -8,8 +8,8 @@ case object Down  extends Direction(id = 2, x = 0,  y = 1)
 case object Right extends Direction(id = 3, x = 1,  y = 0)
 
 case class Vec2d(override val x: Int, override val y: Int) extends Vec(x, y) {
-  def +(v: Vec2d): Vec2d = Vec2d(x + v.x, y + v.y)
-  def -(v: Vec2d): Vec2d = Vec2d(x - v.x, y - v.y)
-  def *(f: Int): Vec2d = Vec2d(x * f, y * f)
-  def /(f: Int): Vec2d = Vec2d(x / f, y / f)
+  def +(v: Vec): Vec = Vec2d(x + v.x, y + v.y)
+  def -(v: Vec): Vec = Vec2d(x - v.x, y - v.y)
+  def *(f: Int): Vec = Vec2d(x * f, y * f)
+  def /(f: Int): Vec = Vec2d(x / f, y / f)
 }

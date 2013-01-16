@@ -56,7 +56,7 @@ object Main extends SimpleSwingApplication {
           neighbors = Set()
           scale = 5
           areas = Set()
-          grid = CellularAutomaton(width = 50, height = 50, cells = Set()).randomFill(factor.text.toDouble)
+          grid = CellularAutomaton(width = 50, height = 50, liveCells = Set()).randomFill(factor.text.toDouble)
           repaint()
         case ButtonClicked(`fill`) =>
           areas = grid.areas
