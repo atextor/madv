@@ -1,6 +1,7 @@
 package de.atextor.madv.engine
 
 import scala.language.postfixOps
+
 import scala.language.reflectiveCalls
 import scala.util.Random
 import Util.pipelineSyntax
@@ -18,14 +19,15 @@ object CellularAutomaton {
   type Area = Set[Cell]
 }
 
-case class Cell(x: Int, y: Int) {
-  def neighbors = (for (ox <- -1 to 1; oy <- -1 to 1) yield
-    Cell(x + ox, y + oy)).toList.filterNot(_ == this)
-  def +(c: Cell) = Cell(x + c.x, y + c.y)
+case class Cell(override val x: Int, override val y: Int) extends Vec(x, y) {
+  def neighbors = (for (ox <- -1 to 1; oy <- -1 to 1)
+    yield Cell(x + ox, y + oy)).toList.filterNot(_ == this)
+  def +[T <: Vec](c: T) = Cell(x + c.x, y + c.y)
+  def -[T <: Vec](c: T) = Cell(x - c.x, y - c.y)
 }
 
 case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set[Cell] = Set()) {
-  def allCells = (for (x <- 0 until width; y <- 0 until height) yield Cell(x, y))
+  def allCells = (for (y <- 0 until height; x <- 0 until width) yield Cell(x, y))
   def isAlive(c: Cell) = liveCells contains c
   def inGrid(c: Cell) = c.x >= 0 && c.y >= 0 && c.x < width && c.y < height
   def isDead(c: Cell) = !isAlive(c)
@@ -34,11 +36,12 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
   def randomDeadCell = Stream continually randomCell find isDead get
   def randomFill(density: Double) = copy(liveCells =
     Stream.continually(randomDeadCell).take((width * height * density).toInt).toSet)
-  def addBorder = copy(liveCells = (liveCells ++
+  def addLiveBorder = copy(liveCells = (liveCells ++
     (0 until height).map(Cell(0, _)).toSet ++
     (0 until height).map(Cell(width - 1, _)).toSet ++
     (0 until width).map(Cell(_, 0)).toSet ++
     (0 until width).map(Cell(_, height - 1)).toSet))
+  def addDeadBorder = copy(width + 2, height + 2, liveCells.map(c => Cell(c.x + 2, c.y + 2)))
   def apply(r: Rule) = copy(liveCells = (allCells.toSet.filter(c => neighborCount(c).
     |> (nc => (isAlive(c) && r.survive.contains(nc)) || (isDead(c) && r.born.contains(nc))))))
   def upscale = copy(width * 2, height * 2, liveCells.map(c => Cell(c.x * 2, c.y * 2)).flatMap(c =>

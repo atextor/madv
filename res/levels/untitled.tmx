@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="6" height="6" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" name="Cave" tilewidth="16" tileheight="16">
+  <image source="../../../../../../import/users/users/a_textor/gfx/cave.png" width="256" height="336"/>
+  <tile id="17">
+   <properties>
+    <property name="floor" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="6" height="6">
+  <data>
+   <tile gid="1"/>
+   <tile gid="2"/>
+   <tile gid="2"/>
+   <tile gid="2"/>
+   <tile gid="3"/>
+   <tile gid="51"/>
+   <tile gid="17"/>
+   <tile gid="18"/>
+   <tile gid="18"/>
+   <tile gid="18"/>
+   <tile gid="19"/>
+   <tile gid="51"/>
+   <tile gid="17"/>
+   <tile gid="18"/>
+   <tile gid="18"/>
+   <tile gid="18"/>
+   <tile gid="19"/>
+   <tile gid="51"/>
+   <tile gid="33"/>
+   <tile gid="65"/>
+   <tile gid="232"/>
+   <tile gid="66"/>
+   <tile gid="35"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="17"/>
+   <tile gid="232"/>
+   <tile gid="19"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+   <tile gid="51"/>
+  </data>
+ </layer>
+</map>

@@ -10,7 +10,8 @@ class Madv extends StateBasedGame("Madv") {
   
   def initStatesList(gc: GameContainer) {
     container = gc
-    addState(new TitleScreen)
+//    addState(new TitleScreen)
+    addState(new LevelTest)
   }
   
   override def keyPressed(key: Int, c: Char) {

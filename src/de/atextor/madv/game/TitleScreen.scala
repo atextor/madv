@@ -1,22 +1,22 @@
 package de.atextor.madv.game
 
-import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.GameContainer
-import org.newdawn.slick.state.StateBasedGame
 import org.newdawn.slick.Graphics
+import org.newdawn.slick.state.BasicGameState
+import org.newdawn.slick.state.StateBasedGame
+
+import de.atextor.madv.engine.Belt
+import de.atextor.madv.engine.Body
+import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.EntitySkin
+import de.atextor.madv.engine.Feet
+import de.atextor.madv.engine.Head
 import de.atextor.madv.engine.Hurt
 import de.atextor.madv.engine.Slash
 import de.atextor.madv.engine.Spellcast
-import de.atextor.madv.engine.Walk
-import de.atextor.madv.engine.Head
-import de.atextor.madv.engine.Belt
 import de.atextor.madv.engine.Torso
-import de.atextor.madv.engine.Feet
-import de.atextor.madv.engine.Body
-import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Vec2d
-import org.newdawn.slick.Input
+import de.atextor.madv.engine.Walk
 
 class TitleScreen extends BasicGameState {
   override val getID = 1
