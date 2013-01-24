@@ -23,7 +23,6 @@ case class Cell(override val x: Int, override val y: Int) extends Vec(x, y) {
   def neighbors = (for (ox <- -1 to 1; oy <- -1 to 1)
     yield Cell(x + ox, y + oy)).toList.filterNot(_ == this)
   def +[T <: Vec](c: T) = Cell(x + c.x, y + c.y)
-  def -[T <: Vec](c: T) = Cell(x - c.x, y - c.y)
 }
 
 case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set[Cell] = Set()) {
