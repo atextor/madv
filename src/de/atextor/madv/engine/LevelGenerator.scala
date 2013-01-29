@@ -26,7 +26,7 @@ case class Cell(override val x: Int, override val y: Int) extends Vec(x, y) {
 }
 
 case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set[Cell] = Set()) {
-  def allCells = (for (y <- 0 until height; x <- 0 until width) yield Cell(x, y))
+  lazy val allCells = (for (y <- 0 until height; x <- 0 until width) yield Cell(x, y))
   def isAlive(c: Cell) = liveCells contains c
   def inGrid(c: Cell) = c.x >= 0 && c.y >= 0 && c.x < width && c.y < height
   def isDead(c: Cell) = !isAlive(c)
@@ -45,7 +45,13 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
     |> (nc => (isAlive(c) && r.survive.contains(nc)) || (isDead(c) && r.born.contains(nc))))))
   def upscale = copy(width * 2, height * 2, liveCells.map(c => Cell(c.x * 2, c.y * 2)).flatMap(c =>
     Set(c, Cell(c.x + 1, c.y), Cell(c.x, c.y + 1), Cell(c.x + 1, c.y + 1)))) 
-    
+  lazy val potholes = allCells.collect(_ match {
+    case c if isDead(c) && isAlive(c + Up) && isAlive(c + Down) => c
+    case c if isDead(c) && isAlive(c + Left) && isAlive(c + Right) => c
+    case c if isDead(c) && isAlive(c + UpLeft) && isAlive(c + DownRight) => c
+    case c if isDead(c) && isAlive(c + UpRight) && isAlive(c + DownLeft) => c
+  }).toSet
+  
   // Returns a set of connected areas of live cells
   def areas: Set[Area] = {
     // Recursive flood fill

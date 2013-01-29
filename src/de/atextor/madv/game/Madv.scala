@@ -25,5 +25,6 @@ class Madv extends StateBasedGame("Madv") {
 object Madv extends App {
   val container = new AppGameContainer(new Madv)
   container.setDisplayMode(800, 600, false)
+  container.setTargetFrameRate(60)
   container.start
 }
