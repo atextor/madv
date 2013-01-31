@@ -2,6 +2,7 @@ package de.atextor.madv.engine
 
 import scala.language.reflectiveCalls
 import scala.language.postfixOps
+import scala.concurrent.duration._
 import de.atextor.madv.engine.Util._
 import org.newdawn.slick.SpriteSheet
 import org.newdawn.slick.Animation
@@ -10,12 +11,12 @@ sealed abstract class Action(
   val frames: Int,
   val delay: Duration,
   val spriteRow: (Direction => Int) = _.id)
-case object Bow extends Action(13, 100 ms)
-case object Hurt extends Action(6, 150 ms, (_ => 0))
-case object Slash extends Action(6, 100 ms)
-case object Spellcast extends Action(7, 100 ms)
-case object Thrust extends Action(8, 100 ms)
-case object Walk extends Action(9, 120 ms)
+case object Bow extends Action(13, 100 milliseconds)
+case object Hurt extends Action(6, 150 milliseconds, (_ => 0))
+case object Slash extends Action(6, 100 milliseconds)
+case object Spellcast extends Action(7, 100 milliseconds)
+case object Thrust extends Action(8, 100 milliseconds)
+case object Walk extends Action(9, 120 milliseconds)
 
 sealed abstract class Part(name: String) {
   private def animation(d: Direction, a: Action): Animation = {
