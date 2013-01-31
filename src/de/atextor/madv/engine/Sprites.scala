@@ -11,12 +11,12 @@ sealed abstract class Action(
   val frames: Int,
   val delay: Duration,
   val spriteRow: (Direction => Int) = _.id)
-case object Bow extends Action(13, 100 milliseconds)
-case object Hurt extends Action(6, 150 milliseconds, (_ => 0))
-case object Slash extends Action(6, 100 milliseconds)
-case object Spellcast extends Action(7, 100 milliseconds)
-case object Thrust extends Action(8, 100 milliseconds)
-case object Walk extends Action(9, 120 milliseconds)
+case object Bow extends Action(13, 100 millis)
+case object Hurt extends Action(6, 150 millis, (_ => 0))
+case object Slash extends Action(6, 100 millis)
+case object Spellcast extends Action(7, 100 millis)
+case object Thrust extends Action(8, 100 millis)
+case object Walk extends Action(9, 120 millis)
 
 sealed abstract class Part(name: String) {
   private def animation(d: Direction, a: Action): Animation = {

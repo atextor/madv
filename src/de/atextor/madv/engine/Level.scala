@@ -1,5 +1,6 @@
 package de.atextor.madv.engine
 
+import scala.language.postfixOps
 import org.newdawn.slick.Animation
 import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
@@ -41,9 +42,9 @@ abstract class CaveDefinition {
     List((0, 7), (1, 7), (3, 7), (0, 8), (1, 8), (3, 8), (3, 9), (4, 9)).map((sheet.getSprite _).tupled(_))
   def floor: Renderable = {
     if (Random.nextInt(100) > 5) {
-      standardFloors(Random.nextInt(standardFloors.size)) 
+      Random shuffle standardFloors head
     } else {
-      floorVariations(Random.nextInt(floorVariations.size))
+      Random shuffle floorVariations head
     }
   }
 }
@@ -71,7 +72,7 @@ case object LavaCave extends CaveDefinition {
       ani.addFrame(sheet.getSprite(x, 19), 500)
       ani.addFrame(sheet.getSprite(x, 20), 500)
     }
-    ani.setPingPong(true)
+    ani setPingPong true
     ani
   }
   val topLeft = StackedRenderable(space, sheet.getSprite(0, 11))
@@ -122,19 +123,19 @@ case object BlackCave extends CaveDefinition {
   
 object Level {
   // for debugging only
-  val scale = 2
+  val scale = 4
   
-  private def fixPotholes(ca: CellularAutomaton): CellularAutomaton = {
+  def fixPotholes(ca: CellularAutomaton): CellularAutomaton = {
     lazy val fixedCa: Stream[CellularAutomaton] =
       ca #:: fixedCa.map(ca => ca.copy(liveCells = ca.liveCells ++ ca.potholes))
-    fixedCa.find(_.potholes.size == 0).get
+    fixedCa find(_.potholes.size == 0) get
   }
   
   def fromCellularAutomaton(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
-    val fixed = fixPotholes(ca)
-    val alive = fixed.isAlive _
-    val dead = fixed.isDead _
-    val levelCells = fixed.allCells.map (_ match {
+//    val fixed = fixPotholes(ca)
+    val alive = ca.isAlive _
+    val dead = ca.isDead _
+    val levelCells = ca.allCells.map (_ match {
       case c if alive(c) => LevelCell(cd.floor, walkable = true)
       case c if alive(c + Down) && dead(c + Left) && dead(c + Right) => LevelCell(cd.top, walkable = false)
       case c if alive(c + Up) && dead(c + Left) && dead(c + Right)   => LevelCell(cd.bottom, walkable = false)

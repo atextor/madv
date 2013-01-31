@@ -2,6 +2,14 @@ package de.atextor.madv.engine
 
 import scala.language.postfixOps
 
+/*
+ * This module implements a cellular automaton for level generation, as described in
+ * http://jeremykun.com/2012/07/29/the-cellular-automaton-method-for-cave-generation/
+ * 
+ * Furthermore, it includes algorithms to separate single caves (using recursive flood fill)
+ * and detection of adjacent caves.
+ */
+
 import scala.language.reflectiveCalls
 import scala.util.Random
 import Util.pipelineSyntax
@@ -51,6 +59,7 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
     case c if isDead(c) && isAlive(c + UpLeft) && isAlive(c + DownRight) => c
     case c if isDead(c) && isAlive(c + UpRight) && isAlive(c + DownLeft) => c
   }).toSet
+  def invert = copy(liveCells = allCells.toSet -- liveCells)
   
   // Returns a set of connected areas of live cells
   def areas: Set[Area] = {
@@ -73,7 +82,7 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
   
   def border(a: Area) = a filter(neighborCount(_) < 8)
   def innerArea(a: Area) = a -- border(a) 
-  def sortAreasBySize(a: Set[Area]): List[Area] = a.toList.sortBy(_.map(neighborCount(_)).sum)
+  def sortAreasBySize(a: Set[Area]): List[Area] = a.toList.sortBy(_.size)
   def findNeighborAreas(areas: List[Area]): Set[(Area, Area)] = {
     def grow(a: Area) = a flatMap(c => c.neighbors.toSet + c)
     // Grow the hd area until it intersects with one of the tl areas.
@@ -87,6 +96,14 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
     ).filterNot(a => a._1 == a._2)
   }
   
+  def printGrid {
+    for (y <- 0 to height - 1) {
+      for (x <- 0 to width - 1) {
+        print (if (isAlive(Cell(x, y))) "#" else ".")
+      }
+      println
+    }
+  }
 }
 
 object GridTest extends App {

@@ -30,21 +30,14 @@ import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.BlueCave
+import de.atextor.madv.engine.Util.pipelineSyntax
+import de.atextor.madv.engine.LavaCave
 
 class LevelTest extends BasicGameState {
   override val getID = 1
   
   val f: Future[String] = future {
     "hallo"
-  }
-  
-  def printGrid(g: CellularAutomaton) {
-    for (y <- 0 to g.height - 1) {
-      for (x <- 0 to g.width - 1) {
-        print (if (g.isAlive(Cell(x, y))) "#" else ".")
-      }
-      println
-    }
   }
   
   var test: EntitySkin = null
@@ -64,11 +57,13 @@ class LevelTest extends BasicGameState {
   future {
     val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
     val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
-    val ca = CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth).addDeadBorder
+    val ca = CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.
+      |> (Level.fixPotholes(_))
+    val area = ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)
 //    implicit val caveDef = LavaCave
-    implicit val caveDef = BlueCave
+//    implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
-    Level fromCellularAutomaton ca
+    Level fromCellularAutomaton area
   } onSuccess { case m => gameMap = Some(m) }
   
   def init(gc: GameContainer, game: StateBasedGame) {

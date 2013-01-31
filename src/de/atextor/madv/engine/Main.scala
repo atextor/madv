@@ -1,5 +1,6 @@
 package de.atextor.madv.engine
 
+import scala.language.postfixOps
 import swing._
 import event._
 import scala.util.Random
@@ -20,7 +21,7 @@ object Main extends SimpleSwingApplication {
   val smoothRule = new Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
   var grid = CellularAutomaton(50, 50, Set()).randomFill(0.5)
   var scale = 5
-    
+  
   override def top: Frame = frame
   val frame = new MainFrame {
     title = "GOL"
@@ -28,15 +29,17 @@ object Main extends SimpleSwingApplication {
       background = AWTColor.white
       preferredSize = new Dimension(800, 700)
       val factor = new TextField("0.5")
+      val cavesize = new TextField("50")
       val cave = new Button("Cave")
       val smooth = new Button("Smooth")
       val upscale = new Button("Upscale")
       val reset = new Button("Reset")
       val fill = new Button("Fill")
       val neigh = new Button("Neighbors")
+      val fixpotholes = new Button("Fix Potholes")
       
-      contents.append(mainPanel, factor, cave, smooth, upscale, reset, fill, neigh)
-      listenTo(cave, smooth, upscale, reset, fill, neigh)
+      contents.append(mainPanel, factor, cavesize, cave, smooth, upscale, reset, fill, neigh, fixpotholes)
+      listenTo(cave, smooth, upscale, reset, fill, neigh, fixpotholes)
       reactions += {
         case ButtonClicked(`cave`) =>
           areas = Set()
@@ -56,13 +59,17 @@ object Main extends SimpleSwingApplication {
           neighbors = Set()
           scale = 5
           areas = Set()
-          grid = CellularAutomaton(width = 50, height = 50, liveCells = Set()).randomFill(factor.text.toDouble)
+          grid = CellularAutomaton(width = cavesize.text.toInt, height = cavesize.text.toInt,
+              liveCells = Set()).randomFill(factor.text.toDouble)
           repaint()
         case ButtonClicked(`fill`) =>
           areas = grid.areas
           repaint()
         case ButtonClicked(`neigh`) =>
           neighbors = grid.areas |> (grid.sortAreasBySize(_)) |> (grid.findNeighborAreas(_))
+          repaint()
+        case ButtonClicked(`fixpotholes`) =>
+          grid = Level.fixPotholes(grid)
           repaint()
       }
     }
