@@ -139,7 +139,7 @@ case object StairsEntry {
   
 object Level {
   // for debugging only
-  val scale = 1
+  val scale = 2
   
   def fromCellularAutomaton(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
     val alive = ca.isAlive _
@@ -168,18 +168,27 @@ object Level {
   }
 }
   
-case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell]) {
-  def at(x: Int, y: Int) = cells(x + y * width)
+case class Level(width: Int, height: Int, val cells: IndexedSeq[LevelCell]) {
+  def at(x: Int, y: Int): LevelCell = cells(x + y * width)
+  def at(p: Vec): LevelCell = at((p.x + 8) / 16, (p.y + 8) / 16)
+  def indexToVec(index: Int) = Vec2d(index % width, index / width)
+  
+  def blockToScreenX(x: Int, offsetX: Int) = x * 16 - offsetX + 95
+  def blockToScreenY(y: Int, offsetY: Int) = y * 16 - offsetY + 70
+  
   
   def draw(offset: Vec2d, layer: Int) {
+    val p = Vec2d(offset.x / 16, offset.y / 16)
     val blockOffsetX = (offset.x + 8) / 16
     val blockOffsetY = (offset.y + 8) / 16
     val window = 40 / Level.scale
     for (x <- blockOffsetX - window to blockOffsetX + window;
          y <- blockOffsetY - window to blockOffsetY + window) {
       val tile = if (x > 0 && x < width && y > 0 && y < height) at(x, y).layer(layer) else at(0, 0).layer(layer)
-      tile.foreach(_.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100))
+//      tile.foreach(_.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100))
+      tile.foreach(_.draw(blockToScreenX(x, offset.x), blockToScreenY(y, offset.y)))
     }
+//    at(0, 0).layer(0).foreach(r => r.draw(blockToScreenX(p.x, offset.x), blockToScreenY(p.y, offset.y)))
   }
 }
   

@@ -1,25 +1,25 @@
 package de.atextor.madv.game
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.future
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
-import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
+import de.atextor.madv.engine.BlackCave
 import de.atextor.madv.engine.Cell
 import de.atextor.madv.engine.CellularAutomaton
-import de.atextor.madv.engine.Direction
 import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.Entity
+import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.Right
+import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Vec2d
-import de.atextor.madv.engine.Scene
-import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.Walk
+import de.atextor.madv.engine.Walkable
 
 class LevelTest extends Scene {
   override val getID = 1
@@ -28,9 +28,9 @@ class LevelTest extends Scene {
       skin = Entities.playerSkin,
       spriteAction = Walk,
       startPosition = Vec2d(160, 90),
-      speed = 10
+      speed = 5
   ) {
-    override def draw = {}//skin.draw(lookingDirection, spriteAction, Vec2d(160, 90))
+    override def draw = skin.draw(lookingDirection, spriteAction, Vec2d(160, 90))
   }
   
   var gameMap: Option[Level] = None
@@ -44,7 +44,7 @@ class LevelTest extends Scene {
     Level fromCellularAutomaton ca
   }
   
-  future {
+  val levelFuture: Future[Level] = future {
     val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
     val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
     val ca = CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes
@@ -53,14 +53,23 @@ class LevelTest extends Scene {
 //    implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
     Level fromCellularAutomaton area
-  } onSuccess { case m => gameMap = Some(m) }
+  }
   
   def init(gc: GameContainer, game: StateBasedGame) {
+    levelFuture onSuccess { case m =>
+      gameMap = Some(m)
+      val firstWalkable = m.cells.
+        find(_.properties contains Walkable).
+        map(m.cells.indexOf(_)).
+        map(m.indexToVec(_)).get
+      println("Firstwalkable: " + firstWalkable)
+      player.pos = Vec2d(firstWalkable.x * 16 + 8, firstWalkable.y * 16 + 8)
+    }
     entities += player
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
-    g.scale(4, 4)
+    g.scale(2, 2)
     gameMap.foreach(l => l.draw(player.pos, layer = 0))
     g.scale(0.5f, 0.5f)
     entities.foreach(_.draw)
