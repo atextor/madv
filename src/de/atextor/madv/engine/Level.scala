@@ -7,10 +7,17 @@ import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 import scala.util.Random
 
+sealed abstract class CellProperty
+case object Walkable extends CellProperty
+case object Exit extends CellProperty
+
 case class LevelCell(
-  val visual: Renderable,
-  val walkable: Boolean)
-  
+  val layer0: Option[Renderable] = None,
+  val layer1: Option[Renderable] = None)(
+  val properties: CellProperty*) {
+  def layer(i: Int) = if (i == 0) layer0 else layer1
+}
+ 
 object CaveDefinition {
   val sheet = new SpriteSheet("res/tilesets/cave.png", 16, 16); 
   implicit val defaultCave = GreenCave
@@ -120,51 +127,58 @@ case object BlackCave extends CaveDefinition {
   val innerBottomLeft = sheet.getSprite(6, 9)
   val innerBottomRight = sheet.getSprite(7, 9)
 }
+
+case object StairsEntry {
+  val sheet = CaveDefinition.sheet
+  val row1 = List((12, 3), (13, 3), (14, 3), (13, 3), (15, 3))
+  val row2 = List((12, 4), (13, 4), (14, 4), (13, 4), (15, 4))
+  val row3 = List((12, 5), (3, 1), (4, 1), (5, 1), (15, 5))
+  val row4 = List((12, 6), (3, 2), (4, 2), (5, 2), (15, 6))
+  
+}
   
 object Level {
   // for debugging only
-  val scale = 4
-  
-  def fixPotholes(ca: CellularAutomaton): CellularAutomaton = {
-    lazy val fixedCa: Stream[CellularAutomaton] =
-      ca #:: fixedCa.map(ca => ca.copy(liveCells = ca.liveCells ++ ca.potholes))
-    fixedCa find(_.potholes.size == 0) get
-  }
+  val scale = 1
   
   def fromCellularAutomaton(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
-//    val fixed = fixPotholes(ca)
     val alive = ca.isAlive _
     val dead = ca.isDead _
     val levelCells = ca.allCells.map (_ match {
-      case c if alive(c) => LevelCell(cd.floor, walkable = true)
-      case c if alive(c + Down) && dead(c + Left) && dead(c + Right) => LevelCell(cd.top, walkable = false)
-      case c if alive(c + Up) && dead(c + Left) && dead(c + Right)   => LevelCell(cd.bottom, walkable = false)
-      case c if alive(c + Right) && dead(c + Up) && dead(c + Down)   => LevelCell(cd.left, walkable = false)
-      case c if alive(c + Left) && dead(c + Up) && dead(c + Down)    => LevelCell(cd.right, walkable = false)
-      case c if alive(c + Right) && alive(c + Down)                  => LevelCell(cd.innerTopLeft, walkable = false)
-      case c if alive(c + Left) && alive(c + Down)                   => LevelCell(cd.innerTopRight, walkable = false)
-      case c if alive(c + Right) && alive(c + Up)                    => LevelCell(cd.innerBottomLeft, walkable = false)
-      case c if alive(c + Left) && alive(c + Up)                     => LevelCell(cd.innerBottomRight, walkable = false)
-      case c if alive(c + DownRight)                                 => LevelCell(cd.topLeft, walkable = false)
-      case c if alive(c + DownLeft)                                  => LevelCell(cd.topRight, walkable = false)
-      case c if alive(c + UpRight)                                   => LevelCell(cd.bottomLeft, walkable = false)
-      case c if alive(c + UpLeft)                                    => LevelCell(cd.bottomRight, walkable = false)
-      case c => LevelCell(cd.space, walkable = false)
+      case c if alive(c) => LevelCell(layer0 = Some(cd.floor))(Walkable)
+      case c if alive(c + Down) && dead(c + Left) && dead(c + Right) => LevelCell(layer0 = Some(cd.top))()
+      case c if alive(c + Up) && dead(c + Left) && dead(c + Right)   => LevelCell(layer0 = Some(cd.bottom))()
+      case c if alive(c + Right) && dead(c + Up) && dead(c + Down)   => LevelCell(layer0 = Some(cd.left))()
+      case c if alive(c + Left) && dead(c + Up) && dead(c + Down)    => LevelCell(layer0 = Some(cd.right))()
+      case c if alive(c + Right) && alive(c + Down)                  => LevelCell(layer0 = Some(cd.innerTopLeft))()
+      case c if alive(c + Left) && alive(c + Down)                   => LevelCell(layer0 = Some(cd.innerTopRight))()
+      case c if alive(c + Right) && alive(c + Up)                    => LevelCell(layer0 = Some(cd.innerBottomLeft))()
+      case c if alive(c + Left) && alive(c + Up)                     => LevelCell(layer0 = Some(cd.innerBottomRight))()
+      case c if alive(c + DownRight)                                 => LevelCell(layer0 = Some(cd.topLeft))()
+      case c if alive(c + DownLeft)                                  => LevelCell(layer0 = Some(cd.topRight))()
+      case c if alive(c + UpRight)                                   => LevelCell(layer0 = Some(cd.bottomLeft))()
+      case c if alive(c + UpLeft)                                    => LevelCell(layer0 = Some(cd.bottomRight))()
+      case c => LevelCell(layer0 = Some(cd.space))()
     })
     Level(width = ca.width, height = ca.height, cells = levelCells)
+  }
+  
+  def placeExit(l: Level): Level = {
+    l
   }
 }
   
 case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell]) {
   def at(x: Int, y: Int) = cells(x + y * width)
-  def draw(offset: Vec2d){
+  
+  def draw(offset: Vec2d, layer: Int) {
     val blockOffsetX = (offset.x + 8) / 16
     val blockOffsetY = (offset.y + 8) / 16
     val window = 40 / Level.scale
     for (x <- blockOffsetX - window to blockOffsetX + window;
          y <- blockOffsetY - window to blockOffsetY + window) {
-      val tile = if (x > 0 && x < width && y > 0 && y < height) at(x, y) else at(0, 0)
-      tile.visual.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100)
+      val tile = if (x > 0 && x < width && y > 0 && y < height) at(x, y).layer(layer) else at(0, 0).layer(layer)
+      tile.foreach(_.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100))
     }
   }
 }

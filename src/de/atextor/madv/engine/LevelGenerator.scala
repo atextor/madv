@@ -59,6 +59,11 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
     case c if isDead(c) && isAlive(c + UpLeft) && isAlive(c + DownRight) => c
     case c if isDead(c) && isAlive(c + UpRight) && isAlive(c + DownLeft) => c
   }).toSet
+  def fixPotholes = {
+    lazy val fixedCa: Stream[CellularAutomaton] =
+      this #:: fixedCa.map(ca => ca.copy(liveCells = ca.liveCells ++ ca.potholes))
+    fixedCa find(_.potholes.size == 0) get
+  }
   def invert = copy(liveCells = allCells.toSet -- liveCells)
   
   // Returns a set of connected areas of live cells

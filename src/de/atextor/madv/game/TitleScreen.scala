@@ -23,7 +23,7 @@ class TitleScreen extends BasicGameState {
   
   var test: EntitySkin = null
   def init(gc: GameContainer, game: StateBasedGame) {
-    test = EntitySkin(List(Hurt, Slash, Spellcast, Walk),
+    test = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
         body = List(Body("female")),
         head = List(Head("female_darkblondehair")),
         torso = List(Torso("female_vest"), Torso("female_forestrobe")),

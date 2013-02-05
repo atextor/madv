@@ -8,4 +8,9 @@ package object engine {
   val UpRight = Vec2d(1, -1)
   val DownLeft = Vec2d(-1, 1)
   val DownRight = Vec2d(1, 1)
+  val Nowhere = Vec2d(0, 0)
+  
+  type Action = (Int => Unit)
+  type TimedAction = (Int, Action)
+  val DoNothing: Action = (_ => ())
 }

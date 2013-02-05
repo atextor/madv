@@ -1,48 +1,38 @@
 package de.atextor.madv.game
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.concurrent.future
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
-import de.atextor.madv.engine.Belt
-import de.atextor.madv.engine.BlackCave
-import de.atextor.madv.engine.Body
 import de.atextor.madv.engine.Cell
 import de.atextor.madv.engine.CellularAutomaton
-import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.Feet
-import de.atextor.madv.engine.Head
-import de.atextor.madv.engine.Hurt
-import de.atextor.madv.engine.Level
-import de.atextor.madv.engine.Slash
-import de.atextor.madv.engine.Spellcast
-import de.atextor.madv.engine.Torso
-import de.atextor.madv.engine.Vec2d
-import de.atextor.madv.engine.Walk
-import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.Vec
 import de.atextor.madv.engine.Direction
-import de.atextor.madv.engine.Up
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.Entity
 import de.atextor.madv.engine.Left
+import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.Right
-import de.atextor.madv.engine.BlueCave
-import de.atextor.madv.engine.Util.pipelineSyntax
-import de.atextor.madv.engine.LavaCave
+import de.atextor.madv.engine.Up
+import de.atextor.madv.engine.Vec2d
+import de.atextor.madv.engine.Scene
+import de.atextor.madv.engine.Humanoid
+import de.atextor.madv.engine.Walk
 
-class LevelTest extends BasicGameState {
+class LevelTest extends Scene {
   override val getID = 1
   
-  val f: Future[String] = future {
-    "hallo"
+  val player = new Humanoid (
+      skin = Entities.playerSkin,
+      spriteAction = Walk,
+      startPosition = Vec2d(160, 90),
+      speed = 10
+  ) {
+    override def draw = {}//skin.draw(lookingDirection, spriteAction, Vec2d(160, 90))
   }
   
-  var test: EntitySkin = null
-  var coord = Vec2d(64, 64)
-  var offset = Vec2d(0, 0)
   var gameMap: Option[Level] = None
   
   val gameMap2: Level = {
@@ -57,8 +47,7 @@ class LevelTest extends BasicGameState {
   future {
     val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
     val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
-    val ca = CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.
-      |> (Level.fixPotholes(_))
+    val ca = CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes
     val area = ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)
 //    implicit val caveDef = LavaCave
 //    implicit val caveDef = BlueCave
@@ -67,59 +56,27 @@ class LevelTest extends BasicGameState {
   } onSuccess { case m => gameMap = Some(m) }
   
   def init(gc: GameContainer, game: StateBasedGame) {
-    test = EntitySkin(List(Hurt, Slash, Spellcast, Walk),
-        body = List(Body("female")),
-        head = List(Head("female_darkblondehair")),
-        torso = List(Torso("female_vest"), Torso("female_forestrobe")),
-        belt = List(Belt("female_blackbelt"), Belt("female_ironbuckle")),
-        feet = List(Feet("female_grayslippers")))
+    entities += player
   }
-  
-  def draw(l: Level) = {
-    l.draw(coord)
-  }
-  
-  var playerDir: Direction = Down
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
     g.scale(4, 4)
-    gameMap.foreach(draw(_))
+    gameMap.foreach(l => l.draw(player.pos, layer = 0))
     g.scale(0.5f, 0.5f)
-    test.draw(playerDir, Walk, Vec2d(160, 80))
+    entities.foreach(_.draw)
+    g.scale(2.0f, 2.0f)
+    gameMap.foreach(l => l.draw(player.pos, layer = 1))
   }
   
-  override def keyPressed(key: Int, c: Char) {
-    val inc = 4
-    super.keyPressed(key, c)
-    if (key == Input.KEY_UP) {
-      offset = Vec2d(offset.x, -inc)
-      playerDir = Up
-    } else if (key == Input.KEY_DOWN) {
-      offset = Vec2d(offset.x, inc)
-      playerDir = Down
-    } else if (key == Input.KEY_LEFT) {
-      offset = Vec2d(-inc, offset.y)
-      playerDir = Left
-    } else if (key == Input.KEY_RIGHT) {
-      offset = Vec2d(inc, offset.y)
-      playerDir = Right
+  def processKeys {
+    if (pressedKeys.size > 0) pressedKeys.last match {
+      case Input.KEY_UP => player.go(Up)
+      case Input.KEY_RIGHT => player.go(Right)
+      case Input.KEY_DOWN => player.go(Down)
+      case Input.KEY_LEFT => player.go(Left)
+      case _ =>
+    } else {
+      player.stop
     }
-  }
-  
-  override def keyReleased(key: Int, c: Char) {
-    super.keyReleased(key, c)
-    if (key == Input.KEY_UP) {
-      offset = Vec2d(offset.x, 0)
-    } else if (key == Input.KEY_DOWN) {
-      offset = Vec2d(offset.x, 0)
-    } else if (key == Input.KEY_LEFT) {
-      offset = Vec2d(0, offset.y)
-    } else if (key == Input.KEY_RIGHT) {
-      offset = Vec2d(0, offset.y)
-    }
-  }
-  
-  def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
-    coord += offset
   }
 }

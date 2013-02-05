@@ -69,7 +69,7 @@ object Main extends SimpleSwingApplication {
           neighbors = grid.areas |> (grid.sortAreasBySize(_)) |> (grid.findNeighborAreas(_))
           repaint()
         case ButtonClicked(`fixpotholes`) =>
-          grid = Level.fixPotholes(grid)
+          grid = grid.fixPotholes
           repaint()
       }
     }

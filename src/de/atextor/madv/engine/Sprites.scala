@@ -7,19 +7,19 @@ import de.atextor.madv.engine.Util._
 import org.newdawn.slick.SpriteSheet
 import org.newdawn.slick.Animation
 
-sealed abstract class Action(
+sealed abstract class SpriteAction(
   val frames: Int,
   val delay: Duration,
   val spriteRow: (Direction => Int) = _.id)
-case object Bow extends Action(13, 100 millis)
-case object Hurt extends Action(6, 150 millis, (_ => 0))
-case object Slash extends Action(6, 100 millis)
-case object Spellcast extends Action(7, 100 millis)
-case object Thrust extends Action(8, 100 millis)
-case object Walk extends Action(9, 120 millis)
+case object Bow extends SpriteAction(13, 100 millis)
+case object Hurt extends SpriteAction(6, 150 millis, (_ => 0))
+case object Slash extends SpriteAction(6, 100 millis)
+case object Spellcast extends SpriteAction(7, 100 millis)
+case object Thrust extends SpriteAction(8, 100 millis)
+case object Walk extends SpriteAction(9, 120 millis)
 
 sealed abstract class Part(name: String) {
-  private def animation(d: Direction, a: Action): Animation = {
+  private def animation(d: Direction, a: SpriteAction): Animation = {
     val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64); 
     val ani = new Animation
     for (x <- 0 until a.frames) {
@@ -31,7 +31,7 @@ sealed abstract class Part(name: String) {
   import Memoize._
   val getAnimation = memoize(animation _)
     
-  def draw(d: Direction, a: Action, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
+  def draw(d: Direction, a: SpriteAction, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
 }
 case class Weapon(name: String) extends Part("weapon_" + name)
 case class Hands(name: String) extends Part("hands_" + name)
@@ -44,7 +44,8 @@ case class Body(name: String) extends Part("body_" + name)
 case class Behind(name: String) extends Part("behind_" + name)
 
 case class EntitySkin(
-    actions: List[Action],
+    val size: Vec2d,
+    actions: List[SpriteAction],
     weapon: List[Weapon] = Nil,
     hands: List[Hands] = Nil,
     head: List[Head] = Nil,
@@ -54,7 +55,7 @@ case class EntitySkin(
     feet: List[Feet] = Nil,
     body: List[Body] = Nil,
     behind: List[Behind] = Nil) {
-  def draw(d: Direction, a: Action, position: Vec) {
+  def draw(d: Direction, a: SpriteAction, position: Vec) {
     // optimal drawing order taken from artists readme :)
     behind foreach (_.draw(d, a, position))
     body foreach (_.draw(d, a, position))
