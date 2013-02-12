@@ -5,16 +5,11 @@ import org.newdawn.slick.Graphics
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
 
-import de.atextor.madv.engine.Belt
-import de.atextor.madv.engine.Body
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.Feet
-import de.atextor.madv.engine.Head
 import de.atextor.madv.engine.Hurt
 import de.atextor.madv.engine.Slash
 import de.atextor.madv.engine.Spellcast
-import de.atextor.madv.engine.Torso
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walk
 
@@ -23,12 +18,13 @@ class TitleScreen extends BasicGameState {
   
   var test: EntitySkin = null
   def init(gc: GameContainer, game: StateBasedGame) {
-    test = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
-        body = List(Body("female")),
-        head = List(Head("female_darkblondehair")),
-        torso = List(Torso("female_vest"), Torso("female_forestrobe")),
-        belt = List(Belt("female_blackbelt"), Belt("female_ironbuckle")),
-        feet = List(Feet("female_grayslippers")))
+  import de.atextor.madv.engine.PartName._
+  val test = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+     (body -> ("female" :: Nil)),
+     (head -> ("female_darkblondehair" :: Nil)),
+     (torso -> ("female_vest" :: "female_forestrobe" :: Nil)),
+     (belt -> ("female_blackbelt" :: "female_ironbuckle" :: Nil)),
+     (feet -> ("female_grayslippers" :: Nil)))
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {

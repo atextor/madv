@@ -6,6 +6,7 @@ import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 import scala.util.Random
+import de.atextor.madv.engine.Util.pipelineSyntax
 
 sealed abstract class CellProperty
 case object Walkable extends CellProperty
@@ -169,26 +170,42 @@ object Level {
 }
   
 case class Level(width: Int, height: Int, val cells: IndexedSeq[LevelCell]) {
-  def at(x: Int, y: Int): LevelCell = cells(x + y * width)
-  def at(p: Vec): LevelCell = at((p.x + 8) / 16, (p.y + 8) / 16)
-  def indexToVec(index: Int) = Vec2d(index % width, index / width)
+  // Path dependent type, as placed cells depend on this level's cells collection
+  case class PlacedLevelCell(pos: Vec2d, cell: LevelCell) {
+    def +(d: Vec) = {
+      val coord = pos + d
+      PlacedLevelCell(coord, at(coord.x, coord.y))
+    }
+  }
   
-  def blockToScreenX(x: Int, offsetX: Int) = x * 16 - offsetX + 95
-  def blockToScreenY(y: Int, offsetY: Int) = y * 16 - offsetY + 70
+  def find(p: LevelCell => Boolean, randomize: Boolean = true): Option[PlacedLevelCell] = {
+    val coord = (if (randomize) (Random shuffle cells) else cells).
+      |> (_.find(p).map(cells.indexOf(_)).map(indexToVec(_)))
+    coord.map(c => PlacedLevelCell(c * 16, at(c.x, c.y)))
+  }
   
+  def tileAt(v: Vec) = at((v.x + 8) / 16, (v.y + 8) / 16)
+  
+  def cellAt(x: Int, y: Int) = PlacedLevelCell(Vec2d(x, y), at(x, y))
+  
+  private def at(x: Int, y: Int): LevelCell = cells(x + y * width)
+  private def indexToVec(index: Int) = Vec2d(index % width, index / width)
+  private def blockToScreenX(x: Int, offsetX: Int) = x * 16 - offsetX// + 160
+  private def blockToScreenY(y: Int, offsetY: Int) = y * 16 - offsetY// + 90
   
   def draw(offset: Vec2d, layer: Int) {
-    val p = Vec2d(offset.x / 16, offset.y / 16)
-    val blockOffsetX = (offset.x + 8) / 16
-    val blockOffsetY = (offset.y + 8) / 16
-    val window = 40 / Level.scale
-    for (x <- blockOffsetX - window to blockOffsetX + window;
-         y <- blockOffsetY - window to blockOffsetY + window) {
+    //val p = Vec2d(offset.x / 16, offset.y / 16)
+    val blockOffsetX = (offset.x) / 16
+    val blockOffsetY = (offset.y) / 16
+    val w = 7//40 / Level.scale
+    for (x <- blockOffsetX - w to blockOffsetX + w; y <- blockOffsetY - w to blockOffsetY + w) {
       val tile = if (x > 0 && x < width && y > 0 && y < height) at(x, y).layer(layer) else at(0, 0).layer(layer)
 //      tile.foreach(_.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100))
-      tile.foreach(_.draw(blockToScreenX(x, offset.x), blockToScreenY(y, offset.y)))
+//      tile.foreach(_.draw(blockToScreenX(x, offset.x), blockToScreenY(y, offset.y)))
+      tile.foreach(_.draw(x * 16 - offset.x + 90, y * 16 - offset.y + 60))
     }
-//    at(0, 0).layer(0).foreach(r => r.draw(blockToScreenX(p.x, offset.x), blockToScreenY(p.y, offset.y)))
+//    if (layer == 0) at(0, 0).layer(0).foreach(r =>
+//      r.draw(blockOffsetX * 16 - offset.x + (offset.x % 16) + 100, blockOffsetY * 16 - offset.y + (offset.y % 16) + 60))
   }
 }
   

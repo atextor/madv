@@ -1,19 +1,22 @@
 package de.atextor.madv.engine
 
-import org.newdawn.slick.state.BasicGameState
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
+
 import org.newdawn.slick.GameContainer
+import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
 
 abstract class Scene extends BasicGameState {
-  var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
   
-  def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
-    ticks += delta
+  def addEntity(e: Entity): ListBuffer[Entity] = entities += e
+  
+  def at(ticks: Int, f: Action) { actions += ((ticks, f)) }
+  
+  def update(gc: GameContainer, game: StateBasedGame, ticks: Int) {
     var changed = false
     while (actions.size > 0 && actions.head._1 <= ticks) {
       actions.remove(0)._2(ticks)

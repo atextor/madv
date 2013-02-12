@@ -18,7 +18,7 @@ case object Spellcast extends SpriteAction(7, 100 millis)
 case object Thrust extends SpriteAction(8, 100 millis)
 case object Walk extends SpriteAction(9, 120 millis)
 
-sealed abstract class Part(name: String) {
+case class Part(name: String) {
   private def animation(d: Direction, a: SpriteAction): Animation = {
     val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64); 
     val ani = new Animation
@@ -32,40 +32,29 @@ sealed abstract class Part(name: String) {
   val getAnimation = memoize(animation _)
     
   def draw(d: Direction, a: SpriteAction, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
+  def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).stop
+  def startAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).start
 }
-case class Weapon(name: String) extends Part("weapon_" + name)
-case class Hands(name: String) extends Part("hands_" + name)
-case class Head(name: String) extends Part("head_" + name)
-case class Belt(name: String) extends Part("belt_" + name)
-case class Torso(name: String) extends Part("torso_" + name)
-case class Legs(name: String) extends Part("legs_" + name)
-case class Feet(name: String) extends Part("feet_" + name)
-case class Body(name: String) extends Part("body_" + name)
-case class Behind(name: String) extends Part("behind_" + name)
 
-case class EntitySkin(
-    val size: Vec2d,
-    actions: List[SpriteAction],
-    weapon: List[Weapon] = Nil,
-    hands: List[Hands] = Nil,
-    head: List[Head] = Nil,
-    belt: List[Belt] = Nil,
-    torso: List[Torso] = Nil,
-    legs: List[Legs] = Nil,
-    feet: List[Feet] = Nil,
-    body: List[Body] = Nil,
-    behind: List[Behind] = Nil) {
-  def draw(d: Direction, a: SpriteAction, position: Vec) {
-    // optimal drawing order taken from artists readme :)
-    behind foreach (_.draw(d, a, position))
-    body foreach (_.draw(d, a, position))
-    feet foreach (_.draw(d, a, position))
-    legs foreach (_.draw(d, a, position))
-    torso foreach (_.draw(d, a, position))
-    belt foreach (_.draw(d, a, position))
-    head foreach (_.draw(d, a, position))
-    hands foreach (_.draw(d, a, position))
-    weapon foreach (_.draw(d, a, position))
-  }
+object PartName extends Enumeration {
+  val behind, body, feet, legs, torso, belt, head, hands, weapon = Value
 }
+
+case class EntitySkin(val size: Vec2d, actions: List[SpriteAction], parts: (PartName.Value, Seq[String])*) {
+  import PartName._
+  val m = parts.map{case (partName, images) => (partName, images.map(i => Part(partName.toString + "_" + i)))}.toMap
+  def draw(d: Direction, a: SpriteAction, position: Vec) {
+    m get behind foreach(_.foreach(_.draw(d, a, position)))
+    m get body foreach(_.foreach(_.draw(d, a, position)))
+    m get feet foreach(_.foreach(_.draw(d, a, position)))
+    m get legs foreach(_.foreach(_.draw(d, a, position)))
+    m get torso foreach(_.foreach(_.draw(d, a, position)))
+    m get belt foreach(_.foreach(_.draw(d, a, position)))
+    m get head foreach(_.foreach(_.draw(d, a, position)))
+    m get hands foreach(_.foreach(_.draw(d, a, position)))
+    m get weapon foreach(_.foreach(_.draw(d, a, position)))
+  }
   
+  def stopAnimation(d: Direction, a: SpriteAction) = m.values.foreach(_.foreach(_.stopAnimation(d, a)))
+  def startAnimation(d: Direction, a: SpriteAction) = m.values.foreach(_.foreach(_.startAnimation(d, a)))
+}

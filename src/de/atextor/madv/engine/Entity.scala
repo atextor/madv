@@ -20,7 +20,7 @@ class Humanoid (
     behavior: Action = DoNothing,
     var spriteAction: SpriteAction = Walk,
     startPosition: Vec2d,
-    speed: Int) extends Entity(skin, startPosition) {
+    val speed: Int) extends Entity(skin = skin, pos = startPosition) {
   def tick(delta: Int) = behavior(delta)
   def draw = skin.draw(lookingDirection, spriteAction, pos)
   def stop = movingDirection = Nowhere
