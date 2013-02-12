@@ -1,11 +1,13 @@
 package de.atextor.madv.engine
 
 import scala.language.postfixOps
+import scala.util.Random
+
 import org.newdawn.slick.Animation
 import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
-import scala.util.Random
+
 import de.atextor.madv.engine.Util.pipelineSyntax
 
 sealed abstract class CellProperty
@@ -161,15 +163,33 @@ object Level {
       case c if alive(c + UpLeft)                                    => LevelCell(layer0 = Some(cd.bottomRight))()
       case c => LevelCell(layer0 = Some(cd.space))()
     })
-    Level(width = ca.width, height = ca.height, cells = levelCells)
+    Level(width = ca.width, height = ca.height, cells = levelCells).
+      |> (placeExit(_))
   }
   
-  def placeExit(l: Level): Level = {
-    l
+  def placeExit[L <: Level](l: L)(implicit cd: CaveDefinition): Level = {
+    import l.PlacedLevelCell
+    val exitLocationProperty: PlacedLevelCell => Boolean = { c =>
+      (c.cell.properties.contains(Walkable)) &&
+      ((c + Left).cell.properties contains Walkable) &&
+      ((c + Right).cell.properties contains Walkable) &&
+      !((c + UpLeft).cell.properties contains Walkable) &&
+      !((c + Up).cell.properties contains Walkable) &&
+      !((c + UpRight).cell.properties contains Walkable)
+    }
+    val exitLocation = l.find(exitLocationProperty, randomize = true).get
+    println("exit: " + exitLocation)
+    val updatedCells = l.placedCells.map { _ match {
+      case p if p.pos == exitLocation.pos => p.copy(cell = LevelCell(layer0 = Some(cd.space))())
+      case p => p
+    }}.map(_.cell)
+    l.copy(cells = updatedCells)
   }
 }
   
-case class Level(width: Int, height: Int, val cells: IndexedSeq[LevelCell]) {
+case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell]) {
+  lazy val placedCells = cells.zipWithIndex.map(c => PlacedLevelCell(indexToVec(c._2), c._1))
+  
   // Path dependent type, as placed cells depend on this level's cells collection
   case class PlacedLevelCell(pos: Vec2d, cell: LevelCell) {
     def +(d: Vec) = {
@@ -178,34 +198,22 @@ case class Level(width: Int, height: Int, val cells: IndexedSeq[LevelCell]) {
     }
   }
   
-  def find(p: LevelCell => Boolean, randomize: Boolean = true): Option[PlacedLevelCell] = {
-    val coord = (if (randomize) (Random shuffle cells) else cells).
-      |> (_.find(p).map(cells.indexOf(_)).map(indexToVec(_)))
-    coord.map(c => PlacedLevelCell(c * 16, at(c.x, c.y)))
-  }
+  def find(p: PlacedLevelCell => Boolean, randomize: Boolean = true): Option[PlacedLevelCell] =
+    (if (randomize) (Random shuffle placedCells) else placedCells).find(p)
   
-  def tileAt(v: Vec) = at((v.x + 8) / 16, (v.y + 8) / 16)
+  def cellAt(v: Vec) = at((v.x + 8) / 16, (v.y + 8) / 16)
   
-  def cellAt(x: Int, y: Int) = PlacedLevelCell(Vec2d(x, y), at(x, y))
-  
-  private def at(x: Int, y: Int): LevelCell = cells(x + y * width)
+  private def at(x: Int, y: Int) =
+    if (x >= 0 && x < width && y >= 0 && y < height) cells(x + y * width) else cells(0)
   private def indexToVec(index: Int) = Vec2d(index % width, index / width)
-  private def blockToScreenX(x: Int, offsetX: Int) = x * 16 - offsetX// + 160
-  private def blockToScreenY(y: Int, offsetY: Int) = y * 16 - offsetY// + 90
   
   def draw(offset: Vec2d, layer: Int) {
-    //val p = Vec2d(offset.x / 16, offset.y / 16)
     val blockOffsetX = (offset.x) / 16
     val blockOffsetY = (offset.y) / 16
-    val w = 7//40 / Level.scale
+    val w = 7 * Level.scale
     for (x <- blockOffsetX - w to blockOffsetX + w; y <- blockOffsetY - w to blockOffsetY + w) {
-      val tile = if (x > 0 && x < width && y > 0 && y < height) at(x, y).layer(layer) else at(0, 0).layer(layer)
-//      tile.foreach(_.draw(x * 16 - offset.x + 150, y * 16 - offset.y + 100))
-//      tile.foreach(_.draw(blockToScreenX(x, offset.x), blockToScreenY(y, offset.y)))
-      tile.foreach(_.draw(x * 16 - offset.x + 90, y * 16 - offset.y + 60))
+      at(x, y).layer(layer).foreach(_.draw(x * 16 - offset.x + (Level.scale * 90), y * 16 - offset.y + (Level.scale * 60)))
     }
-//    if (layer == 0) at(0, 0).layer(0).foreach(r =>
-//      r.draw(blockOffsetX * 16 - offset.x + (offset.x % 16) + 100, blockOffsetY * 16 - offset.y + (offset.y % 16) + 60))
   }
 }
   

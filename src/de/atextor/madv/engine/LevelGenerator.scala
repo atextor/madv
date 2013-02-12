@@ -25,6 +25,26 @@ object CellularAutomaton {
   // An Area is a cohesive set of cells, i.e., the cells are contiguous.
   // This constraint is not enforced programmatically.
   type Area = Set[Cell]
+  
+  val cave = new Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
+  val smooth = new Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
+  
+  def generateCoherentLevel = {
+    val ca = CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes
+    ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)
+  }
+  
+  def generateIslandLevel = {
+    CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth)(smooth).upscale(smooth).fixPotholes
+  }
+  
+  lazy val staticSmallLevel = {
+    val allCells = CellularAutomaton(10, 10).allCells.toSet
+    val island = ((for (x <- 0 until 10; y <- 0 until 10) yield (x, y)) collect {
+      case (x, y) if (math.sqrt((x - 5) * (x - 5) + (y - 5) * (y - 5)) > 3) => Cell(x, y)
+    }).toSet
+    CellularAutomaton(width = 10, height = 10, liveCells = allCells -- island)
+  }
 }
 
 case class Cell(override val x: Int, override val y: Int) extends Vec(x, y) {
@@ -105,25 +125,6 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
     for (y <- 0 to height - 1) {
       for (x <- 0 to width - 1) {
         print (if (isAlive(Cell(x, y))) "#" else ".")
-      }
-      println
-    }
-  }
-}
-
-object GridTest extends App {
-  val gol = new Rule(born = Set(3), survive = Set(2, 3))
-  val gol2 = new Rule(born = Set(3), survive = Set(3, 4, 5, 6))
-  val cave = new Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
-  val smooth = new Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
-  
-  val ca = CellularAutomaton(50, 20).randomFill(0.5) (cave) (smooth) (smooth) (smooth) upscale (smooth)
-  printGrid(ca)
-  
-  def printGrid(g: CellularAutomaton) {
-    for (y <- 0 to g.height - 1) {
-      for (x <- 0 to g.width - 1) {
-        print (if (g.isAlive(Cell(x, y))) "#" else ".")
       }
       println
     }

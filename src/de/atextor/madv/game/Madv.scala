@@ -22,9 +22,11 @@ class Madv extends StateBasedGame("Madv") {
   }
 }
 
-object Madv extends App {
-  val container = new AppGameContainer(new Madv)
-  container.setDisplayMode(800, 600, false)
-  container.setTargetFrameRate(60)
-  container.start
+object Madv {
+  def main(args: Array[String]) {
+    val container = new AppGameContainer(new Madv)
+    container.setDisplayMode(800, 600, false)
+    container.setTargetFrameRate(60)
+    container.start
+  }
 }

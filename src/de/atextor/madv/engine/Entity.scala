@@ -23,10 +23,14 @@ class Humanoid (
     val speed: Int) extends Entity(skin = skin, pos = startPosition) {
   def tick(delta: Int) = behavior(delta)
   def draw = skin.draw(lookingDirection, spriteAction, pos)
-  def stop = movingDirection = Nowhere
+  def stop = {
+    movingDirection = Nowhere
+    skin.stopAnimation(lookingDirection, spriteAction)
+  }
   def go(d: Direction) {
     movingDirection = movingDirection(d)
     lookingDirection = d
+    skin.startAnimation(lookingDirection, spriteAction)
   }
   override def move = {
     pos += movingDirection * speed

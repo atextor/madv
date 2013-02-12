@@ -16,7 +16,7 @@ case object Hurt extends SpriteAction(6, 150 millis, (_ => 0))
 case object Slash extends SpriteAction(6, 100 millis)
 case object Spellcast extends SpriteAction(7, 100 millis)
 case object Thrust extends SpriteAction(8, 100 millis)
-case object Walk extends SpriteAction(9, 120 millis)
+case object Walk extends SpriteAction(8, 100 millis)
 
 case class Part(name: String) {
   private def animation(d: Direction, a: SpriteAction): Animation = {
@@ -25,6 +25,7 @@ case class Part(name: String) {
     for (x <- 0 until a.frames) {
       ani.addFrame(ss.getSprite(x, a.spriteRow(d)), a.delay.toMillis.toInt)
     }
+    ani.setPingPong(false)
     ani
   }
     
