@@ -1,49 +1,20 @@
 package de.atextor.madv.game
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import scala.concurrent.future
-
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.StateBasedGame
-
-import de.atextor.madv.engine.Cell
 import de.atextor.madv.engine.CellularAutomaton
 import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.Up
-import de.atextor.madv.engine.Vec2d
-import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
+import de.atextor.madv.engine.LavaCave
+import de.atextor.madv.engine.Constants
 
-class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid (
-    skin = entitySkin,
-    spriteAction = Walk,
-    startPosition = startPosition,
-    speed = 5
-) {
-  override def draw = skin.draw(lookingDirection, spriteAction, Vec2d(170, 80))
-  
-  override def move = {
-    super.move
-    /*
-    if (level.cellAt(pos).properties contains Walkable) {
-      true 
-    } else {
-      pos += movingDirection.invert * speed 
-      false
-    }
-    */
-  }
-}
-  
 class LevelTest extends Scene {
   override val getID = 1
   
@@ -53,7 +24,7 @@ class LevelTest extends Scene {
   def generateLevel: Level = {
     val area = CellularAutomaton.generateCoherentLevel
 //    val area = CellularAutomaton.staticSmallLevel
-//    implicit val caveDef = LavaCave
+    implicit val caveDef = LavaCave
 //    implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
     Level.fromCellularAutomaton(area)
@@ -61,7 +32,7 @@ class LevelTest extends Scene {
   
   def init(gc: GameContainer, game: StateBasedGame) {
     val m = generateLevel
-    val startCell = m.find(_.cell.properties contains Walkable, randomize = true).get
+    val startCell = m.find(_.cell.properties contains Walkable).get
     player = new Player(level = m, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
     addEntity(player)
     gameMap = Some(m)
@@ -69,12 +40,18 @@ class LevelTest extends Scene {
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
-    g.scale(2, 2)
-    gameMap.foreach(_.draw(player.pos, layer = 0))
-//    g.scale(0.5f, 0.5f)
-//    entities.foreach(_.draw)
-//    g.scale(2.0f, 2.0f)
-    gameMap.foreach(_.draw(player.pos, layer = 1))
+    if (Constants.debug) {
+      g.scale(2, 2)
+      gameMap.foreach(_.draw(player.pos, layer = 0))
+      gameMap.foreach(_.draw(player.pos, layer = 1))
+    } else {
+      g.scale(4, 4)
+      gameMap.foreach(_.draw(player.pos, layer = 0))
+      g.scale(0.5f, 0.5f)
+      entities.foreach(_.draw)
+      g.scale(2.0f, 2.0f)
+      gameMap.foreach(_.draw(player.pos, layer = 1))
+    }
   }
   
   def processKeys {

@@ -7,7 +7,9 @@ import org.newdawn.slick.Animation
 import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
+import org.newdawn.slick.util.Log
 
+import de.atextor.madv.game.Madv
 import de.atextor.madv.engine.Util.pipelineSyntax
 
 sealed abstract class CellProperty
@@ -30,8 +32,12 @@ case class StackedRenderable(r: Renderable*) extends Renderable {
   def draw(x: Float, y: Float) = r foreach(_.draw(x, y))
 }
 
-abstract class CaveDefinition {
+trait SpriteSheetHelper {
   val sheet = CaveDefinition.sheet
+  val toSprite: ((Int, Int)) => Image = (sheet.getSprite _).tupled(_)
+}
+
+abstract class CaveDefinition extends SpriteSheetHelper {
   def space: Renderable
   def topLeft: Renderable
   def top: Renderable
@@ -46,10 +52,8 @@ abstract class CaveDefinition {
   def innerBottomLeft: Renderable
   def innerBottomRight: Renderable
   
-  private[this] val standardFloors =
-    List((1, 1), (0, 9), (1, 9), (0, 10), (1, 10)).map((sheet.getSprite _).tupled(_))
-  private[this] val floorVariations =
-    List((0, 7), (1, 7), (3, 7), (0, 8), (1, 8), (3, 8), (3, 9), (4, 9)).map((sheet.getSprite _).tupled(_))
+  private[this] val standardFloors = List((1, 1), (0, 9), (1, 9), (0, 10), (1, 10)) map toSprite
+  private[this] val floorVariations = List((0, 7), (1, 7), (3, 7), (0, 8), (1, 8), (3, 8), (3, 9), (4, 9)) map toSprite
   def floor: Renderable = {
     if (Random.nextInt(100) > 5) {
       Random shuffle standardFloors head
@@ -131,18 +135,15 @@ case object BlackCave extends CaveDefinition {
   val innerBottomRight = sheet.getSprite(7, 9)
 }
 
-case object StairsEntry {
-  val sheet = CaveDefinition.sheet
-  val row1 = List((12, 3), (13, 3), (14, 3), (13, 3), (15, 3))
-  val row2 = List((12, 4), (13, 4), (14, 4), (13, 4), (15, 4))
-  val row3 = List((12, 5), (3, 1), (4, 1), (5, 1), (15, 5))
-  val row4 = List((12, 6), (3, 2), (4, 2), (5, 2), (15, 6))
-  
+case object StairsEntry extends SpriteSheetHelper {
+  val row1 = List((12, 3), (13, 3), (14, 3), (13, 3), (15, 3)) map toSprite
+  val row2 = List((12, 4), (13, 4), (14, 4), (13, 4), (15, 4)) map toSprite
+  val row3 = List((12, 5), (3, 1), (4, 1), (5, 1), (15, 5)) map toSprite
+  val row4 = List((12, 2), (3, 2), (4, 2), (5, 2), (15, 2)) map toSprite
 }
   
 object Level {
-  // for debugging only
-  val scale = 2
+  val scale = if (Constants.debug) 2 else 1
   
   def fromCellularAutomaton(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
     val alive = ca.isAlive _
@@ -157,30 +158,89 @@ object Level {
       case c if alive(c + Left) && alive(c + Down)                   => LevelCell(layer0 = Some(cd.innerTopRight))()
       case c if alive(c + Right) && alive(c + Up)                    => LevelCell(layer0 = Some(cd.innerBottomLeft))()
       case c if alive(c + Left) && alive(c + Up)                     => LevelCell(layer0 = Some(cd.innerBottomRight))()
-      case c if alive(c + DownRight)                                 => LevelCell(layer0 = Some(cd.topLeft))()
-      case c if alive(c + DownLeft)                                  => LevelCell(layer0 = Some(cd.topRight))()
-      case c if alive(c + UpRight)                                   => LevelCell(layer0 = Some(cd.bottomLeft))()
-      case c if alive(c + UpLeft)                                    => LevelCell(layer0 = Some(cd.bottomRight))()
+      case c if alive(c + Down + Right)                              => LevelCell(layer0 = Some(cd.topLeft))()
+      case c if alive(c + Down + Left)                               => LevelCell(layer0 = Some(cd.topRight))()
+      case c if alive(c + Up + Right)                                => LevelCell(layer0 = Some(cd.bottomLeft))()
+      case c if alive(c + Up + Left)                                 => LevelCell(layer0 = Some(cd.bottomRight))()
       case c => LevelCell(layer0 = Some(cd.space))()
     })
     Level(width = ca.width, height = ca.height, cells = levelCells).
       |> (placeExit(_))
   }
   
-  def placeExit[L <: Level](l: L)(implicit cd: CaveDefinition): Level = {
+  private def placeExit[L <: Level](l: L)(implicit cd: CaveDefinition): Level = {
     import l.PlacedLevelCell
     val exitLocationProperty: PlacedLevelCell => Boolean = { c =>
+      c.pos.x > 3 && c.pos.y > 3 &&
+      (c.cell.properties.contains(Walkable)) &&
+      ((c + Left).cell.properties contains Walkable) &&
+      ((c + Left * 2).cell.properties contains Walkable) &&
+      ((c + Right).cell.properties contains Walkable) &&
+      ((c + Right * 2).cell.properties contains Walkable) &&
+      ((c + Down).cell.properties contains Walkable) &&
+      !((c + Up + Left).cell.properties contains Walkable) &&
+      !((c + Up + Left * 2).cell.properties contains Walkable) &&
+      !((c + Up).cell.properties contains Walkable) &&
+      !((c + Up + Right).cell.properties contains Walkable) &&
+      !((c + Up + Right * 2).cell.properties contains Walkable)
+    }
+    
+    // In rare cases, no optimal exit location can be found. In that case,
+    // we take the fallback one which can cause slight graphical glitches.
+    val exitLocationFallbackProperty: PlacedLevelCell => Boolean = { c =>
+      c.pos.x > 3 && c.pos.y > 3 &&
       (c.cell.properties.contains(Walkable)) &&
       ((c + Left).cell.properties contains Walkable) &&
       ((c + Right).cell.properties contains Walkable) &&
-      !((c + UpLeft).cell.properties contains Walkable) &&
-      !((c + Up).cell.properties contains Walkable) &&
-      !((c + UpRight).cell.properties contains Walkable)
+      ((c + Down).cell.properties contains Walkable)
+    } 
+    val exitLocation = l.find(exitLocationProperty).getOrElse {
+      Log.debug("Fallback exit location")
+      l.find(exitLocationFallbackProperty).get
     }
-    val exitLocation = l.find(exitLocationProperty, randomize = true).get
-    println("exit: " + exitLocation)
+    Log.debug("Placed Exit: " + exitLocation.pos)
+    
     val updatedCells = l.placedCells.map { _ match {
-      case p if p.pos == exitLocation.pos => p.copy(cell = LevelCell(layer0 = Some(cd.space))())
+      case p if p.pos == exitLocation.pos + Left * 2 =>
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(0)))())
+      case p if p.pos == exitLocation.pos + Left =>
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(1)))())
+      case p if p.pos == exitLocation.pos =>
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(2)))(Exit))
+      case p if p.pos == exitLocation.pos + Right =>
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(3)))()) 
+      case p if p.pos == exitLocation.pos + Right * 2 =>
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(4)))())
+      case p if p.pos == exitLocation.pos + Up + Left * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(0)))())
+      case p if p.pos == exitLocation.pos + Up + Left =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(1)))())
+      case p if p.pos == exitLocation.pos + Up =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(2)))())
+      case p if p.pos == exitLocation.pos + Up + Right =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(3)))())
+      case p if p.pos == exitLocation.pos + Up + Right * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(4)))())
+      case p if p.pos == exitLocation.pos + Up * 2 + Left * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(0)))())
+      case p if p.pos == exitLocation.pos + Up * 2 + Left =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(1)))())
+      case p if p.pos == exitLocation.pos + Up * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(2)))())
+      case p if p.pos == exitLocation.pos + Up * 2 + Right =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(3)))())
+      case p if p.pos == exitLocation.pos + Up * 2 + Right * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(3)))())
+      case p if p.pos == exitLocation.pos + Up * 3 + Left * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(0)))())
+      case p if p.pos == exitLocation.pos + Up * 3 + Left =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(1)))())
+      case p if p.pos == exitLocation.pos + Up * 3 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(2)))())
+      case p if p.pos == exitLocation.pos + Up * 3 + Right =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(3)))())
+      case p if p.pos == exitLocation.pos + Up * 3 + Right * 2 =>
+        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(4)))())
       case p => p
     }}.map(_.cell)
     l.copy(cells = updatedCells)

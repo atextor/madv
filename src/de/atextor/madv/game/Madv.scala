@@ -4,6 +4,7 @@ import org.newdawn.slick.AppGameContainer
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.StateBasedGame
+import org.newdawn.slick.SpriteSheet
 
 class Madv extends StateBasedGame("Madv") {
   var container: GameContainer = null

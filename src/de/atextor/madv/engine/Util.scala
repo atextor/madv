@@ -3,6 +3,7 @@ package de.atextor.madv.engine
 import scala.language.implicitConversions
 import java.util.concurrent.TimeUnit._
 import java.util.concurrent.TimeUnit
+import org.newdawn.slick.Image
 
 object Util {
   class PipelineSyntax[A](a: => A) {

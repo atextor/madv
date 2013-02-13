@@ -20,7 +20,7 @@ case object Walk extends SpriteAction(8, 100 millis)
 
 case class Part(name: String) {
   private def animation(d: Direction, a: SpriteAction): Animation = {
-    val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64); 
+    val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64)
     val ani = new Animation
     for (x <- 0 until a.frames) {
       ani.addFrame(ss.getSprite(x, a.spriteRow(d)), a.delay.toMillis.toInt)
