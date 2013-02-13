@@ -76,8 +76,8 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
   lazy val potholes = allCells.collect(_ match {
     case c if isDead(c) && isAlive(c + Up) && isAlive(c + Down) => c
     case c if isDead(c) && isAlive(c + Left) && isAlive(c + Right) => c
-    case c if isDead(c) && isAlive(c + UpLeft) && isAlive(c + DownRight) => c
-    case c if isDead(c) && isAlive(c + UpRight) && isAlive(c + DownLeft) => c
+    case c if isDead(c) && isAlive(c + Up + Left) && isAlive(c + Down + Right) => c
+    case c if isDead(c) && isAlive(c + Up + Right) && isAlive(c + Down + Left) => c
   }).toSet
   def fixPotholes = {
     lazy val fixedCa: Stream[CellularAutomaton] =
@@ -88,6 +88,30 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
   
   // Returns a set of connected areas of live cells
   def areas: Set[Area] = {
+    // Iterative flood fill :'-(
+    // Recursive variant below causes stack overflows 1/10th of the time
+    def fill(c: Cell, alive: Area, dead: Area): (Area, Area) = {
+      import scala.collection.mutable.{Set => MSet}
+      import scala.collection.mutable.Stack
+      val stack = new Stack[Cell]
+      val a: MSet[Cell] = MSet() ++ alive
+      val d: MSet[Cell] = MSet() ++ dead
+      stack.push(c)
+      while (!stack.isEmpty) {
+        val cn = stack.pop
+        if (a contains cn) {
+          a remove cn
+          d += cn
+          stack.push(cn + Up)
+          stack.push(cn + Left)
+          stack.push(cn + Right)
+          stack.push(cn + Down)
+        } 
+      }
+      (Set[Cell]() ++ a, Set[Cell]() ++ d)
+    }
+    
+    /*
     // Recursive flood fill
     // Returns the tuple (A, B) where A is the set of cells that were previously alive and are not
     // in B now; and B is the set of cells directly connected to c
@@ -97,6 +121,7 @@ case class CellularAutomaton(val width: Int, val height: Int, val liveCells: Set
         |> (n => fill(Cell(c.x + 1, c.y), n._1, n._2)).
         |> (n => fill(Cell(c.x, c.y - 1), n._1, n._2)).
         |> (n => fill(Cell(c.x, c.y + 1), n._1, n._2))
+    */
     
     // Returns the set of all connected areas in a
     def allAreas(a: Area, areas: Set[Area] = Set()): Set[Area] = if (a isEmpty) areas else
