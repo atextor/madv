@@ -11,6 +11,8 @@ sealed abstract class SpriteAction(
   val frames: Int,
   val delay: Duration,
   val spriteRow: (Direction => Int) = _.id)
+
+case class SimpleSprite(override val frames: Int, override val delay: Duration) extends SpriteAction(frames, delay)
 case object Bow extends SpriteAction(13, 100 millis)
 case object Hurt extends SpriteAction(6, 150 millis, (_ => 0))
 case object Slash extends SpriteAction(6, 100 millis)
@@ -18,15 +20,27 @@ case object Spellcast extends SpriteAction(7, 100 millis)
 case object Thrust extends SpriteAction(8, 100 millis)
 case object Walk extends SpriteAction(8, 100 millis)
 
-case class Part(name: String) {
-  private def animation(d: Direction, a: SpriteAction): Animation = {
-    val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64)
+object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Animation) {
+  def apply(sheet: SpriteSheet, sa: SpriteAction, row: Int): Animation = {
     val ani = new Animation
-    for (x <- 0 until a.frames) {
-      ani.addFrame(ss.getSprite(x, a.spriteRow(d)), a.delay.toMillis.toInt)
+    for (x <- 0 until sa.frames) {
+      ani.addFrame(sheet.getSprite(x, row), sa.delay.toMillis.toInt)
     }
     ani.setPingPong(false)
     ani
+  }
+}
+
+case class Part(name: String) {
+  private def animation(d: Direction, a: SpriteAction): Animation = {
+    val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64)
+//    val ani = new Animation
+//    for (x <- 0 until a.frames) {
+//      ani.addFrame(ss.getSprite(x, a.spriteRow(d)), a.delay.toMillis.toInt)
+//    }
+//    ani.setPingPong(false)
+//    ani
+    SpriteAnimation(ss, a, a.spriteRow(d))
   }
     
   import Memoize._

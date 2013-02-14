@@ -1,6 +1,5 @@
 package de.atextor.madv.engine
 
-import scala.language.postfixOps
 import scala.util.Random
 
 import org.newdawn.slick.Animation
@@ -9,7 +8,6 @@ import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 import org.newdawn.slick.util.Log
 
-import de.atextor.madv.game.Madv
 import de.atextor.madv.engine.Util.pipelineSyntax
 
 sealed abstract class CellProperty
@@ -168,7 +166,7 @@ object Level {
       |> (placeExit(_))
   }
   
-  private def placeExit[L <: Level](l: L)(implicit cd: CaveDefinition): Level = {
+  private def placeExit[L <: Level](l: L): Level = {
     import l.PlacedLevelCell
     val exitLocationProperty: PlacedLevelCell => Boolean = { c =>
       c.pos.x > 3 && c.pos.y > 3 &&
@@ -187,7 +185,7 @@ object Level {
     
     // In rare cases, no optimal exit location can be found. In that case,
     // we take the fallback one which can cause slight graphical glitches.
-    val exitLocationFallbackProperty: PlacedLevelCell => Boolean = { c =>
+    lazy val exitLocationFallbackProperty: PlacedLevelCell => Boolean = { c =>
       c.pos.x > 3 && c.pos.y > 3 &&
       (c.cell.properties.contains(Walkable)) &&
       ((c + Left).cell.properties contains Walkable) &&
@@ -206,21 +204,21 @@ object Level {
       case p if p.pos == exitLocation.pos + Left =>
         p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(1)))())
       case p if p.pos == exitLocation.pos =>
-        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(2)))(Exit))
+        p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(2)))(Exit, Walkable))
       case p if p.pos == exitLocation.pos + Right =>
         p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(3)))()) 
       case p if p.pos == exitLocation.pos + Right * 2 =>
         p.copy(cell = LevelCell(layer0 = Some(StairsEntry.row4(4)))())
       case p if p.pos == exitLocation.pos + Up + Left * 2 =>
-        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(0)))())
+        p.copy(cell = LevelCell(layer0 = Some(StackedRenderable(p.cell.layer0.get, StairsEntry.row3(0))))())
       case p if p.pos == exitLocation.pos + Up + Left =>
-        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(1)))())
+        p.copy(cell = LevelCell(layer0 = Some(StackedRenderable(p.cell.layer0.get, StairsEntry.row3(1))))())
       case p if p.pos == exitLocation.pos + Up =>
         p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(2)))())
       case p if p.pos == exitLocation.pos + Up + Right =>
-        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(3)))())
+        p.copy(cell = LevelCell(layer0 = Some(StackedRenderable(p.cell.layer0.get, StairsEntry.row3(3))))())
       case p if p.pos == exitLocation.pos + Up + Right * 2 =>
-        p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row3(4)))())
+        p.copy(cell = LevelCell(layer0 = Some(StackedRenderable(p.cell.layer0.get, StairsEntry.row3(4))))())
       case p if p.pos == exitLocation.pos + Up * 2 + Left * 2 =>
         p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row2(0)))())
       case p if p.pos == exitLocation.pos + Up * 2 + Left =>
@@ -243,11 +241,11 @@ object Level {
         p.copy(cell = LevelCell(layer0 = p.cell.layer0, layer1 = Some(StairsEntry.row1(4)))())
       case p => p
     }}.map(_.cell)
-    l.copy(cells = updatedCells)
+    l.copy(cells = updatedCells, exitLocation = exitLocation.pos * 16)
   }
 }
   
-case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell]) {
+case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Nowhere) {
   lazy val placedCells = cells.zipWithIndex.map(c => PlacedLevelCell(indexToVec(c._2), c._1))
   
   // Path dependent type, as placed cells depend on this level's cells collection

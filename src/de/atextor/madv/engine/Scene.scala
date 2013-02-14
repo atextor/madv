@@ -7,24 +7,32 @@ import org.newdawn.slick.GameContainer
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
 
-abstract class Scene extends BasicGameState {
+abstract class Scene[PlayerType <: Entity] extends BasicGameState {
+  var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
+  var player: PlayerType
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   
   def at(ticks: Int, f: Action) { actions += ((ticks, f)) }
   
-  def update(gc: GameContainer, game: StateBasedGame, ticks: Int) {
+  def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
+    ticks += delta
     var changed = false
     while (actions.size > 0 && actions.head._1 <= ticks) {
       actions.remove(0)._2(ticks)
       changed = true
     }
     if (changed) actions = actions.sortWith(_._1 < _._1)
-    entities.foreach(_.tick(ticks))
-    entities.foreach(_.move)
+    player.update(ticks)
+    player.move
+    entities.foreach { e =>
+      e.enabled = e.distanceTo(player) < 150
+      e.update(ticks)
+      e.move
+    }
     entities.filterNot(_.alive).foreach(entities -= _)
   }
   
@@ -41,5 +49,4 @@ abstract class Scene extends BasicGameState {
     pressedKeys.dequeueAll(_ == key)
     processKeys
   }
-  
 }

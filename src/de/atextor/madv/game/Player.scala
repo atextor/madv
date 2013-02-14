@@ -17,11 +17,15 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     speed = (if (Constants.debug) 5 else 1)
 ) {
   val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+  val staticRenderPos = Vec2d(170, 80)
   
-  override def draw = {
-    shadow.draw(170, 85)
-    skin.draw(lookingDirection, spriteAction, Vec2d(170, 80))
+  override def draw(x: Float, y: Float) = {
+    shadow.draw(staticRenderPos.x, staticRenderPos.y + 5)
+    skin.draw(lookingDirection, spriteAction, staticRenderPos)
   }
+  
+  override def touchTopLeft = pos + Vec2d(25, 30)
+  override def touchBottomRight = pos + Vec2d(26, 31)
   
   override def move = {
     super.move
