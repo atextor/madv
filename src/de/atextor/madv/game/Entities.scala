@@ -2,22 +2,32 @@ package de.atextor.madv.game
 
 import scala.concurrent.duration._
 import org.newdawn.slick.SpriteSheet
+import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Entity
 import de.atextor.madv.engine.EntitySkin
 import de.atextor.madv.engine.Hurt
+import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.PartName.belt
 import de.atextor.madv.engine.PartName.body
 import de.atextor.madv.engine.PartName.feet
 import de.atextor.madv.engine.PartName.head
 import de.atextor.madv.engine.PartName.torso
+import de.atextor.madv.engine.SimpleSprite
 import de.atextor.madv.engine.Slash
 import de.atextor.madv.engine.Spellcast
+import de.atextor.madv.engine.SpriteAnimation
+import de.atextor.madv.engine.Up
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.Left
+import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walk
+import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.Action
-import de.atextor.madv.engine.SpriteAction
-import de.atextor.madv.engine.SimpleSprite
-import de.atextor.madv.engine.SpriteAnimation
+import de.atextor.madv.engine.DoNothing
+import de.atextor.madv.engine.Audio
+import de.atextor.madv.engine.noArg2intArg
+import de.atextor.madv.engine.Constants
 
 object Entities {
   private def sprite(sheet: String, size: Int, frames: Int, delay: Duration) =
@@ -29,10 +39,66 @@ object Entities {
      (belt  -> ("female_blackbelt" :: "female_ironbuckle" :: Nil)),
      (feet  -> ("female_grayslippers" :: Nil)))
   lazy val goldCoinSprite = sprite(sheet = "res/items/coin_gold.png", size = 32, frames = 8, delay = 60 millis)
+  lazy val silverCoinSprite = sprite(sheet = "res/items/coin_silver.png", size = 32, frames = 8, delay = 60 millis)
+  lazy val copperCoinSprite = sprite(sheet = "res/items/coin_copper.png", size = 32, frames = 8, delay = 60 millis)
+  
+  def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
+    import level.PlacedLevelCell
+    
+    val playPling: Int => Unit = if (Constants.debug) DoNothing else (Audio.pling.play _)
+    
+    // Place a bunch of coins at the end of land
+    val landsEndProperty: PlacedLevelCell => Boolean = { c =>
+      (c.cell.properties.contains(Walkable)) &&
+      ((c + Up).cell.properties.contains(Walkable)) &&
+      ((c + Down).cell.properties.contains(Walkable)) &&
+      ((c + Left).cell.properties.contains(Walkable)) &&
+      ((c + Right).cell.properties.contains(Walkable)) &&
+      (List(((c + Up * 2).cell.properties.contains(Walkable)),
+            ((c + Down * 2).cell.properties.contains(Walkable)),
+            ((c + Left * 2).cell.properties.contains(Walkable)),
+            ((c + Right * 2).cell.properties.contains(Walkable))).filter(identity).size == 1)
+    }
+    val coins = level.placedCells.filter(landsEndProperty).flatMap { pc =>
+      new GoldCoin(player, pc.pos * 16, onTouch = playPling) ::
+      new SilverCoin(player, (pc.pos + Up) * 16, onTouch = playPling) ::
+      new SilverCoin(player, (pc.pos + Down) * 16, onTouch = playPling) ::
+      new SilverCoin(player, (pc.pos + Right) * 16, onTouch = playPling) ::
+      new SilverCoin(player, (pc.pos + Left) * 16, onTouch = playPling) :: Nil
+    }
+    println("coins: " + coins.map(_.pos))
+    
+    /*
+    // Coins on every walkable cell
+    val coins = level.placedCells.filter(_.cell.properties contains Walkable).map { pc =>
+      new GoldCoin(player, pc.pos * 16, onTouch = playPling)
+    }
+    */
+    coins
+  }
 }
 
-class Coin(player: Player, startPos: Vec2d, onTouch: Action) extends
+class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.goldCoinSprite), pos = startPos) {
+  def tick(delta: Int) = {
+    if (player touches this) {
+      alive = false
+      onTouch(delta)
+    }
+  }
+}
+
+class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
+    Entity(size = Vec2d(32, 32), visual = Some(Entities.silverCoinSprite), pos = startPos) {
+  def tick(delta: Int) = {
+    if (player touches this) {
+      alive = false
+      onTouch(delta)
+    }
+  }
+}
+class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
+    Entity(size = Vec2d(32, 32), visual = Some(Entities.copperCoinSprite), pos = startPos) {
   def tick(delta: Int) = {
     if (player touches this) {
       alive = false

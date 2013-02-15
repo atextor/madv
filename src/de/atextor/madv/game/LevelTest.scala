@@ -18,6 +18,7 @@ import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walkable
+import de.atextor.madv.engine.Audio
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -25,37 +26,34 @@ class LevelTest extends Scene[Player] {
   var player: Player = null
   var gameMap: Option[Level] = None
   
-  def generateLevel: Level = {
-    val area = CellularAutomaton.generateCoherentLevel
-//    val area = CellularAutomaton.staticSmallLevel
+  def init(gc: GameContainer, game: StateBasedGame) {
 //    implicit val caveDef = LavaCave
     implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
-    Level.fromCellularAutomaton(area)
-  }
-  
-  def init(gc: GameContainer, game: StateBasedGame) {
-    val m = generateLevel
-    val startCell = m.find(_.cell.properties contains Walkable).get
-    player = new Player(level = m, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
+    val level = Level generateCoherentLevel
+//    val level = Level generateStaticSmallLevel
+    val startCell = level.find(_.cell.properties contains Walkable).get
+    player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
+    addEntities(Entities.placeEntitiesInLevel(player, level))
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
-    val coin = new Coin(player, player.pos + Vec2d(40, 0), onTouch = DoNothing)
-    addEntity(coin)
-    gameMap = Some(m)
+    
+      
+    gameMap = Some(level)
     at(0, t => player.stop)
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
     if (Constants.debug) {
       g.scale(2, 2)
+      g.translate(90, 60)
     } else {
       g.scale(4, 4)
     }
     
     gameMap.foreach(_.draw(player.pos, layer = 0))
     g.scale(0.5f, 0.5f)
-    entities.foreach(e => if (e.enabled) e.draw((e.pos.x - player.pos.x) * 2 + player.staticRenderPos.x, (e.pos.y - player.pos.y) * 2 + player.staticRenderPos.y))
+    entities.foreach(e => if (e.enabled) e.draw((e.pos.x - player.pos.x) * 2 + player.staticRenderPos.x + 8, (e.pos.y - player.pos.y) * 2 + player.staticRenderPos.y + 32))
     player.draw(player.staticRenderPos.x, player.staticRenderPos.y)
     g.scale(2.0f, 2.0f)
     gameMap.foreach(_.draw(player.pos, layer = 1))

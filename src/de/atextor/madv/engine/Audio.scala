@@ -1,9 +1,12 @@
 package de.atextor.madv.engine
 
-class Audio {
-}
+import org.newdawn.slick.openal.AudioLoader
+import org.newdawn.slick.util.ResourceLoader
+import org.newdawn.slick.Sound
 
-object Audio extends App {
+object Audio {
+  lazy val pling = new Sound("res/audio/pling.wav")
+  
 //  val stream = classOf[Audio].getClassLoader.getResourceAsStream("sample.ogg")
   
 //  val ogg = new OggClip(stream);
@@ -14,7 +17,5 @@ object Audio extends App {
 //  ogg.resume
 //  ogg.stop
 //  ogg.setGain(1.0f) 
-  Console.readLine
-  
   
 }

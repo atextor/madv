@@ -5,4 +5,5 @@ package object engine {
   type Action = (Int => Unit)
   type TimedAction = (Int, Action)
   val DoNothing: Action = (_ => ())
+  implicit def noArg2intArg(f: (() => Unit)): Action = { i => f() }
 }

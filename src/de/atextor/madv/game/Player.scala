@@ -24,8 +24,8 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     skin.draw(lookingDirection, spriteAction, staticRenderPos)
   }
   
-  override def touchTopLeft = pos + Vec2d(25, 30)
-  override def touchBottomRight = pos + Vec2d(26, 31)
+  override def touchTopLeft = pos + Vec2d(23, 17)
+  override def touchBottomRight = pos + Vec2d(15, 18)
   
   override def move = {
     super.move

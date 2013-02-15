@@ -143,7 +143,7 @@ case object StairsEntry extends SpriteSheetHelper {
 object Level {
   val scale = if (Constants.debug) 2 else 1
   
-  def fromCellularAutomaton(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
+  private def cellularAutomatonToLevel(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
     val alive = ca.isAlive _
     val dead = ca.isDead _
     val levelCells = ca.allCells.map (_ match {
@@ -162,8 +162,7 @@ object Level {
       case c if alive(c + Up + Left)                                 => LevelCell(layer0 = Some(cd.bottomRight))()
       case c => LevelCell(layer0 = Some(cd.space))()
     })
-    Level(width = ca.width, height = ca.height, cells = levelCells).
-      |> (placeExit(_))
+    Level(width = ca.width, height = ca.height, cells = levelCells)
   }
   
   private def placeExit[L <: Level](l: L): Level = {
@@ -243,6 +242,31 @@ object Level {
     }}.map(_.cell)
     l.copy(cells = updatedCells, exitLocation = exitLocation.pos * 16)
   }
+  
+  val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
+  val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
+  
+  def generateCoherentLevel = {
+    CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes.
+      |> (ca => ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)).
+      |> (cellularAutomatonToLevel(_)).
+      |> (placeExit(_))
+  }
+  
+  def generateIslandLevel(implicit cd: CaveDefinition) = {
+    CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth)(smooth).upscale(smooth).fixPotholes.
+      |> (cellularAutomatonToLevel(_)).
+      |> (placeExit(_))
+  }
+  
+  def generateStaticSmallLevel(implicit cd: CaveDefinition) = {
+    val allCells = CellularAutomaton(20, 20).allCells.toSet
+    val island = ((for (x <- 0 until 20; y <- 0 until 20) yield (x, y)) collect {
+      case (x, y) if (math.sqrt((x - 10) * (x - 10) + (y - 10) * (y - 10)) > 6) => Cell(x, y)
+    }).toSet
+    CellularAutomaton(width = 20, height = 20, liveCells = allCells -- island).
+      |> (cellularAutomatonToLevel(_))
+  }
 }
   
 case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Nowhere) {
@@ -270,7 +294,7 @@ case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLoca
     val blockOffsetY = (offset.y) / 16
     val w = 7 * Level.scale
     for (x <- blockOffsetX - w to blockOffsetX + w; y <- blockOffsetY - w to blockOffsetY + w) {
-      at(x, y).layer(layer).foreach(_.draw(x * 16 - offset.x + (Level.scale * 90), y * 16 - offset.y + (Level.scale * 60)))
+      at(x, y).layer(layer).foreach(_.draw(x * 16 - offset.x + 90, y * 16 - offset.y + 60))
     }
   }
 }

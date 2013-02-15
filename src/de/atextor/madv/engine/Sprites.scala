@@ -26,26 +26,15 @@ object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Animation) {
     for (x <- 0 until sa.frames) {
       ani.addFrame(sheet.getSprite(x, row), sa.delay.toMillis.toInt)
     }
-    ani.setPingPong(false)
+    ani setPingPong false
     ani
   }
 }
 
 case class Part(name: String) {
-  private def animation(d: Direction, a: SpriteAction): Animation = {
-    val ss = new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64)
-//    val ani = new Animation
-//    for (x <- 0 until a.frames) {
-//      ani.addFrame(ss.getSprite(x, a.spriteRow(d)), a.delay.toMillis.toInt)
-//    }
-//    ani.setPingPong(false)
-//    ani
-    SpriteAnimation(ss, a, a.spriteRow(d))
-  }
-    
-  import Memoize._
-  val getAnimation = memoize(animation _)
-    
+  private def animation(d: Direction, a: SpriteAction): Animation =
+    SpriteAnimation(new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64), a, a.spriteRow(d))
+  val getAnimation = Memoize.memoize(animation _)
   def draw(d: Direction, a: SpriteAction, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
   def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).stop
   def startAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).start

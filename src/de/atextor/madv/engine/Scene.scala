@@ -16,6 +16,8 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   
+  def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
+  
   def at(ticks: Int, f: Action) { actions += ((ticks, f)) }
   
   def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
@@ -29,7 +31,7 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
     player.update(ticks)
     player.move
     entities.foreach { e =>
-      e.enabled = e.distanceTo(player) < 150
+      e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
       e.update(ticks)
       e.move
     }
