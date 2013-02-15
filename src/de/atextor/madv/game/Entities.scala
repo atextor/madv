@@ -41,6 +41,7 @@ object Entities {
   lazy val goldCoinSprite = sprite(sheet = "res/items/coin_gold.png", size = 32, frames = 8, delay = 60 millis)
   lazy val silverCoinSprite = sprite(sheet = "res/items/coin_silver.png", size = 32, frames = 8, delay = 60 millis)
   lazy val copperCoinSprite = sprite(sheet = "res/items/coin_copper.png", size = 32, frames = 8, delay = 60 millis)
+  lazy val chestSprite = sprite(sheet = "res/items/chest.png", size = 32, frames = 2, delay = 1 second)
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
@@ -75,6 +76,23 @@ object Entities {
     }
     */
     coins
+  }
+}
+
+class Chest(player: Player, startPos: Vec2d, onTouch: Action) extends
+    Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
+  visual.get.stop
+  var activated = false
+  def tick(delta: Int) = {
+    if (player touches this) {
+      if (!activated) {
+        activated = true
+        Audio.chestopen.play
+        visual.get.setCurrentFrame(1)
+        onTouch(delta)
+      }
+      player.goBack
+    } 
   }
 }
 

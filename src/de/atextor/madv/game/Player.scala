@@ -24,7 +24,9 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     skin.draw(lookingDirection, spriteAction, staticRenderPos)
   }
   
-  override def touchTopLeft = pos + Vec2d(23, 17)
+  def goBack = pos += movingDirection.invert * speed 
+  
+  override def touchTopLeft = pos + Vec2d(27, 25)
   override def touchBottomRight = pos + Vec2d(15, 18)
   
   override def move = {
@@ -35,7 +37,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
       if (level.cellAt(pos).properties contains Walkable) {
         true 
       } else {
-        pos += movingDirection.invert * speed 
+        goBack
         false
       }
     }

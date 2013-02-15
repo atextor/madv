@@ -37,7 +37,8 @@ class LevelTest extends Scene[Player] {
     addEntities(Entities.placeEntitiesInLevel(player, level))
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
-    
+    val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0), onTouch = DoNothing)
+    addEntity(chest)
       
     gameMap = Some(level)
     at(0, t => player.stop)

@@ -1,6 +1,7 @@
 package de.atextor.madv.engine
 
 import org.newdawn.slick.Renderable
+import org.newdawn.slick.Animation
 
 trait Tickable {
   var enabled = true
@@ -8,7 +9,7 @@ trait Tickable {
   def tick(delta: Int)
 }
 
-abstract class Entity(var size: Vec2d, visual: Option[Renderable] = None, override var pos: Vec2d) extends Movable with Tickable with Renderable {
+abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2d) extends Movable with Tickable with Renderable {
   var lookingDirection: Direction = Down
   var movingDirection: Vec2d = Nowhere
   var alive = true
