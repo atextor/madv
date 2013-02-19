@@ -20,6 +20,13 @@ import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.AutoMap
 import de.atextor.madv.engine.Action
+import de.atextor.madv.engine.Text
+import org.newdawn.slick.UnicodeFont
+import java.awt.Font
+import org.newdawn.slick.font.effects.ColorEffect
+import org.newdawn.slick.font.effects.ShadowEffect
+import org.newdawn.slick.Color
+import de.atextor.madv.engine.Inventory
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -44,16 +51,16 @@ class LevelTest extends Scene[Player] {
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
     val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0), onTouch = DoNothing)
     addEntity(chest)
-      
+    addText(new Text("Hallo Wörld", appear = true))
+    
     gameMap = Some(level)
     at(0, t => player.stop)
-    at(0, updateAutomap(_))
+    
+    lazy val updateAm: Action = { t => automap.update(player); at(t + 300, updateAm) }
+    at(0, updateAm)
   }
   
-  def updateAutomap(t: Int): Unit = {
-    automap.update(player)
-    at(t + 300, (updateAutomap(_)))
-  }
+  var ui = new Inventory(Vec2d(100, 100))
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
     if (Constants.debug) {
@@ -72,6 +79,11 @@ class LevelTest extends Scene[Player] {
     gameMap.foreach(_.draw(player.pos, layer = 1))
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
+    
+    ui.draw(10, 10)
+    
+	g.setColor(org.newdawn.slick.Color.white);
+    texts.foreach(_.draw(10, 10))
   }
   
   def processKeys {

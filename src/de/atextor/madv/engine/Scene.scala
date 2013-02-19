@@ -14,16 +14,17 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
+  val texts: ListBuffer[Text] = ListBuffer()
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
-  
-  def addEffect(e: Effect): ListBuffer[Effect] = effects += e
-  
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
+  def addEffect(e: Effect): ListBuffer[Effect] = effects += e
+  def addText(t: Text): ListBuffer[Text] = texts += t
   
   def at(ticks: Int, f: Action) { actions += ((ticks, f)) }
   
   def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
+    Text.unicodeFont.loadGlyphs
     ticks += delta
     var changed = false
     while (actions.size > 0 && actions.head._1 <= ticks) {
@@ -42,6 +43,7 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
       e.update(ticks)
       e.move
     }
+    texts.foreach(_.update(ticks))
     entities.filterNot(_.alive).foreach(entities -= _)
     effects.filterNot(_.alive).foreach(effects -= _)
   }

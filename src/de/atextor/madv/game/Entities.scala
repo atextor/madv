@@ -30,6 +30,8 @@ import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Constants
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.Animation
+import de.atextor.madv.engine.Tickable
+import de.atextor.madv.engine.Movable
 
 object Entities {
   private def sprite(sheet: String, size: Int, frames: Int, delay: Duration) =
@@ -72,7 +74,6 @@ object Entities {
       new SilverCoin(player, (pc.pos + Right) * 16, onTouch = playPling) ::
       new SilverCoin(player, (pc.pos + Left) * 16, onTouch = playPling) :: Nil
     }
-    println("coins: " + coins.map(_.pos))
     
     /*
     // Coins on every walkable cell
