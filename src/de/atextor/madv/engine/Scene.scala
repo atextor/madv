@@ -2,19 +2,22 @@ package de.atextor.madv.engine
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
-
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
+import de.atextor.madv.game.Effect
 
 abstract class Scene[PlayerType <: Entity] extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
+  var player: PlayerType
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
-  var player: PlayerType
+  val effects: ListBuffer[Effect] = ListBuffer()
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
+  
+  def addEffect(e: Effect): ListBuffer[Effect] = effects += e
   
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
   
@@ -35,7 +38,12 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
       e.update(ticks)
       e.move
     }
+    effects.foreach { e =>
+      e.update(ticks)
+      e.move
+    }
     entities.filterNot(_.alive).foreach(entities -= _)
+    effects.filterNot(_.alive).foreach(effects -= _)
   }
   
   def processKeys

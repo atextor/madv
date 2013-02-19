@@ -28,6 +28,8 @@ import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Constants
+import org.newdawn.slick.Renderable
+import org.newdawn.slick.Animation
 
 object Entities {
   private def sprite(sheet: String, size: Int, frames: Int, delay: Duration) =
@@ -42,6 +44,9 @@ object Entities {
   lazy val silverCoinSprite = sprite(sheet = "res/items/coin_silver.png", size = 32, frames = 8, delay = 60 millis)
   lazy val copperCoinSprite = sprite(sheet = "res/items/coin_copper.png", size = 32, frames = 8, delay = 60 millis)
   lazy val chestSprite = sprite(sheet = "res/items/chest.png", size = 32, frames = 2, delay = 1 second)
+  lazy val sparkle1 = sprite(sheet = "res/effects/sparkle1.png", size = 31, frames = 8, delay = 120 millis)
+  lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
+  def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0)
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
@@ -96,8 +101,8 @@ class Chest(player: Player, startPos: Vec2d, onTouch: Action) extends
   }
 }
 
-class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
-    Entity(size = Vec2d(32, 32), visual = Some(Entities.goldCoinSprite), pos = startPos) {
+class Collectible(player: Player, startPos: Vec2d, onTouch: Action, visual: Animation) extends 
+    Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
   def tick(delta: Int) = {
     if (player touches this) {
       alive = false
@@ -106,21 +111,18 @@ class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
   }
 }
 
-class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
-    Entity(size = Vec2d(32, 32), visual = Some(Entities.silverCoinSprite), pos = startPos) {
+class Effect(startPos: Vec2d, visual: Animation) extends
+    Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
+  visual.setLooping(false)
   def tick(delta: Int) = {
-    if (player touches this) {
+    if (visual.getFrame == visual.getFrameCount - 1) {
       alive = false
-      onTouch(delta)
     }
-  }
+  } 
 }
-class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends
-    Entity(size = Vec2d(32, 32), visual = Some(Entities.copperCoinSprite), pos = startPos) {
-  def tick(delta: Int) = {
-    if (player touches this) {
-      alive = false
-      onTouch(delta)
-    }
-  }
-}
+
+class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.goldCoinSprite)
+class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.silverCoinSprite)
+class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.copperCoinSprite)
+
+class Explosion(startPos: Vec2d) extends Effect(startPos, Entities.explosion)

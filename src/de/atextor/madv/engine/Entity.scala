@@ -19,6 +19,11 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
     val b = Math.abs(pos.y - other.pos.y)
     Math.sqrt(a * a + b * b)
   }
+  def relativeDraw(base: Vec, staticOffset: Vec) {
+    if (enabled) {
+      draw((pos.x - base.x) * 2 + staticOffset.x + 8, (pos.y - base.y) * 2 + staticOffset.y + 32)
+    }
+  }
 }
 
 class Humanoid (
