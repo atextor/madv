@@ -2,9 +2,11 @@ package de.atextor.madv.engine
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
+
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
+
 import de.atextor.madv.game.Effect
 
 abstract class Scene[PlayerType <: Entity] extends BasicGameState {
@@ -14,12 +16,12 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
-  val texts: ListBuffer[Text] = ListBuffer()
+  val overlays: ListBuffer[Overlay] = ListBuffer()
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
   def addEffect(e: Effect): ListBuffer[Effect] = effects += e
-  def addText(t: Text): ListBuffer[Text] = texts += t
+  def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
   
   def at(ticks: Int, f: Action) { actions += ((ticks, f)) }
   
@@ -43,9 +45,10 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
       e.update(ticks)
       e.move
     }
-    texts.foreach(_.update(ticks))
+    overlays.foreach(_.update(ticks))
     entities.filterNot(_.alive).foreach(entities -= _)
     effects.filterNot(_.alive).foreach(effects -= _)
+    overlays.filterNot(_.alive).foreach(overlays -= _)
   }
   
   def processKeys

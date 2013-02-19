@@ -1,37 +1,37 @@
 package de.atextor.madv.game
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
+import org.newdawn.slick.Animation
 import org.newdawn.slick.SpriteSheet
+import de.atextor.madv.engine.Action
+import de.atextor.madv.engine.Audio
+import de.atextor.madv.engine.Constants
+import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Entity
 import de.atextor.madv.engine.EntitySkin
+import de.atextor.madv.engine.FrameBox
 import de.atextor.madv.engine.Hurt
+import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.PartName.belt
 import de.atextor.madv.engine.PartName.body
 import de.atextor.madv.engine.PartName.feet
 import de.atextor.madv.engine.PartName.head
 import de.atextor.madv.engine.PartName.torso
+import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.SimpleSprite
 import de.atextor.madv.engine.Slash
 import de.atextor.madv.engine.Spellcast
 import de.atextor.madv.engine.SpriteAnimation
+import de.atextor.madv.engine.Text
 import de.atextor.madv.engine.Up
-import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.Left
-import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
-import de.atextor.madv.engine.Action
-import de.atextor.madv.engine.DoNothing
-import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.noArg2intArg
-import de.atextor.madv.engine.Constants
-import org.newdawn.slick.Renderable
-import org.newdawn.slick.Animation
-import de.atextor.madv.engine.Tickable
-import de.atextor.madv.engine.Movable
+import de.atextor.madv.engine.Overlay
 
 object Entities {
   private def sprite(sheet: String, size: Int, frames: Int, delay: Duration) =
@@ -127,3 +127,16 @@ class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.copperCoinSprite)
 
 class Explosion(startPos: Vec2d) extends Effect(startPos, Entities.explosion)
+
+class TextBox(width: Int, text: String) extends Overlay(pos = Vec2d(200 - width / 2, 30)) {
+  val size = Vec2d(width, Text.getTextHeight(text))
+  val box = new FrameBox(size)
+  val txt = new Text(text)
+  val tw = Text.unicodeFont.getWidth(text)
+  
+  override def draw {
+    box.draw(pos.x, pos.y)
+    txt.draw(pos.x + width / 2 - tw / 2, pos.y + 7)
+  }
+  def tick(delta: Int) {}
+}

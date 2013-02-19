@@ -1,31 +1,24 @@
 package de.atextor.madv.game
 
+import org.newdawn.slick.Color
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.StateBasedGame
-import de.atextor.madv.engine.CellularAutomaton
+import de.atextor.madv.engine.AutoMap
+import de.atextor.madv.engine.BlueCave
 import de.atextor.madv.engine.Constants
 import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.LavaCave
-import de.atextor.madv.engine.BlueCave
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
 import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Scene
+import de.atextor.madv.engine.Text
 import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walkable
-import de.atextor.madv.engine.Audio
-import de.atextor.madv.engine.AutoMap
 import de.atextor.madv.engine.Action
-import de.atextor.madv.engine.Text
-import org.newdawn.slick.UnicodeFont
-import java.awt.Font
-import org.newdawn.slick.font.effects.ColorEffect
-import org.newdawn.slick.font.effects.ShadowEffect
-import org.newdawn.slick.Color
 import de.atextor.madv.engine.Inventory
 
 class LevelTest extends Scene[Player] {
@@ -49,18 +42,25 @@ class LevelTest extends Scene[Player] {
     
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
-    val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0), onTouch = DoNothing)
+    
+    val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0),
+      onTouch = { t =>
+        val text = new TextBox(width = 150, text = "Opened chest\nfoo")
+        addOverlay(text)
+        at(t + 5000, (_ => text.alive = false))
+      })
     addEntity(chest)
-    addText(new Text("Hallo Wörld", appear = true))
     
     gameMap = Some(level)
     at(0, t => player.stop)
     
     lazy val updateAm: Action = { t => automap.update(player); at(t + 300, updateAm) }
     at(0, updateAm)
+    
+//    val gui = new TextBox(pos = Vec2d(10, 10), width = 200, text = "Hallo Wörld")
+    val inv = new Inventory
+    addOverlay(inv)
   }
-  
-  var ui = new Inventory(Vec2d(100, 100))
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
     if (Constants.debug) {
@@ -80,10 +80,8 @@ class LevelTest extends Scene[Player] {
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
     
-    ui.draw(10, 10)
-    
 	g.setColor(org.newdawn.slick.Color.white);
-    texts.foreach(_.draw(10, 10))
+    overlays.foreach(_.draw)
   }
   
   def processKeys {
