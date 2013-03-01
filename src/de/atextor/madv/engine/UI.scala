@@ -1,9 +1,13 @@
 package de.atextor.madv.engine
 
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
+
 import org.newdawn.slick.Color
 import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
-import scala.collection.mutable.ListBuffer
+import org.newdawn.slick.SpriteSheet
 
 class FrameBox(size: Vec2d) extends Renderable {
   private def image(r: String) = {
@@ -49,28 +53,54 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   val size = Vec2d(200, 200)
   val box = new FrameBox(size)
   val text = new Text("Inventar")
-  var selection = 0
+  val arrow = SpriteAnimation(new SpriteSheet("res/ui/arrow.png", 16, 7), new SimpleSprite(2, 500 millis), 0)
+  var selection = -1
+  active = false
   
-  val stuff: ListBuffer[InventoryItem] = new ListBuffer()
-  def addItem(i: InventoryItem) = stuff += i
+  private val stuff: ListBuffer[InventoryItem] = new ListBuffer()
   
-  stuff += Potion()
+  addItem(Potion())
+  addItem(Potion())
+  
+  def addItem(i: InventoryItem) = {
+    if (stuff.isEmpty) selection = 0
+    stuff += i
+  }
+  
+  def removeItem(i: InventoryItem) = {
+    stuff -= i
+    if (selection > stuff.size - 1) selection = stuff.size - 1
+    if (stuff.isEmpty) selection = -1
+  }
   
   def draw {
     box.draw(pos.x, pos.y)
     text.draw(pos.x + size.x / 2 - text.getWidth / 2, pos.y + 7)
-    stuff.zipWithIndex.foreach { case (item, i) =>
-      val x = pos.x + 7
-      val y = pos.y + 20 + i * 6
-      item.text.draw(x, y)
-    }
+    stuff.zipWithIndex.foreach(s => s._1.text.draw(pos.x + 25, pos.y + 20 + s._2 * 10))
+    if (!stuff.isEmpty) arrow.draw(pos.x + 7, pos.y + 21 + selection * 10)
   }
   
   def tick(delta: Int) { }
   
-  def changeSelection(d: Direction) = d match {
-    case Up => selection -= 1
-    case Down => selection += 1
-    case _ => println("select")
+  def changeSelection(d: Direction) = {
+    d match {
+      case Up => {
+        if (!stuff.isEmpty) {
+          selection -= 1
+          if (selection < 0) selection = stuff.size - 1
+        }
+      }
+      case Down => {
+        if (!stuff.isEmpty) {
+          selection += 1
+          if (selection > stuff.size - 1) selection = 0
+        }
+      }
+      case _ =>
+    }
+  }
+  
+  def activateSelected {
+    removeItem(stuff(selection))
   }
 }

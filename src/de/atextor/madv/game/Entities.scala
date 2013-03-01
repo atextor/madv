@@ -32,28 +32,29 @@ import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Overlay
+import org.newdawn.slick.Graphics
 
 object Entities {
-  private def sprite(sheet: String, size: Int, frames: Int, delay: Duration) =
-    SpriteAnimation(new SpriteSheet(sheet, size, size), new SimpleSprite(frames, delay), 0)
+  private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
+    SpriteAnimation(new SpriteSheet(sheet, sizeX, if (sizeY == 0) sizeX else sizeY), new SimpleSprite(frames, delay), 0)
   lazy val playerSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female" :: Nil)),
      (head  -> ("female_darkblondehair" :: Nil)),
      (torso -> ("female_vest" :: "female_forestrobe" :: Nil)),
      (belt  -> ("female_blackbelt" :: "female_ironbuckle" :: Nil)),
      (feet  -> ("female_grayslippers" :: Nil)))
-  lazy val goldCoinSprite = sprite(sheet = "res/items/coin_gold.png", size = 32, frames = 8, delay = 60 millis)
-  lazy val silverCoinSprite = sprite(sheet = "res/items/coin_silver.png", size = 32, frames = 8, delay = 60 millis)
-  lazy val copperCoinSprite = sprite(sheet = "res/items/coin_copper.png", size = 32, frames = 8, delay = 60 millis)
-  lazy val chestSprite = sprite(sheet = "res/items/chest.png", size = 32, frames = 2, delay = 1 second)
-  lazy val sparkle1 = sprite(sheet = "res/effects/sparkle1.png", size = 31, frames = 8, delay = 120 millis)
+  lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis)
+  lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis)
+  lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis)
+  lazy val chestSprite = animation(sheet = "res/items/chest.png", sizeX = 32, frames = 2, delay = 1 second)
+  lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis)
   lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
   def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0)
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
     
-    val playPling: Int => Unit = if (Constants.debug) DoNothing else (Audio.pling.play _)
+    val playPling: Action = if (Constants.debug) DoNothing else (Audio.pling.play _)
     
     // Place a bunch of coins at the end of land
     val landsEndProperty: PlacedLevelCell => Boolean = { c =>

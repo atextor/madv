@@ -29,6 +29,7 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
 abstract class Overlay(var pos: Vec2d) extends Tickable {
   def draw
   var alive = true
+  var active = true
 }
 
 class Humanoid (

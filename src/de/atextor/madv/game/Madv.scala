@@ -15,13 +15,6 @@ class Madv extends StateBasedGame("Madv") {
 //    addState(new TitleScreen)
     addState(new LevelTest)
   }
-  
-  override def keyPressed(key: Int, c: Char) {
-    super.keyPressed(key, c)
-    if (key == Input.KEY_ESCAPE) {
-      container.exit
-    }
-  }
 }
 
 object Madv {

@@ -1,5 +1,7 @@
 package de.atextor.madv.game
 
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
 import org.newdawn.slick.Color
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
@@ -27,13 +29,14 @@ class LevelTest extends Scene[Player] {
   var player: Player = null
   var gameMap: Option[Level] = None
   var automap: AutoMap = null
+  val inventory = new Inventory
   
   def init(gc: GameContainer, game: StateBasedGame) {
 //    implicit val caveDef = LavaCave
     implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
-    val level = Level generateCoherentLevel
-//    val level = Level generateStaticSmallLevel
+//    val level = Level generateCoherentLevel
+    val level = Level generateStaticSmallLevel
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
     addEntities(Entities.placeEntitiesInLevel(player, level))
@@ -47,19 +50,17 @@ class LevelTest extends Scene[Player] {
       onTouch = { t =>
         val text = new TextBox(width = 150, text = "Opened chest\nfoo")
         addOverlay(text)
-        at(t + 5000, (_ => text.alive = false))
+        at(t.milliseconds + 5.seconds, (_ => text.alive = false))
       })
     addEntity(chest)
     
     gameMap = Some(level)
-    at(0, t => player.stop)
+    at(0 millis, t => player.stop)
     
-    lazy val updateAm: Action = { t => automap.update(player); at(t + 300, updateAm) }
-    at(0, updateAm)
+    lazy val updateAm: Action = { t => automap.update(player); at(t.millis + 300.millis, updateAm) }
+    at(0 millis, updateAm)
     
-//    val gui = new TextBox(pos = Vec2d(10, 10), width = 200, text = "Hallo Wörld")
-    val inv = new Inventory
-    addOverlay(inv)
+    addOverlay(inventory)
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
@@ -81,17 +82,20 @@ class LevelTest extends Scene[Player] {
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
     
 	g.setColor(org.newdawn.slick.Color.white);
-    overlays.foreach(_.draw)
+    overlays.filter(_.active).foreach(_.draw)
   }
   
   def processKeys {
     if (gameMap.isDefined) {
       if (pressedKeys.size > 0) pressedKeys.last match {
-        case Input.KEY_UP => player.go(Up)
-        case Input.KEY_RIGHT => player.go(Right)
-        case Input.KEY_DOWN => player.go(Down)
-        case Input.KEY_LEFT => player.go(Left)
+        case Input.KEY_I => inventory.active = !inventory.active
+        case Input.KEY_UP => if (inventory.active) inventory.changeSelection(Up) else player.go(Up)
+        case Input.KEY_DOWN => if (inventory.active) inventory.changeSelection(Down) else player.go(Down)
+        case Input.KEY_LEFT => if (!inventory.active) player.go(Left)
+        case Input.KEY_RIGHT => if (!inventory.active) player.go(Right)
         case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
+        case Input.KEY_ESCAPE => if (inventory.active) inventory.active = false else exitScene
+        case Input.KEY_ENTER => if (inventory.active) inventory.activateSelected
         case _ =>
       } else {
         player.stop
