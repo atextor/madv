@@ -22,6 +22,7 @@ import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
+import de.atextor.madv.engine.Potion
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -48,9 +49,10 @@ class LevelTest extends Scene[Player] {
     
     val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0),
       onTouch = { t =>
-        val text = new TextBox(width = 150, text = "Opened chest\nfoo")
+        val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
         addOverlay(text)
         at(t.milliseconds + 5.seconds, (_ => text.alive = false))
+        inventory.addItem(new Potion())
       })
     addEntity(chest)
     

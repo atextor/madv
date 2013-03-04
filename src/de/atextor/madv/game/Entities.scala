@@ -32,6 +32,7 @@ import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Overlay
+import de.atextor.madv.engine.TextBox
 import org.newdawn.slick.Graphics
 
 object Entities {
@@ -129,15 +130,4 @@ class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 
 class Explosion(startPos: Vec2d) extends Effect(startPos, Entities.explosion)
 
-class TextBox(width: Int, text: String) extends Overlay(pos = Vec2d(200 - width / 2, 30)) {
-  val size = Vec2d(width, Text.getTextHeight(text))
-  val box = new FrameBox(size)
-  val txt = new Text(text)
-  val tw = Text.unicodeFont.getWidth(text)
-  
-  override def draw {
-    box.draw(pos.x, pos.y)
-    txt.draw(pos.x + width / 2 - tw / 2, pos.y + 7)
-  }
-  def tick(delta: Int) {}
-}
+class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))

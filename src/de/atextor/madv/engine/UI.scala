@@ -9,6 +9,24 @@ import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 
+abstract class Overlay(var pos: Vec2d) {
+  def draw
+  var alive = true
+  var active = true
+}
+
+class TextBox(width: Int, text: String, startPos: Vec2d) extends Overlay(pos = startPos) {
+  val size = Vec2d(width, Text.getTextHeight(text))
+  val box = new FrameBox(size)
+  val txt = new Text(text)
+  val tw = Text.unicodeFont.getWidth(text)
+  
+  override def draw {
+    box.draw(pos.x, pos.y)
+    txt.draw(pos.x + width / 2 - tw / 2, pos.y + 7)
+  }
+}
+
 class FrameBox(size: Vec2d) extends Renderable {
   private def image(r: String) = {
     val img = new Image(s"res/ui/box${r}.png")
@@ -43,11 +61,22 @@ class FrameBox(size: Vec2d) extends Renderable {
   }
 }
 
-abstract class InventoryItem(name: String) {
+abstract class InventoryItem(name: String, description: String) extends Renderable {
   val text = new Text(name)
+  val desc = new Text(description)
+  val tbox = new TextBox(150, description, Vec2d(300, 100))
+  
+  def draw(x: Float, y: Float) {
+    text.draw(x, y)
+  }
+  
+  def drawDescription(x: Float, y: Float) {
+    tbox.pos = Vec2d(x.toInt, y.toInt)
+    tbox.draw
+  }
 }
 
-case class Potion() extends InventoryItem("Potion")
+case class Potion() extends InventoryItem("Potion", "A strange potion.\nWill restore 100 HP.")
 
 class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   val size = Vec2d(200, 200)
@@ -76,11 +105,12 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   def draw {
     box.draw(pos.x, pos.y)
     text.draw(pos.x + size.x / 2 - text.getWidth / 2, pos.y + 7)
-    stuff.zipWithIndex.foreach(s => s._1.text.draw(pos.x + 25, pos.y + 20 + s._2 * 10))
-    if (!stuff.isEmpty) arrow.draw(pos.x + 7, pos.y + 21 + selection * 10)
+    stuff.zipWithIndex.foreach(s => s._1.draw(pos.x + 25, pos.y + 20 + s._2 * 10))
+    if (!stuff.isEmpty) {
+      arrow.draw(pos.x + 7, pos.y + 21 + selection * 10)
+      stuff(selection).drawDescription(200, 200)
+    }
   }
-  
-  def tick(delta: Int) { }
   
   def changeSelection(d: Direction) = {
     d match {
@@ -101,6 +131,6 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   }
   
   def activateSelected {
-    removeItem(stuff(selection))
+    if (selection > -1) removeItem(stuff(selection))
   }
 }

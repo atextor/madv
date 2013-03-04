@@ -49,7 +49,6 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
       e.update(ticks)
       e.move
     }
-    overlays.foreach(_.update(ticks))
     entities.filterNot(_.alive).foreach(entities -= _)
     effects.filterNot(_.alive).foreach(effects -= _)
     overlays.filterNot(_.alive).foreach(overlays -= _)
