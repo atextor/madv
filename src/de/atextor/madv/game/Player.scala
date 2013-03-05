@@ -11,35 +11,25 @@ import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 
 class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
+    level = level,
     skin = entitySkin,
     spriteAction = Walk,
     startPosition = startPosition,
     speed = (if (Constants.debug) 5 else 1)
 ) {
-  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
-  val staticRenderPos = Vec2d(170, 80)
+  val staticRenderPos = Vec2d(168, 80)
   
   override def draw(x: Float, y: Float) = {
-    shadow.draw(staticRenderPos.x, staticRenderPos.y + 5)
-    skin.draw(lookingDirection, spriteAction, staticRenderPos)
+    shadow.draw(x, y + 5)
+    skin.draw(lookingDirection, spriteAction, Vec2d(x.toInt, y.toInt)) 
   }
-  
-  def goBack = pos += movingDirection.invert * speed 
   
   override def touchTopLeft = pos + Vec2d(27, 25)
   override def touchBottomRight = pos + Vec2d(15, 18)
   
-  override def move = {
-    super.move
-    if (Constants.debug) {
-      true
-    } else {
-      if (level.cellAt(pos).properties contains Walkable) {
-        true 
-      } else {
-        goBack
-        false
-      }
-    }
+  override def move {
+    pos += movingDirection * speed
+    if (Constants.debug) return
+    if (!(level.cellAt(pos).properties contains Walkable)) goBack
   }
 }

@@ -25,12 +25,11 @@ trait Movable {
       (touchTopLeft.y > otherBR.y))
   }
       
-  def move: Boolean = {
+  def move {
     pos += movingDirection
 //    val canMove = !(obstacles.foldLeft(false) { (b, s) => b || s.touches(this) })
 //    if (!canMove) pos -= direction
 //    canMove
-    true
   }
 }
   

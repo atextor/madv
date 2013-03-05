@@ -19,6 +19,7 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
   val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
   val overlays: ListBuffer[Overlay] = ListBuffer()
+  val inventory = new Inventory
   
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e

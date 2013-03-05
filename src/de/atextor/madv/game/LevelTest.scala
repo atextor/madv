@@ -23,6 +23,8 @@ import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.Potion
+import de.atextor.madv.engine.Dumb
+import de.atextor.madv.engine.Humanoid
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -30,31 +32,28 @@ class LevelTest extends Scene[Player] {
   var player: Player = null
   var gameMap: Option[Level] = None
   var automap: AutoMap = null
-  val inventory = new Inventory
   
   def init(gc: GameContainer, game: StateBasedGame) {
 //    implicit val caveDef = LavaCave
     implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
-    val level = Level generateStaticSmallLevel
+//    val level = Level generateStaticSmallLevel
+    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+    
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
-    addEntities(Entities.placeEntitiesInLevel(player, level))
+//    addEntities(Entities.placeEntitiesInLevel(player, level))
+//    addEntities(entities)
+    
+    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
+    val orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
+    addEntity(orc)
     
     automap = new AutoMap(level, player) 
     
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
-    
-    val chest = new Chest(player = player, startPos = player.pos + Vec2d(32, 0),
-      onTouch = { t =>
-        val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
-        addOverlay(text)
-        at(t.milliseconds + 5.seconds, (_ => text.alive = false))
-        inventory.addItem(new Potion())
-      })
-    addEntity(chest)
     
     gameMap = Some(level)
     at(0 millis, t => player.stop)

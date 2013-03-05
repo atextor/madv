@@ -2,6 +2,7 @@ package de.atextor.madv.engine
 
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.Animation
+import org.newdawn.slick.SpriteSheet
 
 trait Tickable {
   var enabled = true
@@ -26,15 +27,27 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
   }
 }
 
+abstract class Brain extends (Humanoid => Unit)
+
+object Dumb extends Brain {
+  def apply(h: Humanoid) { }
+}
+
 class Humanoid (
+    level: Level,
     var skin: EntitySkin,
-    behavior: Action = DoNothing,
+    behavior: Brain = Dumb,
     var spriteAction: SpriteAction = Walk,
     startPosition: Vec2d,
     val speed: Int) extends Entity(size = skin.size, pos = startPosition) {
-  def tick(delta: Int) = behavior(delta)
   
-  override def draw(x: Float, y: Float) = skin.draw(lookingDirection, spriteAction, Vec2d(x.toInt, y.toInt))
+  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+  def tick(delta: Int) = behavior(this)
+  
+  override def draw(x: Float, y: Float) = {
+    shadow.draw(x - 8, y - 26)
+    skin.draw(lookingDirection, spriteAction, Vec2d(x.toInt - 8, y.toInt - 31)) 
+  }
   
   def stop = {
     movingDirection = Nowhere
@@ -47,8 +60,15 @@ class Humanoid (
     skin.startAnimation(lookingDirection, spriteAction)
   }
   
+  def goBack = pos += movingDirection.invert * speed 
+  
   override def move = {
     pos += movingDirection * speed
-    true
+    if (!(level.cellAt(pos).properties contains Walkable)) goBack
   }
+    
+//  override def move = {
+//    pos += movingDirection * speed
+//    true
+//  }
 }
