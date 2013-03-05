@@ -171,29 +171,26 @@ class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 class Explosion(startPos: Vec2f) extends Effect(startPos, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))
 
-class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(level, Entities.femaleOrcSkin, brain, Walk, startPos, 0.1f) 
+class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(level, Entities.femaleOrcSkin, brain, Walk, startPos, 0.3f) 
 
 class Chaser(player: Player) extends Brain {
-  val eps = 1.5
-  var updates = 0
+  val eps = 2.0
   def apply(me: Humanoid) {
-    updates += 1
-    
     val dist = player distanceTo me
-    if (dist < 5) {
+    if (dist < 10) {
       me stop;
       return
     }
     
     if (dist < 500) {
-      val xdist = me.xDistanceTo(player)
-      val ydist = me.yDistanceTo(player)
+      val xdist = Math.abs(me.pos.x.toInt / 16 - player.pos.x.toInt / 16)
+      val ydist = Math.abs(me.pos.y.toInt / 16 - player.pos.y.toInt / 16)
       if (xdist > ydist) {
         if (me.pos.x > player.pos.x + eps) { me go Left; return }
-        if (me.pos.x < player.pos.x + eps) { me go Right; return }
+        if (me.pos.x < player.pos.x - eps) { me go Right; return }
       } else {
         if (me.pos.y > player.pos.y + eps) { me go Up; return }
-        if (me.pos.y < player.pos.y + eps) { me go Down; return }
+        if (me.pos.y < player.pos.y - eps) { me go Down; return }
       }
     }
   }
