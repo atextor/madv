@@ -83,7 +83,7 @@ class LevelTest extends Scene[Player] {
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
     
-	g.setColor(org.newdawn.slick.Color.white);
+//	g.setColor(org.newdawn.slick.Color.white);
     overlays.filter(_.active).foreach(_.draw)
   }
   

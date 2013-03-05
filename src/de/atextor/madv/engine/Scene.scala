@@ -42,25 +42,28 @@ abstract class Scene[PlayerType <: Entity] extends BasicGameState {
       changed = true
     }
     if (changed) actions = actions.sortWith(_._1 < _._1)
-    player.update(ticks)
-    player.move
-    entities.foreach { e =>
-      e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
-      e.update(ticks)
-      e.move
-    }
-    effects.foreach { e =>
-      e.update(ticks)
-      e.move
-    }
-    entities.filterNot(_.alive).foreach(entities -= _)
-    effects.filterNot(_.alive).foreach(effects -= _)
-    overlays.filterNot(_.alive).foreach(overlays -= _)
     
-    // z ordering
-    val parted = entities.sortWith(_.pos.y < _.pos.y).partition(_.pos.y < player.pos.y)
-    drawBeforePlayer = parted._1
-    drawAfterPlayer = parted._2
+    if (!inventory.active) {
+      player.update(ticks)
+      player.move
+      entities.foreach { e =>
+        e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
+        e.update(ticks)
+        e.move
+      }
+      effects.foreach { e =>
+        e.update(ticks)
+        e.move
+      }
+      entities.filterNot(_.alive).foreach(entities -= _)
+      effects.filterNot(_.alive).foreach(effects -= _)
+      overlays.filterNot(_.alive).foreach(overlays -= _)
+    
+      // do Z ordering for all entities that need to be drawn
+      val parted = entities.filter(_.enabled).sortWith(_.pos.y < _.pos.y).partition(_.pos.y < player.pos.y)
+      drawBeforePlayer = parted._1
+      drawAfterPlayer = parted._2
+    }
   }
   
   def processKeys
