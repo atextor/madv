@@ -269,12 +269,12 @@ object Level {
   }
 }
   
-case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Nowhere) {
+case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Vec2d(0, 0)) {
   lazy val placedCells = cells.zipWithIndex.map(c => PlacedLevelCell(indexToVec(c._2), c._1))
   
   // Path dependent type, as placed cells depend on this level's cells collection
   case class PlacedLevelCell(pos: Vec2d, cell: LevelCell) {
-    def +(d: Vec) = {
+    def +(d: Vec[Int]) = {
       val coord = pos + d
       PlacedLevelCell(coord, at(coord.x, coord.y))
     }
@@ -283,7 +283,7 @@ case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLoca
   def find(p: PlacedLevelCell => Boolean, randomize: Boolean = true): Option[PlacedLevelCell] =
     (if (randomize) (Random shuffle placedCells) else placedCells).find(p)
   
-  def cellAt(v: Vec) = at((v.x + 8) / 16, (v.y + 8) / 16)
+  def cellAt(v: Vec[Int]) = at((v.x + 8) / 16, (v.y + 8) / 16)
   
   private def at(x: Int, y: Int) =
     if (x >= 0 && x < width && y >= 0 && y < height) cells(x + y * width) else cells(0)

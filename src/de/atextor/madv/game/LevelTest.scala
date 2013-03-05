@@ -72,13 +72,13 @@ class LevelTest extends Scene[Player] {
       g.scale(4, 4)
     }
     
-    gameMap.foreach(_.draw(player.pos, layer = 0))
+    gameMap.foreach(_.draw(player.pos.toVec2d, layer = 0))
     g.scale(0.5f, 0.5f)
     entities.foreach(_.relativeDraw(player.pos, player.staticRenderPos))
     player.draw(player.staticRenderPos.x, player.staticRenderPos.y)
     effects.foreach(_.relativeDraw(player.pos, player.staticRenderPos))
     g.scale(2.0f, 2.0f)
-    gameMap.foreach(_.draw(player.pos, layer = 1))
+    gameMap.foreach(_.draw(player.pos.toVec2d, layer = 1))
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
     

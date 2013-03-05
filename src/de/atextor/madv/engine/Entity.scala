@@ -10,17 +10,19 @@ trait Tickable {
   def tick(delta: Int)
 }
 
-abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2d) extends Movable with Tickable with Renderable {
+abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable {
   var lookingDirection: Direction = Down
-  var movingDirection: Vec2d = Nowhere
+  var movingDirection: Vec2f = Nowhere
   var alive = true
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
+  def xDistanceTo(other: Entity) = Math.abs(pos.x - other.pos.x)
+  def yDistanceTo(other: Entity) = Math.abs(pos.y - other.pos.y)
   def distanceTo(other: Entity) = {
-    val a = Math.abs(pos.x - other.pos.x)
-    val b = Math.abs(pos.y - other.pos.y)
+    val a = xDistanceTo(other)
+    val b = yDistanceTo(other)
     Math.sqrt(a * a + b * b)
   }
-  def relativeDraw(base: Vec, staticOffset: Vec) {
+  def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
       draw((pos.x - base.x) * 2 + staticOffset.x + 8, (pos.y - base.y) * 2 + staticOffset.y + 32)
     }
@@ -38,8 +40,8 @@ class Humanoid (
     var skin: EntitySkin,
     behavior: Brain = Dumb,
     var spriteAction: SpriteAction = Walk,
-    startPosition: Vec2d,
-    val speed: Int) extends Entity(size = skin.size, pos = startPosition) {
+    startPosition: Vec2f,
+    val speed: Float) extends Entity(size = skin.size, pos = startPosition) {
   
   val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
   def tick(delta: Int) = behavior(this)
@@ -63,12 +65,9 @@ class Humanoid (
   def goBack = pos += movingDirection.invert * speed 
   
   override def move = {
-    pos += movingDirection * speed
-    if (!(level.cellAt(pos).properties contains Walkable)) goBack
+    if (movingDirection != Nowhere) {
+      pos += movingDirection * speed
+      if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
+    }
   }
-    
-//  override def move = {
-//    pos += movingDirection * speed
-//    true
-//  }
 }

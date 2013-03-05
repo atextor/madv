@@ -3,14 +3,14 @@ package de.atextor.madv.engine
 import scala.collection.mutable.ListBuffer
 
 trait Movable {
-  var pos: Vec2d
+  var pos: Vec2f
   var size: Vec2d
-  var movingDirection: Vec2d
+  var movingDirection: Vec2f
 //  val obstacles: ListBuffer[Movable]
 //  def addObstacle(m: Movable): ListBuffer[Movable] = obstacles += m
 //  def removeObstacle(m: Movable): ListBuffer[Movable] = obstacles -= m
   
-  def middle: Vec2d = Vec2d(pos.x + size.x / 2, pos.y + size.y / 2)
+  def middle: Vec2d = Vec2d(pos.x.toInt + size.x / 2, pos.y.toInt + size.y / 2)
   
   def touchTopLeft = pos
   

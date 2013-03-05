@@ -28,6 +28,7 @@ import de.atextor.madv.engine.SpriteAnimation
 import de.atextor.madv.engine.Text
 import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Vec2d
+import de.atextor.madv.engine.Vec2f
 import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
@@ -154,7 +155,7 @@ class Collectible(player: Player, startPos: Vec2d, onTouch: Action, visual: Anim
   }
 }
 
-class Effect(startPos: Vec2d, visual: Animation) extends
+class Effect(startPos: Vec2f, visual: Animation) extends
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
   visual.setLooping(false)
   def tick(delta: Int) = {
@@ -167,13 +168,17 @@ class Effect(startPos: Vec2d, visual: Animation) extends
 class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.goldCoinSprite)
 class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.silverCoinSprite)
 class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.copperCoinSprite)
-class Explosion(startPos: Vec2d) extends Effect(startPos, Entities.explosion)
+class Explosion(startPos: Vec2f) extends Effect(startPos, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))
 
-class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(level, Entities.femaleOrcSkin, brain, Walk, startPos, 1) 
+class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(level, Entities.femaleOrcSkin, brain, Walk, startPos, 0.1f) 
 
 class Chaser(player: Player) extends Brain {
+  val eps = 1.5
+  var updates = 0
   def apply(me: Humanoid) {
+    updates += 1
+    
     val dist = player distanceTo me
     if (dist < 5) {
       me stop;
@@ -181,10 +186,15 @@ class Chaser(player: Player) extends Brain {
     }
     
     if (dist < 500) {
-      if (me.pos.y > player.pos.y) { me go Up; return }
-      if (me.pos.x > player.pos.x) { me go Left; return }
-      if (me.pos.y < player.pos.y) { me go Down; return }
-      if (me.pos.x < player.pos.x) { me go Right; return }
+      val xdist = me.xDistanceTo(player)
+      val ydist = me.yDistanceTo(player)
+      if (xdist > ydist) {
+        if (me.pos.x > player.pos.x + eps) { me go Left; return }
+        if (me.pos.x < player.pos.x + eps) { me go Right; return }
+      } else {
+        if (me.pos.y > player.pos.y + eps) { me go Up; return }
+        if (me.pos.y < player.pos.y + eps) { me go Down; return }
+      }
     }
   }
 }

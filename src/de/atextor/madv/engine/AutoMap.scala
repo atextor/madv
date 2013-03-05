@@ -38,7 +38,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
       imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
     }
     // Add player
-    setLargePixel(player.pos / 16, RGBA(255, 0, 0, 255))
+    setLargePixel(player.pos.toVec2d / 16, RGBA(255, 0, 0, 255))
   }
 
 }

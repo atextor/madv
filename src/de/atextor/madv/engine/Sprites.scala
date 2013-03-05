@@ -35,7 +35,7 @@ case class Part(name: String) {
   private def animation(d: Direction, a: SpriteAction): Animation =
     SpriteAnimation(new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64), a, a.spriteRow(d))
   val getAnimation = Memoize.memoize(animation _)
-  def draw(d: Direction, a: SpriteAction, position: Vec) = getAnimation(d, a).draw(position.x, position.y)
+  def draw(d: Direction, a: SpriteAction, position: Vec[Int]) = getAnimation(d, a).draw(position.x, position.y)
   def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).stop
   def startAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).start
 }
@@ -47,7 +47,7 @@ object PartName extends Enumeration {
 case class EntitySkin(val size: Vec2d, actions: List[SpriteAction], parts: (PartName.Value, Seq[String])*) {
   import PartName._
   val m = parts.map{case (partName, images) => (partName, images.map(i => Part(partName.toString + "_" + i)))}.toMap
-  def draw(d: Direction, a: SpriteAction, position: Vec) {
+  def draw(d: Direction, a: SpriteAction, position: Vec[Int]) {
     m get behind foreach(_.foreach(_.draw(d, a, position)))
     m get body foreach(_.foreach(_.draw(d, a, position)))
     m get feet foreach(_.foreach(_.draw(d, a, position)))

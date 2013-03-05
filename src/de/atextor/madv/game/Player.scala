@@ -30,6 +30,6 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   override def move {
     pos += movingDirection * speed
     if (Constants.debug) return
-    if (!(level.cellAt(pos).properties contains Walkable)) goBack
+    if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
   }
 }
