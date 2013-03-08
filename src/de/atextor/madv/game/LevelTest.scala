@@ -39,7 +39,8 @@ class LevelTest extends Scene[Player] {
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
-    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
@@ -82,8 +83,6 @@ class LevelTest extends Scene[Player] {
     gameMap.foreach(_.draw(player.pos.toVec2d, layer = 1))
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
-    
-//	g.setColor(org.newdawn.slick.Color.white);
     overlays.filter(_.active).foreach(_.draw)
   }
   

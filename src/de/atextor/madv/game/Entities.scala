@@ -40,6 +40,7 @@ import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.Potion
 import org.newdawn.slick.Graphics
 import de.atextor.madv.engine.LevelCell
+import de.atextor.madv.engine.Direction
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -186,13 +187,25 @@ class Chaser(player: Player) extends Brain {
       val xdist = Math.abs(me.pos.x.toInt / 16 - player.pos.x.toInt / 16)
       val ydist = Math.abs(me.pos.y.toInt / 16 - player.pos.y.toInt / 16)
       if (xdist > ydist) {
-        if (me.pos.x > player.pos.x + eps) { me go Left; return }
-        if (me.pos.x < player.pos.x - eps) { me go Right; return }
+        if (me.pos.x > player.pos.x + eps) { me go Left; if (!me.canMove) tryUpDown(me); return }
+        if (me.pos.x < player.pos.x - eps) { me go Right; if (!me.canMove) tryUpDown(me); return }
       } else {
-        if (me.pos.y > player.pos.y + eps) { me go Up; return }
-        if (me.pos.y < player.pos.y - eps) { me go Down; return }
+        if (me.pos.y > player.pos.y + eps) { me go Up; if (!me.canMove) tryLeftRight(me); return }
+        if (me.pos.y < player.pos.y - eps) { me go Down; if (!me.canMove) tryLeftRight(me); return }
       }
     }
+  }
+  
+  private def tryUpDown(me: Humanoid) {
+    if (me.pos.y > player.pos.y + eps) { me go Up; if(!me.canMove) me.stop; return }
+    if (me.pos.y < player.pos.y - eps) { me go Down; if(!me.canMove) me.stop; return }
+    me.stop
+  }
+  
+  private def tryLeftRight(me: Humanoid) {
+    if (me.pos.x > player.pos.x + eps) { me go Left; if(!me.canMove) me.stop; return }
+    if (me.pos.x < player.pos.x - eps) { me go Right; if(!me.canMove) me.stop; return }
+    me.stop
   }
 }
 

@@ -62,12 +62,17 @@ class Humanoid (
     skin.startAnimation(lookingDirection, spriteAction)
   }
   
+  def goForward = pos += movingDirection * speed
   def goBack = pos += movingDirection.invert * speed 
+  
+  def canMove = {
+    val dest = pos + movingDirection * speed
+    level.cellAt(dest.toVec2d).properties contains Walkable
+  }
   
   override def move = {
     if (movingDirection != Nowhere) {
-      pos += movingDirection * speed
-      if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
+      if (canMove) goForward
     }
   }
 }
