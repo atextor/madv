@@ -12,7 +12,16 @@ class AutoMap(level: Level, player: Player) extends Renderable {
   case class RGBA(r: Int, g: Int, b: Int, a: Int)
   val imageBuffer = new ImageBuffer(level.width, level.height)
   val image = new Image(imageBuffer, Image.FILTER_NEAREST)
-  update(player)
+  val invis = RGBA(0, 0, 0, 0)
+//  update(player)
+  init
+  
+  private def init {
+    level.placedCells.foreach { pc =>
+      val rgba = cellToPixel(pc)
+      imageBuffer.setRGBA(pc.pos.x, pc.pos.y, invis.r, invis.g, invis.b, invis.a)
+    }
+  }
   
   private def setLargePixel(pos: Vec2d, rgba: RGBA) {
     imageBuffer.setRGBA(pos.x, pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
@@ -32,8 +41,21 @@ class AutoMap(level: Level, player: Player) extends Renderable {
   
   def draw(x: Float, y: Float) = new Image(imageBuffer, Image.FILTER_NEAREST).draw(x, y)
   
-  def update(player: Player) = {
+  def update2(player: Player) = {
     level.placedCells.foreach { pc =>
+      val rgba = cellToPixel(pc)
+      imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
+    }
+    // Add player
+    setLargePixel(player.pos.toVec2d / 16, RGBA(255, 0, 0, 255))
+  }
+  
+  def update(p: Player) {
+    level.placedCells.filter { pc =>
+      val a = pc.pos.x.toInt - (p.pos.x.toInt / 16)
+      val b = pc.pos.y.toInt - (p.pos.y.toInt / 16)
+      math.sqrt(a * a + b * b) < 10
+    } foreach { pc =>
       val rgba = cellToPixel(pc)
       imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
     }
