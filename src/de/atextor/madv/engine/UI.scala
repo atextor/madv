@@ -16,10 +16,10 @@ abstract class Overlay(var pos: Vec2d) {
 }
 
 class TextBox(width: Int, text: String, startPos: Vec2d) extends Overlay(pos = startPos) {
-  val size = Vec2d(width, Text.getTextHeight(text))
+  val size = Vec2d(width, Text.getTextHeight(text) + 15)
   val box = new FrameBox(size)
   val txt = new Text(text)
-  val tw = Text.unicodeFont.getWidth(text)
+  val tw = Text.getTextWidth(text)
   
   override def draw {
     box.draw(pos.x, pos.y)
@@ -64,7 +64,7 @@ class FrameBox(size: Vec2d) extends Renderable {
 abstract class InventoryItem(name: String, description: String) extends Renderable {
   val text = new Text(name)
   val desc = new Text(description)
-  val tbox = new TextBox(150, description, Vec2d(300, 100))
+  val tbox = new TextBox(180, description, Vec2d(300, 100))
   
   def draw(x: Float, y: Float) {
     text.draw(x, y)
@@ -77,6 +77,8 @@ abstract class InventoryItem(name: String, description: String) extends Renderab
 }
 
 case class Potion() extends InventoryItem("Potion", "A strange potion.\nWill restore 100 HP.")
+case class MagicMapScroll() extends InventoryItem("Magic Map Scroll",
+    "This scroll will uncover\nthe whole map.")
 
 class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   val size = Vec2d(200, 200)
@@ -90,6 +92,7 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   
   addItem(Potion())
   addItem(Potion())
+  addItem(MagicMapScroll())
   
   def addItem(i: InventoryItem) = {
     if (stuff.isEmpty) selection = 0
@@ -112,25 +115,25 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
     }
   }
   
-  def changeSelection(d: Direction) = {
-    d match {
-      case Up => {
-        if (!stuff.isEmpty) {
-          selection -= 1
-          if (selection < 0) selection = stuff.size - 1
-        }
+  def changeSelection(d: Direction) = d match {
+    case Up => {
+      if (!stuff.isEmpty) {
+        selection -= 1
+        if (selection < 0) selection = stuff.size - 1
       }
-      case Down => {
-        if (!stuff.isEmpty) {
-          selection += 1
-          if (selection > stuff.size - 1) selection = 0
-        }
-      }
-      case _ =>
     }
+    case Down => {
+      if (!stuff.isEmpty) {
+        selection += 1
+        if (selection > stuff.size - 1) selection = 0
+      }
+    }
+    case _ =>
   }
   
-  def activateSelected {
-    if (selection > -1) removeItem(stuff(selection))
+  def activateSelected: Option[InventoryItem] = {
+    val item: Option[InventoryItem] = if (selection > -1) Some(stuff(selection)) else None
+    item.foreach(removeItem(_))
+    item
   }
 }

@@ -41,7 +41,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
   
   def draw(x: Float, y: Float) = new Image(imageBuffer, Image.FILTER_NEAREST).draw(x, y)
   
-  def update2(player: Player) = {
+  def uncoverMap(player: Player) = {
     level.placedCells.foreach { pc =>
       val rgba = cellToPixel(pc)
       imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)

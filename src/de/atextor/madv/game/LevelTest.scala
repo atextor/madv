@@ -25,6 +25,8 @@ import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.Potion
 import de.atextor.madv.engine.Dumb
 import de.atextor.madv.engine.Humanoid
+import de.atextor.madv.engine.InventoryItem
+import de.atextor.madv.engine.MagicMapScroll
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -39,17 +41,17 @@ class LevelTest extends Scene[Player] {
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
-//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
+    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+//    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
 //    addEntities(Entities.placeEntitiesInLevel(player, level))
 //    addEntities(entities)
     
-    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
-    val orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
-    addEntity(orc)
+//    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
+//    val orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
+//    addEntity(orc)
     
     automap = new AutoMap(level, player) 
     
@@ -86,6 +88,12 @@ class LevelTest extends Scene[Player] {
     overlays.filter(_.active).foreach(_.draw)
   }
   
+  def activateInventoryItem(item: InventoryItem) = item match {
+    case p: Potion =>
+    case s: MagicMapScroll => automap.uncoverMap(player)
+    case _ =>  
+  }
+  
   def processKeys {
     if (gameMap.isDefined) {
       if (pressedKeys.size > 0) pressedKeys.last match {
@@ -96,7 +104,7 @@ class LevelTest extends Scene[Player] {
         case Input.KEY_RIGHT => if (!inventory.active) player.go(Right)
         case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
         case Input.KEY_ESCAPE => if (inventory.active) inventory.active = false else exitScene
-        case Input.KEY_ENTER => if (inventory.active) inventory.activateSelected
+        case Input.KEY_ENTER => if (inventory.active) inventory.activateSelected.foreach(activateInventoryItem(_))
         case _ =>
       } else {
         player.stop
