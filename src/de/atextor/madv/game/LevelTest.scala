@@ -41,8 +41,8 @@ class LevelTest extends Scene[Player] {
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
-    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-//    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
+//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)

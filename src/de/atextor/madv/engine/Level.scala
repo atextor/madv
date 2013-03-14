@@ -13,6 +13,7 @@ import de.atextor.madv.engine.Util.pipelineSyntax
 sealed abstract class CellProperty
 case object Walkable extends CellProperty
 case object Exit extends CellProperty
+case object IslandBorder extends CellProperty
 
 case class LevelCell(
   val layer0: Option[Renderable] = None,
@@ -148,18 +149,18 @@ object Level {
     val dead = ca.isDead _
     val levelCells = ca.allCells.map (_ match {
       case c if alive(c) => LevelCell(layer0 = Some(cd.floor))(Walkable)
-      case c if alive(c + Down) && dead(c + Left) && dead(c + Right) => LevelCell(layer0 = Some(cd.top))()
-      case c if alive(c + Up) && dead(c + Left) && dead(c + Right)   => LevelCell(layer0 = Some(cd.bottom))()
-      case c if alive(c + Right) && dead(c + Up) && dead(c + Down)   => LevelCell(layer0 = Some(cd.left))()
-      case c if alive(c + Left) && dead(c + Up) && dead(c + Down)    => LevelCell(layer0 = Some(cd.right))()
-      case c if alive(c + Right) && alive(c + Down)                  => LevelCell(layer0 = Some(cd.innerTopLeft))()
-      case c if alive(c + Left) && alive(c + Down)                   => LevelCell(layer0 = Some(cd.innerTopRight))()
-      case c if alive(c + Right) && alive(c + Up)                    => LevelCell(layer0 = Some(cd.innerBottomLeft))()
-      case c if alive(c + Left) && alive(c + Up)                     => LevelCell(layer0 = Some(cd.innerBottomRight))()
-      case c if alive(c + Down + Right)                              => LevelCell(layer0 = Some(cd.topLeft))()
-      case c if alive(c + Down + Left)                               => LevelCell(layer0 = Some(cd.topRight))()
-      case c if alive(c + Up + Right)                                => LevelCell(layer0 = Some(cd.bottomLeft))()
-      case c if alive(c + Up + Left)                                 => LevelCell(layer0 = Some(cd.bottomRight))()
+      case c if alive(c + Down) && dead(c + Left) && dead(c + Right) => LevelCell(layer0 = Some(cd.top))(IslandBorder)
+      case c if alive(c + Up) && dead(c + Left) && dead(c + Right)   => LevelCell(layer0 = Some(cd.bottom))(IslandBorder)
+      case c if alive(c + Right) && dead(c + Up) && dead(c + Down)   => LevelCell(layer0 = Some(cd.left))(IslandBorder)
+      case c if alive(c + Left) && dead(c + Up) && dead(c + Down)    => LevelCell(layer0 = Some(cd.right))(IslandBorder)
+      case c if alive(c + Right) && alive(c + Down)                  => LevelCell(layer0 = Some(cd.innerTopLeft))(IslandBorder)
+      case c if alive(c + Left) && alive(c + Down)                   => LevelCell(layer0 = Some(cd.innerTopRight))(IslandBorder)
+      case c if alive(c + Right) && alive(c + Up)                    => LevelCell(layer0 = Some(cd.innerBottomLeft))(IslandBorder)
+      case c if alive(c + Left) && alive(c + Up)                     => LevelCell(layer0 = Some(cd.innerBottomRight))(IslandBorder)
+      case c if alive(c + Down + Right)                              => LevelCell(layer0 = Some(cd.topLeft))(IslandBorder)
+      case c if alive(c + Down + Left)                               => LevelCell(layer0 = Some(cd.topRight))(IslandBorder)
+      case c if alive(c + Up + Right)                                => LevelCell(layer0 = Some(cd.bottomLeft))(IslandBorder)
+      case c if alive(c + Up + Left)                                 => LevelCell(layer0 = Some(cd.bottomRight))(IslandBorder)
       case c => LevelCell(layer0 = Some(cd.space))()
     })
     Level(width = ca.width, height = ca.height, cells = levelCells)

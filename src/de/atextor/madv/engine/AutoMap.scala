@@ -36,6 +36,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
     case c if (c + Left).cell.properties contains Exit => RGBA(0, 255, 0, 255)
     case c if (c + Up + Left).cell.properties contains Exit => RGBA(0, 255, 0, 255)
     case c if c.cell.properties contains Walkable => RGBA(255, 255, 255, 150)
+    case c if c.cell.properties contains IslandBorder => RGBA(0, 0, 0, 255)
     case _ => RGBA(0, 0, 0, 0)
   }
   
