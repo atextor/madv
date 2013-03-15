@@ -27,6 +27,7 @@ import de.atextor.madv.engine.Dumb
 import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.InventoryItem
 import de.atextor.madv.engine.MagicMapScroll
+import de.atextor.madv.engine.StoryText
 
 class LevelTest extends Scene[Player] {
   override val getID = 1
@@ -63,8 +64,6 @@ class LevelTest extends Scene[Player] {
     
     lazy val updateAm: Action = { t => automap.update(player); at(t.millis + 300.millis, updateAm) }
     at(0 millis, updateAm)
-    
-    addOverlay(inventory)
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
@@ -86,6 +85,7 @@ class LevelTest extends Scene[Player] {
     g.scale(0.5f, 0.5f)
     gameMap.foreach(m => automap.draw(400 - m.width, 0))
     overlays.filter(_.active).foreach(_.draw)
+    storyTexts.headOption.foreach(_.draw)
   }
   
   def activateInventoryItem(item: InventoryItem) = item match {
@@ -94,15 +94,16 @@ class LevelTest extends Scene[Player] {
     case _ =>  
   }
   
-  def processKeys {
+  override def processKeys {
+    super.processKeys
     if (gameMap.isDefined) {
       if (pressedKeys.size > 0) pressedKeys.last match {
-        case Input.KEY_I => inventory.active = !inventory.active
+        case Input.KEY_I => if (!inStoryMode) inventory.active = !inventory.active
         case Input.KEY_UP => if (inventory.active) inventory.changeSelection(Up) else player.go(Up)
         case Input.KEY_DOWN => if (inventory.active) inventory.changeSelection(Down) else player.go(Down)
         case Input.KEY_LEFT => if (!inventory.active) player.go(Left)
         case Input.KEY_RIGHT => if (!inventory.active) player.go(Right)
-        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
+//        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
         case Input.KEY_ESCAPE => if (inventory.active) inventory.active = false else exitScene
         case Input.KEY_ENTER => if (inventory.active) inventory.activateSelected.foreach(activateInventoryItem(_))
         case _ =>

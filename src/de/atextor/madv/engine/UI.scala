@@ -9,8 +9,9 @@ import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 
-abstract class Overlay(var pos: Vec2d) {
+abstract class Overlay(var pos: Vec2d) extends Tickable {
   def draw
+  def tick(delta: Int) {}
   var alive = true
   var active = true
 }
@@ -79,6 +80,29 @@ abstract class InventoryItem(name: String, description: String) extends Renderab
 case class Potion() extends InventoryItem("Potion", "A strange potion.\nWill restore 100 HP.")
 case class MagicMapScroll() extends InventoryItem("Magic Map Scroll",
     "This scroll will uncover\nthe whole map.")
+
+class StoryText(storyText: String) extends Overlay(pos = Vec2d(100, 200)) {
+  val size = Vec2d(200, 80)
+  val box = new FrameBox(size)
+  val text = new Text(storyText, appear = true)
+  
+  def draw {
+    box.draw(pos.x, pos.y)
+    text.draw(pos.x + size.x / 2 - text.getWidth / 2, pos.y + 7)
+  } 
+  
+  override def tick(delta: Int) {
+    text.tick(delta)
+  }
+  
+  def trigger {
+    if (text.allShown) {
+      alive = false
+    } else {
+      text.showAll
+    }
+  }
+}
 
 class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   val size = Vec2d(200, 200)

@@ -18,6 +18,7 @@ class Text(text: String, appear: Boolean = false) extends Renderable with Tickab
   def showAll = appeared = text.length
   def getWidth = Text.getTextWidth(text)
   def getHeight = Text.getTextHeight(text)
+  def allShown = (!appear) || appeared == text.length
   
   private var lastTick = 0
   def tick(delta: Int) {
