@@ -5,7 +5,6 @@ import org.newdawn.slick.ImageBuffer
 import org.newdawn.slick.Renderable
 
 import de.atextor.madv.engine.Util.pipelineSyntax
-import de.atextor.madv.game.Player
 
 class AutoMap(level: Level, player: Player) extends Renderable {
   import level.PlacedLevelCell

@@ -10,10 +10,10 @@ import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.game.Effect
 import org.newdawn.slick.Input
 
-abstract class Scene[PlayerType <: Entity] extends BasicGameState {
+abstract class Scene extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
-  var player: PlayerType
+  var player: Player
   var running = true
   val entities: ListBuffer[Entity] = ListBuffer()
   val pressedKeys = Queue[Int]()  

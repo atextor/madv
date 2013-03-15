@@ -41,6 +41,7 @@ import de.atextor.madv.engine.Potion
 import org.newdawn.slick.Graphics
 import de.atextor.madv.engine.LevelCell
 import de.atextor.madv.engine.Direction
+import de.atextor.madv.engine.Player
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -106,7 +107,7 @@ object Entities {
     coins
   }
   
-  def placeChestInLevel[P <: Player, L <: Level](level: L, scene: Scene[P]): Level = {
+  def placeChestInLevel[L <: Level](level: L, scene: Scene): Level = {
     import level.PlacedLevelCell
     
     val chestPos = Vec2d(10, 10)
@@ -129,7 +130,7 @@ object Entities {
   }
 }
 
-class Chest[P <: Player](scene: Scene[P], startPos: Vec2d, onTouch: Action) extends
+class Chest(scene: Scene, startPos: Vec2d, onTouch: Action) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
   var activated = false

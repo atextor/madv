@@ -1,14 +1,4 @@
-package de.atextor.madv.game
-
-import org.newdawn.slick.SpriteSheet
-
-import de.atextor.madv.engine.Constants
-import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.Humanoid
-import de.atextor.madv.engine.Level
-import de.atextor.madv.engine.Vec2d
-import de.atextor.madv.engine.Walk
-import de.atextor.madv.engine.Walkable
+package de.atextor.madv.engine
 
 class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
     level = level,

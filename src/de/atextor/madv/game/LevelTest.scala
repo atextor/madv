@@ -28,8 +28,10 @@ import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.InventoryItem
 import de.atextor.madv.engine.MagicMapScroll
 import de.atextor.madv.engine.StoryText
+import de.atextor.madv.engine.Player
+import de.atextor.madv.engine.GameEffects
 
-class LevelTest extends Scene[Player] {
+class LevelTest extends Scene {
   override val getID = 1
   
   var player: Player = null
@@ -88,24 +90,35 @@ class LevelTest extends Scene[Player] {
     storyTexts.headOption.foreach(_.draw)
   }
   
-  def activateInventoryItem(item: InventoryItem) = item match {
-    case p: Potion =>
-    case s: MagicMapScroll => automap.uncoverMap(player)
-    case _ =>  
-  }
-  
   override def processKeys {
     super.processKeys
     if (gameMap.isDefined) {
       if (pressedKeys.size > 0) pressedKeys.last match {
-        case Input.KEY_I => if (!inStoryMode) inventory.active = !inventory.active
-        case Input.KEY_UP => if (inventory.active) inventory.changeSelection(Up) else player.go(Up)
-        case Input.KEY_DOWN => if (inventory.active) inventory.changeSelection(Down) else player.go(Down)
-        case Input.KEY_LEFT => if (!inventory.active) player.go(Left)
-        case Input.KEY_RIGHT => if (!inventory.active) player.go(Right)
+        case Input.KEY_I =>
+          if (!inStoryMode) inventory.active = !inventory.active
+        case Input.KEY_UP =>
+          if (!inStoryMode) {
+            if (inventory.active) inventory.changeSelection(Up) else player.go(Up)
+          }
+        case Input.KEY_DOWN =>
+          if (!inStoryMode) {
+            if (inventory.active) inventory.changeSelection(Down) else player.go(Down)
+          }
+        case Input.KEY_LEFT =>
+          if (!inStoryMode) {
+            if (!inventory.active) player.go(Left)
+          }
+        case Input.KEY_RIGHT =>
+          if (!inStoryMode) {
+            if (!inventory.active) player.go(Right)
+          }
 //        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
-        case Input.KEY_ESCAPE => if (inventory.active) inventory.active = false else exitScene
-        case Input.KEY_ENTER => if (inventory.active) inventory.activateSelected.foreach(activateInventoryItem(_))
+        case Input.KEY_ESCAPE =>
+          if (inventory.active) inventory.active = false else exitScene
+        case Input.KEY_ENTER =>
+          if (inventory.active) {
+            inventory.activateSelected.foreach(item => GameEffects.apply(item.effect, gameMap.get, automap, None, player))
+          }
         case _ =>
       } else {
         player.stop
