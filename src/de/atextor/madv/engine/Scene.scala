@@ -10,7 +10,7 @@ import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.game.Effect
 import org.newdawn.slick.Input
 
-abstract class Scene extends BasicGameState {
+abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   var player: Player
@@ -59,7 +59,7 @@ abstract class Scene extends BasicGameState {
         e.update(ticks)
         e.move
       }
-      storyTexts.foreach(_.update(ticks))
+      storyTexts.headOption.foreach(_.update(ticks))
       entities.filterNot(_.alive).foreach(entities -= _)
       effects.filterNot(_.alive).foreach(effects -= _)
       overlays.filterNot(_.alive).foreach(overlays -= _)
@@ -76,14 +76,19 @@ abstract class Scene extends BasicGameState {
     if (inStoryMode && pressedKeys.size > 0) pressedKeys.last match {
       case Input.KEY_SPACE => storyTexts.head.trigger
       case Input.KEY_ESCAPE => storyTexts.head.alive = false
+      case _ =>
     }
   }
   
   def exitScene = running = false
   
   override def keyPressed(key: Int, c: Char) {
-    pressedKeys += key
-    processKeys
+    if (key == Input.KEY_F12) {
+      toggleFullscreen()
+    } else {
+      pressedKeys += key
+      processKeys
+    }
   }
   
   override def keyReleased(key: Int, c: Char) {

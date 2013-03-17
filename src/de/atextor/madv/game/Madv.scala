@@ -8,19 +8,26 @@ import org.newdawn.slick.SpriteSheet
 import de.atextor.madv.engine.Text
 
 class Madv extends StateBasedGame("Madv") {
-  var container: GameContainer = null
+  var container: AppGameContainer = null
+  
+  def toggleFullscreen {
+    if (container == null) return
+    container.setDisplayMode(800, 600, !container.isFullscreen)
+  }
   
   def initStatesList(gc: GameContainer) {
-    container = gc
+//    container = gc
 //    addState(new TitleScreen)
-    addState(new LevelTest)
+    addState(new LevelTest(toggleFullscreen _))
   }
 }
 
 object Madv {
   def main(args: Array[String]) {
     Input.disableControllers();
-    val container = new AppGameContainer(new Madv)
+    val madv = new Madv
+    val container = new AppGameContainer(madv)
+    madv.container = container 
     container.setDisplayMode(800, 600, false)
     container.setTargetFrameRate(60)
     container.start

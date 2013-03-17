@@ -31,7 +31,7 @@ import de.atextor.madv.engine.StoryText
 import de.atextor.madv.engine.Player
 import de.atextor.madv.engine.GameEffects
 
-class LevelTest extends Scene {
+class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
   
   var player: Player = null
@@ -113,6 +113,11 @@ class LevelTest extends Scene {
             if (!inventory.active) player.go(Right)
           }
 //        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
+        case Input.KEY_B => if (!inStoryMode) {
+          addStoryText(new StoryText("Hallo Welt"))
+          addStoryText(new StoryText("Foobar das ist ein Test"))
+          addStoryText(new StoryText("Noch ein Test"))
+        }
         case Input.KEY_ESCAPE =>
           if (inventory.active) inventory.active = false else exitScene
         case Input.KEY_ENTER =>
