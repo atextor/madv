@@ -181,7 +181,7 @@ class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(le
 
 class Chaser(player: Player) extends Brain {
   val eps = 2.0
-  def apply(me: Humanoid) {
+  def apply(me: Humanoid, delta: Int) {
     val dist = player distanceTo me
     if (dist < 10) {
       me stop;

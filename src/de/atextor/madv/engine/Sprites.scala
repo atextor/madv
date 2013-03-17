@@ -10,11 +10,12 @@ import org.newdawn.slick.Animation
 sealed abstract class SpriteAction(
   val frames: Int,
   val delay: Duration,
-  val spriteRow: (Direction => Int) = _.id)
+  val spriteRow: (Direction => Int) = _.id,
+  val repeat: Boolean = true)
 
 case class SimpleSprite(override val frames: Int, override val delay: Duration) extends SpriteAction(frames, delay)
 case object Bow extends SpriteAction(13, 100 millis)
-case object Hurt extends SpriteAction(6, 150 millis, (_ => 0))
+case object Hurt extends SpriteAction(6, 150 millis, (_ => 0), repeat = false)
 case object Slash extends SpriteAction(6, 100 millis)
 case object Spellcast extends SpriteAction(7, 100 millis)
 case object Thrust extends SpriteAction(8, 100 millis)
@@ -27,6 +28,7 @@ object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Animation) {
       ani.addFrame(sheet.getSprite(x, row), sa.delay.toMillis.toInt)
     }
     ani setPingPong false
+    ani.setLooping(sa.repeat)
     ani
   }
 }
