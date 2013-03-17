@@ -38,23 +38,25 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   var gameMap: Option[Level] = None
   var automap: AutoMap = null
   
+  var orc: FemaleOrc = null
+  
   def init(gc: GameContainer, game: StateBasedGame) {
 //    implicit val caveDef = LavaCave
     implicit val caveDef = BlueCave
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
-//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
+    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+//    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
 //    addEntities(Entities.placeEntitiesInLevel(player, level))
 //    addEntities(entities)
     
-//    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
-//    val orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
-//    addEntity(orc)
+    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
+    orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
+    addEntity(orc)
     
     automap = new AutoMap(level, player) 
     
@@ -113,11 +115,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
             if (!inventory.active) player.go(Right)
           }
 //        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
-        case Input.KEY_B => if (!inStoryMode) {
-          addStoryText(new StoryText("Hallo Welt"))
-          addStoryText(new StoryText("Foobar das ist ein Test"))
-          addStoryText(new StoryText("Noch ein Test"))
-        }
+        case Input.KEY_SPACE => orc.die
+          
         case Input.KEY_ESCAPE =>
           if (inventory.active) inventory.active = false else exitScene
         case Input.KEY_ENTER =>

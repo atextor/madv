@@ -54,6 +54,8 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
         e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
         e.update(ticks)
         e.move
+        actions ++= e.delayedActions
+        e.delayedActions.clear
       }
       effects.foreach { e =>
         e.update(ticks)

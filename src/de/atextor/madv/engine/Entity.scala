@@ -1,5 +1,9 @@
 package de.atextor.madv.engine
 
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
+
 import org.newdawn.slick.Animation
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
@@ -14,6 +18,7 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
   var lookingDirection: Direction = Down
   var movingDirection: Vec2f = Nowhere
   var alive = true
+  val delayedActions: ListBuffer[TimedAction] = ListBuffer()
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
   def xDistanceTo(other: Entity) = Math.abs(pos.x - other.pos.x)
   def yDistanceTo(other: Entity) = Math.abs(pos.y - other.pos.y)
@@ -22,11 +27,14 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
     val b = yDistanceTo(other)
     Math.sqrt(a * a + b * b)
   }
+  
   def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
       draw((pos.x - base.x) * 2 + staticOffset.x + 8, (pos.y - base.y) * 2 + staticOffset.y + 32)
     }
   }
+  
+  def at(ticks: Duration, f: Action) { delayedActions += ((ticks.toMillis.toInt, f)) }
 }
 
 abstract class Brain extends ((Humanoid, Int) => Unit)
@@ -35,12 +43,16 @@ object Dumb extends Brain {
   def apply(h: Humanoid, ticks: Int) { }
 }
 
-class Dying extends Brain {
-  var ticks = 0
+object Dying extends Brain {
   def apply(me: Humanoid, delta: Int) {
-    ticks += delta
-    if (ticks >= 60000) me.movingDirection = Nowhere
-    if (ticks >= 800000) me.alive = false
+    me.at(delta + 700 millis, {_ => me.movingDirection = Nowhere})
+    me.at(delta + 5000 millis, {_ => me.alive = false})
+    me.behavior = Dumb
+  }
+}
+
+object Attack extends Brain {
+  def apply(me: Humanoid, delta: Int) {
   }
 }
     
@@ -83,8 +95,13 @@ class Humanoid (
   def die {
     go(Down)
     spriteAction = Hurt
-    behavior = new Dying
+    behavior = Dying
     skin.startAnimation(Down, Hurt)
+  }
+  
+  def attack {
+    spriteAction = Slash
+    behavior = Attack
   }
   
   override def move = {
