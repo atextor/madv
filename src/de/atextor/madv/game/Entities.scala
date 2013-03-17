@@ -42,10 +42,12 @@ import org.newdawn.slick.Graphics
 import de.atextor.madv.engine.LevelCell
 import de.atextor.madv.engine.Direction
 import de.atextor.madv.engine.Player
+import de.atextor.madv.engine.UI
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
     SpriteAnimation(new SpriteSheet(sheet, sizeX, if (sizeY == 0) sizeX else sizeY), new SimpleSprite(frames, delay), 0)
+    
   lazy val playerSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female" :: Nil)),
      (head  -> ("female_darkblondehair" :: Nil)),
@@ -72,6 +74,8 @@ object Entities {
   lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis)
   lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
   def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0)
+  lazy val muffinPortrait = UI.image("res/portraits/muffin.png")
+  lazy val heroPortrait = UI.image("res/portraits/hero.png")
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell

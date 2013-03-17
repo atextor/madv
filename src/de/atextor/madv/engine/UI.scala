@@ -9,6 +9,14 @@ import org.newdawn.slick.Image
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 
+object UI {
+  def image(res: String) = {
+    val img = new Image(res)
+    img.setFilter(Image.FILTER_NEAREST)
+    img
+  }
+}
+
 abstract class Overlay(var pos: Vec2d) extends Tickable {
   def draw
   def tick(delta: Int) {}
@@ -29,12 +37,7 @@ class TextBox(width: Int, text: String, startPos: Vec2d) extends Overlay(pos = s
 }
 
 class FrameBox(size: Vec2d) extends Renderable {
-  private def image(r: String) = {
-    val img = new Image(s"res/ui/box${r}.png")
-    img.setFilter(Image.FILTER_NEAREST)
-    img
-  }
-  
+  private def image(r: String) = UI.image(s"res/ui/box${r}.png")
   val boxnw = image("nw")
   val boxn  = image("n")
   val boxne = image("ne")
@@ -62,14 +65,16 @@ class FrameBox(size: Vec2d) extends Renderable {
   }
 }
 
-class StoryText(storyText: String) extends Overlay(pos = Vec2d(100, 200)) {
-  val size = Vec2d(200, 80)
+class StoryText(storyText: String, portrait: Option[Renderable]) extends Overlay(pos = Vec2d(80, 200)) {
+  val size = Vec2d(240, 80)
   val box = new FrameBox(size)
   val text = new Text(storyText, appear = true)
+//  val portrait = UI.image("res/sprites/muffin-icon.png")
   
   def draw {
     box.draw(pos.x, pos.y)
-    text.draw(pos.x + size.x / 2 - text.getWidth / 2, pos.y + 7)
+    text.draw(pos.x + 60, pos.y + 7)
+    portrait.foreach(_.draw(pos.x + 10, pos.y + 20))
   } 
   
   override def tick(delta: Int) {
