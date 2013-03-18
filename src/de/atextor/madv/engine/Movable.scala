@@ -6,15 +6,12 @@ trait Movable {
   var pos: Vec2f
   var size: Vec2d
   var movingDirection: Vec2f
-//  val obstacles: ListBuffer[Movable]
-//  def addObstacle(m: Movable): ListBuffer[Movable] = obstacles += m
-//  def removeObstacle(m: Movable): ListBuffer[Movable] = obstacles -= m
   
   def middle: Vec2d = Vec2d(pos.x.toInt + size.x / 2, pos.y.toInt + size.y / 2)
   
   def touchTopLeft = pos
   
-  def touchBottomRight = pos + size
+  def touchBottomRight = pos + size.toVec2f
   
   def touches(other: Movable): Boolean = {
     val thisBR = touchBottomRight
@@ -25,11 +22,6 @@ trait Movable {
       (touchTopLeft.y > otherBR.y))
   }
       
-  def move {
-    pos += movingDirection
-//    val canMove = !(obstacles.foldLeft(false) { (b, s) => b || s.touches(this) })
-//    if (!canMove) pos -= direction
-//    canMove
-  }
+  def move = pos += movingDirection
 }
   

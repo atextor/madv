@@ -20,6 +20,7 @@ case class Vec2d(override val x: Int, override val y: Int) extends Vec[Int](x, y
   def /(f: Int): Vec2d = Vec2d(x / f, y / f)
   def apply(d: Direction) = Vec2d(d.x, d.y)
   def invert = Vec2d(-x, -y)
+  def toVec2f = Vec2f(x.toFloat, y.toFloat)
 }
 
 case class Vec2f(override val x: Float, override val y: Float) extends Vec[Float](x, y) {

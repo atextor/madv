@@ -21,25 +21,27 @@ case object Spellcast extends SpriteAction(7, 100 millis)
 case object Thrust extends SpriteAction(8, 100 millis)
 case object Walk extends SpriteAction(8, 100 millis)
 
-object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Animation) {
-  def apply(sheet: SpriteSheet, sa: SpriteAction, row: Int): Animation = {
+object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Option[Animation]) {
+  def apply(sheet: SpriteSheet, sa: SpriteAction, row: Int): Option[Animation] = {
     val ani = new Animation
     for (x <- 0 until sa.frames) {
       ani.addFrame(sheet.getSprite(x, row), sa.delay.toMillis.toInt)
     }
     ani setPingPong false
     ani.setLooping(sa.repeat)
-    ani
+    Some(ani)
   }
 }
 
 case class Part(name: String) {
-  private def animation(d: Direction, a: SpriteAction): Animation =
-    SpriteAnimation(new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64), a, a.spriteRow(d))
+  private def animation(d: Direction, a: SpriteAction): Option[Animation] =
+    if (!(name.startsWith("weapon")) || a == Slash) {
+      SpriteAnimation(new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64), a, a.spriteRow(d))
+    } else None
   val getAnimation = Memoize.memoize(animation _)
-  def draw(d: Direction, a: SpriteAction, position: Vec[Int]) = getAnimation(d, a).draw(position.x, position.y)
-  def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).stop
-  def startAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).start
+  def draw(d: Direction, a: SpriteAction, position: Vec[Int]) = getAnimation(d, a).foreach(_.draw(position.x, position.y))
+  def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).foreach(_.stop)
+  def startAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).foreach(_.start)
 }
 
 object PartName extends Enumeration {
@@ -58,7 +60,9 @@ case class EntitySkin(val size: Vec2d, actions: List[SpriteAction], parts: (Part
     m get belt foreach(_.foreach(_.draw(d, a, position)))
     m get head foreach(_.foreach(_.draw(d, a, position)))
     m get hands foreach(_.foreach(_.draw(d, a, position)))
-    m get weapon foreach(_.foreach(_.draw(d, a, position)))
+    if (a == Slash) {
+      m get weapon foreach(_.foreach(_.draw(d, a, position)))
+    }
   }
   
   def stopAnimation(d: Direction, a: SpriteAction) = m.values.foreach(_.foreach(_.stopAnimation(d, a)))

@@ -2,47 +2,47 @@ package de.atextor.madv.game
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
+
 import org.newdawn.slick.Animation
 import org.newdawn.slick.SpriteSheet
-import de.atextor.madv.engine.Action
+
 import de.atextor.madv.engine.Audio
+import de.atextor.madv.engine.Brain
 import de.atextor.madv.engine.Constants
+import de.atextor.madv.engine.Direction
 import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Entity
 import de.atextor.madv.engine.EntitySkin
-import de.atextor.madv.engine.FrameBox
+import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.Hurt
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
+import de.atextor.madv.engine.LevelCell
+import de.atextor.madv.engine.Overlay
 import de.atextor.madv.engine.PartName.belt
 import de.atextor.madv.engine.PartName.body
 import de.atextor.madv.engine.PartName.feet
 import de.atextor.madv.engine.PartName.head
 import de.atextor.madv.engine.PartName.torso
+import de.atextor.madv.engine.PartName.weapon
+import de.atextor.madv.engine.Player
+import de.atextor.madv.engine.Potion
 import de.atextor.madv.engine.Right
+import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.SimpleSprite
 import de.atextor.madv.engine.Slash
 import de.atextor.madv.engine.Spellcast
 import de.atextor.madv.engine.SpriteAnimation
-import de.atextor.madv.engine.Text
+import de.atextor.madv.engine.TextBox
+import de.atextor.madv.engine.UI
 import de.atextor.madv.engine.Up
 import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Vec2f
 import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
-import de.atextor.madv.engine.Overlay
-import de.atextor.madv.engine.TextBox
-import de.atextor.madv.engine.Humanoid
-import de.atextor.madv.engine.Brain
-import de.atextor.madv.engine.Scene
-import de.atextor.madv.engine.Potion
-import org.newdawn.slick.Graphics
-import de.atextor.madv.engine.LevelCell
-import de.atextor.madv.engine.Direction
-import de.atextor.madv.engine.Player
-import de.atextor.madv.engine.UI
+import de.atextor.madv.engine.Action
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -57,7 +57,8 @@ object Entities {
   lazy val femaleOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_leather_torso" :: "female_leather_shoulders" :: Nil)),
-     (belt  -> ("female_brownbelt" :: Nil)))
+     (belt  -> ("female_brownbelt" :: Nil)),
+     (weapon -> ("dagger" :: Nil)))
   lazy val femaleArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_chainmail" :: "female_plate_shoulders" :: Nil)),
@@ -67,13 +68,13 @@ object Entities {
      (torso -> ("female_plate_mail" :: "female_plate_shoulders" :: Nil)),
      (feet  -> ("female_plate_boots" :: "female_plate_greaves" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)))
-  lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis)
-  lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis)
-  lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis)
-  lazy val chestSprite = animation(sheet = "res/items/chest.png", sizeX = 32, frames = 2, delay = 1 second)
-  lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis)
+  lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis).get
+  lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis).get
+  lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis).get
+  lazy val chestSprite = animation(sheet = "res/items/chest.png", sizeX = 32, frames = 2, delay = 1 second).get
+  lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis).get
   lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
-  def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0)
+  def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0).get
   lazy val muffinPortrait = UI.image("res/portraits/muffin.png")
   lazy val heroPortrait = UI.image("res/portraits/hero.png")
   
@@ -114,7 +115,7 @@ object Entities {
   def placeChestInLevel[L <: Level](level: L, scene: Scene): Level = {
     import level.PlacedLevelCell
     
-    val chestPos = Vec2d(10, 10)
+    val chestPos = Vec2f(10, 10)
     val chest = new Chest(scene = scene, startPos = chestPos * 16,
       onTouch = { t =>
         val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
@@ -134,7 +135,7 @@ object Entities {
   }
 }
 
-class Chest(scene: Scene, startPos: Vec2d, onTouch: Action) extends
+class Chest(scene: Scene, startPos: Vec2f, onTouch: Action) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
   var activated = false
@@ -151,7 +152,7 @@ class Chest(scene: Scene, startPos: Vec2d, onTouch: Action) extends
   }
 }
 
-class Collectible(player: Player, startPos: Vec2d, onTouch: Action, visual: Animation) extends 
+class Collectible(player: Player, startPos: Vec2f, onTouch: Action, visual: Animation) extends 
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
   def tick(delta: Int) = {
     if (player touches this) {
@@ -171,49 +172,10 @@ class Effect(startPos: Vec2f, visual: Animation) extends
   } 
 }
 
-class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.goldCoinSprite)
-class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.silverCoinSprite)
-class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos, onTouch, Entities.copperCoinSprite)
-class Explosion(startPos: Vec2f) extends Effect(startPos, Entities.explosion)
+class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.goldCoinSprite)
+class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.silverCoinSprite)
+class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.copperCoinSprite)
+class Explosion(startPos: Vec2d) extends Effect(startPos.toVec2f, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))
-
-class FemaleOrc(level: Level, brain: Brain, startPos: Vec2d) extends Humanoid(level, Entities.femaleOrcSkin, brain, Walk, startPos, 0.3f) 
-
-class Chaser(player: Player) extends Brain {
-  val eps = 2.0
-  def apply(me: Humanoid, delta: Int) {
-    val dist = player distanceTo me
-    if (dist < 10) {
-      me stop;
-      return
-    }
-    
-    if (dist < 500) {
-      val xdist = Math.abs(me.pos.x.toInt / 16 - player.pos.x.toInt / 16)
-      val ydist = Math.abs(me.pos.y.toInt / 16 - player.pos.y.toInt / 16)
-      if (xdist > ydist) {
-        if (me.pos.x > player.pos.x + eps) { me go Left; if (!me.canMove) tryUpDown(me); return }
-        if (me.pos.x < player.pos.x - eps) { me go Right; if (!me.canMove) tryUpDown(me); return }
-      } else {
-        if (me.pos.y > player.pos.y + eps) { me go Up; if (!me.canMove) tryLeftRight(me); return }
-        if (me.pos.y < player.pos.y - eps) { me go Down; if (!me.canMove) tryLeftRight(me); return }
-      }
-    }
-  }
-  
-  private def tryUpDown(me: Humanoid) {
-    if (me.pos.y > player.pos.y + eps) { me go Up; if(!me.canMove) me.stop; return }
-    if (me.pos.y < player.pos.y - eps) { me go Down; if(!me.canMove) me.stop; return }
-    me.stop
-  }
-  
-  private def tryLeftRight(me: Humanoid) {
-    if (me.pos.x > player.pos.x + eps) { me go Left; if(!me.canMove) me.stop; return }
-    if (me.pos.x < player.pos.x - eps) { me go Right; if(!me.canMove) me.stop; return }
-    me.stop
-  }
-}
-
-
-
+class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(level, player, Entities.femaleOrcSkin, brain, Walk, startPos.toVec2f, 0.3f, 100, 3) 
 

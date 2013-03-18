@@ -29,7 +29,7 @@ class Inventory extends Overlay(pos = Vec2d(100, 50)) {
   val size = Vec2d(200, 200)
   val box = new FrameBox(size)
   val text = new Text("Inventar")
-  val arrow = SpriteAnimation(new SpriteSheet("res/ui/arrow.png", 16, 7), new SimpleSprite(2, 500 millis), 0)
+  val arrow = SpriteAnimation(new SpriteSheet("res/ui/arrow.png", 16, 7), new SimpleSprite(2, 500 millis), 0).get
   var selection = -1
   active = false
   

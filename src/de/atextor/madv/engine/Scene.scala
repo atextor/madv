@@ -66,6 +66,10 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       effects.filterNot(_.alive).foreach(effects -= _)
       overlays.filterNot(_.alive).foreach(overlays -= _)
       storyTexts.filterNot(_.alive).foreach(storyTexts -= _)
+      
+      if (!player.alive) {
+        addStoryText(new StoryText("You Die.", None))
+      }
     
       // do Z ordering for all entities that need to be drawn
       val parted = entities.filter(_.enabled).sortWith(_.pos.y < _.pos.y).partition(_.pos.y < player.pos.y)

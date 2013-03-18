@@ -24,6 +24,15 @@ abstract class Overlay(var pos: Vec2d) extends Tickable {
   var active = true
 }
 
+class HealthDisplay(player: Player) extends Overlay(pos = Vec2d(180, 2)) {
+  val heart = UI.image("res/ui/heart.png")
+  override def draw {
+    for (i <- 0 to player.hp / 10) {
+      heart.draw(pos.x + i * 10, pos.y)
+    }
+  }
+}
+
 class TextBox(width: Int, text: String, startPos: Vec2d) extends Overlay(pos = startPos) {
   val size = Vec2d(width, Text.getTextHeight(text) + 15)
   val box = new FrameBox(size)
@@ -69,7 +78,6 @@ class StoryText(storyText: String, portrait: Option[Renderable]) extends Overlay
   val size = Vec2d(240, 80)
   val box = new FrameBox(size)
   val text = new Text(storyText, appear = true)
-//  val portrait = UI.image("res/sprites/muffin-icon.png")
   
   def draw {
     box.draw(pos.x, pos.y)

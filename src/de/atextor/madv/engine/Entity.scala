@@ -37,34 +37,19 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
   def at(ticks: Duration, f: Action) { delayedActions += ((ticks.toMillis.toInt, f)) }
 }
 
-abstract class Brain extends ((Humanoid, Int) => Unit)
-
-object Dumb extends Brain {
-  def apply(h: Humanoid, ticks: Int) { }
-}
-
-object Dying extends Brain {
-  def apply(me: Humanoid, delta: Int) {
-    me.at(delta + 700 millis, {_ => me.movingDirection = Nowhere})
-    me.at(delta + 5000 millis, {_ => me.alive = false})
-    me.behavior = Dumb
-  }
-}
-
-object Attack extends Brain {
-  def apply(me: Humanoid, delta: Int) {
-  }
-}
-    
 class Humanoid (
     level: Level,
-    var skin: EntitySkin,
-    var behavior: Brain = Dumb,
+    player: Player,
+    val skin: EntitySkin,
+    val defaultBehavior: Brain = Dumb,
     var spriteAction: SpriteAction = Walk,
     startPosition: Vec2f,
-    val speed: Float) extends Entity(size = skin.size, pos = startPosition) {
+    val speed: Float,
+    var hp: Int,
+    val damage: Int) extends Entity(size = skin.size, pos = startPosition) {
   
   val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+  var behavior = defaultBehavior
   
   def tick(delta: Int) = behavior(this, delta)
   
@@ -92,6 +77,11 @@ class Humanoid (
     level.cellAt(dest.toVec2d).properties contains Walkable
   }
   
+  def chase {
+    behavior = defaultBehavior
+    spriteAction = Walk
+  }
+  
   def die {
     go(Down)
     spriteAction = Hurt
@@ -100,13 +90,19 @@ class Humanoid (
   }
   
   def attack {
+    movingDirection = Nowhere
     spriteAction = Slash
-    behavior = Attack
+    behavior = new Attack(player, damage)
   }
   
   override def move = {
     if (movingDirection != Nowhere) {
       if (canMove) goForward
     }
+  }
+  
+  def hurt(damage: Int) {
+    hp -= damage
+    println("hp: " + hp)
   }
 }

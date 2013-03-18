@@ -30,6 +30,8 @@ import de.atextor.madv.engine.MagicMapScroll
 import de.atextor.madv.engine.StoryText
 import de.atextor.madv.engine.Player
 import de.atextor.madv.engine.GameEffects
+import de.atextor.madv.engine.Chaser
+import de.atextor.madv.engine.HealthDisplay
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -55,13 +57,16 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    addEntities(entities)
     
     val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
-    orc = new FemaleOrc(level, new Chaser(player), orcStart.pos * 16)
+    orc = new FemaleOrc(level, player, new Chaser(player), orcStart.pos * 16)
     addEntity(orc)
     
     automap = new AutoMap(level, player) 
     
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
+    
+    val hpDisplay = new HealthDisplay(player)
+    addOverlay(hpDisplay)
     
     gameMap = Some(level)
     at(0 millis, t => player.stop)
