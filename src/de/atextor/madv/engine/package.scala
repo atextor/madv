@@ -6,7 +6,8 @@ package object engine {
   
   type Action = (Int => Unit)
   type TimedAction = (Int, Action)
-  val DoNothing: Action = (_ => ())
+  val NoAction: Action = (_ => ())
+  val DoNothing = (() => ())
   implicit def noArg2intArg(f: (() => Unit)): Action = { i => f() }
   
   implicit def vec2d2vec2f(v: Vec2d) = Vec2f(v.x, v.y)

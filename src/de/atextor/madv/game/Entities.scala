@@ -10,7 +10,7 @@ import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.Brain
 import de.atextor.madv.engine.Constants
 import de.atextor.madv.engine.Direction
-import de.atextor.madv.engine.DoNothing
+import de.atextor.madv.engine.NoAction
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Entity
 import de.atextor.madv.engine.EntitySkin
@@ -81,7 +81,7 @@ object Entities {
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
     
-    val playPling: Action = if (Constants.debug) DoNothing else (Audio.pling.play _)
+    val playPling: Action = if (Constants.debug) NoAction else (Audio.pling.play _)
     
     // Place a bunch of coins at the end of land
     val landsEndProperty: PlacedLevelCell => Boolean = { c =>
@@ -180,5 +180,18 @@ class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.copperCoinSprite)
 class Explosion(startPos: Vec2d) extends Effect(startPos.toVec2f, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))
-class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(level, player, Entities.femaleOrcSkin, brain, Walk, startPos.toVec2f, 0.3f, 100, 3, Audio.grunt.play _, Audio.growl.play _) 
 
+class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(
+    level = level,
+    player = player,
+    skin = Entities.femaleOrcSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.3f,
+    hp = 100,
+    damage = 3,
+    onHurt = Audio.grunt.play _,
+    onDie = Audio.growl.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _)

@@ -13,8 +13,10 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     speed = (if (Constants.debug) 5 else 1),
     hp = 100,
     damage = 0,
-    onHurt = () => (),
-    onDie = () => ()
+    onHurt = DoNothing,
+    onDie = DoNothing,
+    onBeginAttack = DoNothing,
+    onEndAttack = DoNothing
 ) {
   val staticRenderPos = Vec2d(168, 80)
   var armed = true
@@ -59,10 +61,11 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   }
 }
 
-abstract class Spell(val cooldown: Duration) extends (Vec2f => Seq[Entity])
+abstract class Spell(val cooldown: Duration, onFire: () => Unit = () => ()) extends (Vec2f => Seq[Entity])
 
-class Shooter(shoot: Vec2f => Projectile, cooldown: Duration) extends Spell(cooldown) {
+class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit = () => ()) extends Spell(cooldown, onFire) {
   def apply(pos: Vec2f) = {
+    onFire()
     shoot(pos) :: Nil
   }
 }

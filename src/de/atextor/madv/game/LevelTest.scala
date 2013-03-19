@@ -10,7 +10,7 @@ import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.engine.AutoMap
 import de.atextor.madv.engine.BlueCave
 import de.atextor.madv.engine.Constants
-import de.atextor.madv.engine.DoNothing
+import de.atextor.madv.engine.NoAction
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Level
@@ -35,6 +35,7 @@ import de.atextor.madv.engine.HealthDisplay
 import de.atextor.madv.engine.Vec2f
 import de.atextor.madv.engine.Projectile
 import de.atextor.madv.engine.Shooter
+import de.atextor.madv.engine.Audio
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -55,7 +56,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.sparkle1, speed = 0.5f, damage = 20)
-    val spell = new Shooter(shooter, 500 millis)
+    val spell = new Shooter(shooter, 500 millis, Audio.shoot _)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)

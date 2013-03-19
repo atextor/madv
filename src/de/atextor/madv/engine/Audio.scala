@@ -3,12 +3,19 @@ package de.atextor.madv.engine
 import org.newdawn.slick.openal.AudioLoader
 import org.newdawn.slick.util.ResourceLoader
 import org.newdawn.slick.Sound
+import scala.util.Random
 
 object Audio {
-  lazy val pling = new Sound("res/audio/pling.wav")
-  lazy val chestopen = new Sound("res/audio/dooropen.wav")
-  lazy val grunt = new Sound("res/audio/doggrunt.wav")
-  lazy val growl = new Sound("res/audio/growl.wav")
+  private def sound(name: String) = new Sound(s"res/audio/${name}.wav")
+  lazy val pling = sound("pling")
+  lazy val chestopen = sound("dooropen")
+  lazy val grunt = sound("doggrunt")
+  lazy val growl = sound("growl")
+  lazy val slash = sound("slash")
+  
+  private lazy val shoots = (1 to 5).toList.map(n => sound(s"shoot${n}"))
+  private def randomShootSound = Random shuffle shoots head
+  def shoot = randomShootSound.play
   
 //  val stream = classOf[Audio].getClassLoader.getResourceAsStream("sample.ogg")
   

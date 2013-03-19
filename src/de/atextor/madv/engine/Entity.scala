@@ -39,10 +39,13 @@ class Humanoid (
     val speed: Float,
     var hp: Int,
     val damage: Int,
-    onHurt: () => Unit,
-    onDie: () => Unit) extends Entity(size = skin.size, pos = startPosition) {
+    val onHurt: () => Unit,
+    val onDie: () => Unit,
+    val onBeginAttack: () => Unit,
+    val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) {
   
-  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+//  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+  val shadow = UI.image("res/sprites/humanoid_shadow.png")
   var behavior = defaultBehavior
   var isTarget = true
   
@@ -80,7 +83,6 @@ class Humanoid (
   }
   
   def die {
-    println("die")
     onDie()
     isTarget = false
     movingDirection = movingDirection(Down)
@@ -91,6 +93,7 @@ class Humanoid (
   }
   
   def attack {
+    onBeginAttack()
     movingDirection = Nowhere
     spriteAction = Slash
     behavior = new Attack(player, damage)
