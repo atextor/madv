@@ -70,15 +70,14 @@ class Projectile(spawner: Entity, visual: Animation, speed: Float) extends
   val isTarget = false
   movingDirection = spawner.lookingDirection * speed
   
-  override def touches(other: Movable): Boolean = distanceTo(other) < 3
-  
   def tick(scene: Scene, delta: Int) {
     if (distanceTo(spawner) > 100) {
       alive = false
     }
     
     scene.entities.filter(_.isTarget).foreach {e =>
-      if (e touches this) {
+      val dist = distanceTo(e)
+      if (dist < 7) {
         alive = false
         return
       }
