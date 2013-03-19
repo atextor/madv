@@ -115,8 +115,8 @@ object Entities {
   def placeChestInLevel[L <: Level](level: L, scene: Scene): Level = {
     import level.PlacedLevelCell
     
-    val chestPos = Vec2f(10, 10)
-    val chest = new Chest(scene = scene, startPos = chestPos * 16,
+    val chestPos = Vec2d(10, 10)
+    val chest = new Chest(scene = scene, startPos = chestPos.toVec2f * 16,
       onTouch = { t =>
         val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
         scene.addOverlay(text)

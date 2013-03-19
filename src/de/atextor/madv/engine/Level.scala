@@ -284,7 +284,7 @@ case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLoca
   def find(p: PlacedLevelCell => Boolean, randomize: Boolean = true): Option[PlacedLevelCell] =
     (if (randomize) (Random shuffle placedCells) else placedCells).find(p)
   
-  def cellAt(v: Vec[Int]) = at((v.x + 8) / 16, (v.y + 8) / 16)
+  def cellAt(v: Vec[Int]) = at((v.x + 12) / 16, (v.y + 8) / 16)
   
   private def at(x: Int, y: Int) =
     if (x >= 0 && x < width && y >= 0 && y < height) cells(x + y * width) else cells(0)
