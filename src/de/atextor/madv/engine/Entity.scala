@@ -14,17 +14,10 @@ trait Tickable {
   def tick(scene: Scene, delta: Int)
 }
 
-trait HasEntities {
-  val entities: ListBuffer[Entity] = ListBuffer()
-  def addEntity(e: Entity): ListBuffer[Entity] = entities += e
-  def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
-}
-
-abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable with HasEntities {
+abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable {
   var lookingDirection: Direction = Down
   var movingDirection: Vec2f = Nowhere
   var alive = true
-  val delayedActions: ListBuffer[TimedAction] = ListBuffer()
   def isTarget: Boolean
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
   
@@ -33,8 +26,6 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
       draw((pos.x - base.x) * 2 + staticOffset.x + 8, (pos.y - base.y) * 2 + staticOffset.y + 32)
     }
   }
-  
-  def at(ticks: Duration, f: Action) { delayedActions += ((ticks.toMillis.toInt, f)) }
 }
 
 class Humanoid (

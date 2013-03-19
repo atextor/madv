@@ -10,12 +10,13 @@ import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.game.Effect
 import org.newdawn.slick.Input
 
-abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState with HasEntities {
+abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   var player: Player
   var running = true
   val pressedKeys = Queue[Int]()  
+  val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
   val overlays: ListBuffer[Overlay] = ListBuffer()
   val storyTexts: ListBuffer[StoryText] = ListBuffer()
@@ -29,6 +30,8 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState with H
   def addEffect(e: Effect): ListBuffer[Effect] = effects += e
   def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
   def addStoryText(t: StoryText) = storyTexts += t
+  def addEntity(e: Entity): ListBuffer[Entity] = entities += e
+  def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
   
   def at(ticks: Duration, f: Action) { actions += ((ticks.toMillis.toInt, f)) }
   
@@ -47,19 +50,11 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState with H
     if (!inventory.active) {
       player.update(this, ticks)
       player.move
-      addEntities(player.entities)
-      player.entities.clear
-      actions ++= player.delayedActions
-      player.delayedActions.clear
       
-      addEntities(entities.flatMap(_.entities))
       entities.foreach { e =>
         e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
         e.update(this, ticks)
         e.move
-        actions ++= e.delayedActions
-        e.delayedActions.clear
-        e.entities.clear
       }
       
       effects.foreach { e =>

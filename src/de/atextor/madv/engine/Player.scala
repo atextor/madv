@@ -42,9 +42,9 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   override def tick(scene: Scene, delta: Int) {
     if (spriteAction == Spellcast && armed) {
       val s = spell.get
-      addEntities(s(pos))
       armed = false
-      at((delta millis) + s.cooldown, {_ => armed = true})
+      scene.addEntities(s(pos))
+      scene.at((delta millis) + s.cooldown, {_ => armed = true})
     }
   }
   
