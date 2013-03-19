@@ -12,7 +12,9 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     startPosition = startPosition.toVec2f,
     speed = (if (Constants.debug) 5 else 1),
     hp = 100,
-    damage = 0
+    damage = 0,
+    onHurt = () => (),
+    onDie = () => ()
 ) {
   val staticRenderPos = Vec2d(168, 80)
   var armed = true
@@ -65,7 +67,7 @@ class Shooter(shoot: Vec2f => Projectile, cooldown: Duration) extends Spell(cool
   }
 }
 
-class Projectile(spawner: Entity, visual: Animation, speed: Float) extends
+class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int) extends
     Entity(size = OnePixelSize, visual = Some(visual), pos = spawner.pos + Vec2d(4, 0)) {
   val isTarget = false
   movingDirection = spawner.lookingDirection * speed
@@ -78,6 +80,7 @@ class Projectile(spawner: Entity, visual: Animation, speed: Float) extends
     scene.entities.filter(_.isTarget).foreach {e =>
       val dist = distanceTo(e)
       if (dist < 7) {
+        e.hurt(damage)
         alive = false
         return
       }

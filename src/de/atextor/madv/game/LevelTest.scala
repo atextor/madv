@@ -54,7 +54,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
 //    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
-    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.sparkle1, speed = 0.5f)
+    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.sparkle1, speed = 0.5f, damage = 20)
     val spell = new Shooter(shooter, 500 millis)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
@@ -107,7 +107,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override def processKeys {
     super.processKeys
     if (gameMap.isDefined) {
-      if (pressedKeys.size > 0) pressedKeys.last match {
+      if (!pressedKeys.isEmpty) pressedKeys.last match {
         case Input.KEY_I =>
           if (!inStoryMode) inventory.active = !inventory.active
         case Input.KEY_UP =>
@@ -128,12 +128,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
           }
 //        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
 //        case Input.KEY_SPACE => orc.die
-        case Input.KEY_SPACE =>
-          if (pressedKeys contains Input.KEY_SPACE) {
-            player.attack
-          } else {
-            player.stop
-          }
+        case Input.KEY_SPACE => player.attack
         case Input.KEY_ESCAPE =>
           if (inventory.active) inventory.active = false else exitScene
         case Input.KEY_ENTER =>

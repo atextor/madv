@@ -7,6 +7,8 @@ import org.newdawn.slick.Sound
 object Audio {
   lazy val pling = new Sound("res/audio/pling.wav")
   lazy val chestopen = new Sound("res/audio/dooropen.wav")
+  lazy val grunt = new Sound("res/audio/doggrunt.wav")
+  lazy val growl = new Sound("res/audio/growl.wav")
   
 //  val stream = classOf[Audio].getClassLoader.getResourceAsStream("sample.ogg")
   

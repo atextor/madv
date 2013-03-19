@@ -180,5 +180,5 @@ class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.copperCoinSprite)
 class Explosion(startPos: Vec2d) extends Effect(startPos.toVec2f, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 30))
-class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(level, player, Entities.femaleOrcSkin, brain, Walk, startPos.toVec2f, 0.3f, 100, 3) 
+class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(level, player, Entities.femaleOrcSkin, brain, Walk, startPos.toVec2f, 0.3f, 100, 3, Audio.grunt.play _, Audio.growl.play _) 
 

@@ -20,6 +20,7 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
   var alive = true
   def isTarget: Boolean
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
+  def hurt(damage: Int) {}
   
   def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
@@ -37,11 +38,13 @@ class Humanoid (
     startPosition: Vec2f,
     val speed: Float,
     var hp: Int,
-    val damage: Int) extends Entity(size = skin.size, pos = startPosition) {
+    val damage: Int,
+    onHurt: () => Unit,
+    onDie: () => Unit) extends Entity(size = skin.size, pos = startPosition) {
   
   val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
   var behavior = defaultBehavior
-  val isTarget = true
+  var isTarget = true
   
   def tick(scene: Scene, delta: Int) = behavior(this, scene, delta)
   
@@ -57,11 +60,10 @@ class Humanoid (
   }
   
   def go(d: Direction) {
-    if (spriteAction == Walk) {
-      movingDirection = movingDirection(d)
-      lookingDirection = d
-      skin.startAnimation(lookingDirection, spriteAction)
-    }
+    spriteAction = Walk
+    movingDirection = movingDirection(d)
+    lookingDirection = d
+    skin.startAnimation(lookingDirection, spriteAction)
   }
   
   def goForward = pos += movingDirection * speed
@@ -78,7 +80,11 @@ class Humanoid (
   }
   
   def die {
-    go(Down)
+    println("die")
+    onDie()
+    isTarget = false
+    movingDirection = movingDirection(Down)
+    lookingDirection = Down
     spriteAction = Hurt
     behavior = Dying
     skin.startAnimation(Down, Hurt)
@@ -96,8 +102,10 @@ class Humanoid (
     }
   }
   
-  def hurt(damage: Int) {
+  override def hurt(damage: Int) {
+    if (spriteAction == Hurt) return
+    onHurt()
     hp -= damage
-    println("hp: " + hp)
+    if (hp <= 0) die
   }
 }
