@@ -10,23 +10,23 @@ import org.newdawn.slick.SpriteSheet
 
 trait Tickable {
   var enabled = true
-  final def update(delta: Int) = if (enabled) tick(delta)
-  def tick(delta: Int)
+  final def update(scene: Scene, delta: Int) = if (enabled) tick(scene, delta)
+  def tick(scene: Scene, delta: Int)
 }
 
-abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable {
+trait HasEntities {
+  val entities: ListBuffer[Entity] = ListBuffer()
+  def addEntity(e: Entity): ListBuffer[Entity] = entities += e
+  def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
+}
+
+abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable with HasEntities {
   var lookingDirection: Direction = Down
   var movingDirection: Vec2f = Nowhere
   var alive = true
   val delayedActions: ListBuffer[TimedAction] = ListBuffer()
+  def isTarget: Boolean
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
-  def xDistanceTo(other: Entity) = Math.abs(pos.x - other.pos.x)
-  def yDistanceTo(other: Entity) = Math.abs(pos.y - other.pos.y)
-  def distanceTo(other: Entity) = {
-    val a = xDistanceTo(other)
-    val b = yDistanceTo(other)
-    Math.sqrt(a * a + b * b)
-  }
   
   def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
@@ -50,8 +50,9 @@ class Humanoid (
   
   val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
   var behavior = defaultBehavior
+  val isTarget = true
   
-  def tick(delta: Int) = behavior(this, delta)
+  def tick(scene: Scene, delta: Int) = behavior(this, scene, delta)
   
   override def draw(x: Float, y: Float) = {
     if (spriteAction != Hurt) shadow.draw(x - 8, y - 26)
@@ -60,13 +61,16 @@ class Humanoid (
   
   def stop = {
     movingDirection = Nowhere
+    spriteAction = Walk
     skin.stopAnimation(lookingDirection, spriteAction)
   }
   
   def go(d: Direction) {
-    movingDirection = movingDirection(d)
-    lookingDirection = d
-    skin.startAnimation(lookingDirection, spriteAction)
+    if (spriteAction == Walk) {
+      movingDirection = movingDirection(d)
+      lookingDirection = d
+      skin.startAnimation(lookingDirection, spriteAction)
+    }
   }
   
   def goForward = pos += movingDirection * speed

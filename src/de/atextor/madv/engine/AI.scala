@@ -2,14 +2,14 @@ package de.atextor.madv.engine
 
 import scala.concurrent.duration.DurationInt
 
-abstract class Brain extends ((Humanoid, Int) => Unit)
+abstract class Brain extends ((Humanoid, Scene, Int) => Unit)
 
 object Dumb extends Brain {
-  def apply(h: Humanoid, ticks: Int) { }
+  def apply(h: Humanoid, scene: Scene, ticks: Int) { }
 }
 
 object Dying extends Brain {
-  def apply(me: Humanoid, delta: Int) {
+  def apply(me: Humanoid, scene: Scene, delta: Int) {
     me.at(delta + 700 millis, {_ => me.movingDirection = Nowhere})
     me.at(delta + 5000 millis, {_ => me.alive = false})
     me.behavior = Dumb
@@ -18,7 +18,7 @@ object Dying extends Brain {
 
 class Attack(player: Player, damage: Int) extends Brain {
   var armed = true
-  def apply(me: Humanoid, delta: Int) {
+  def apply(me: Humanoid, scene: Scene, delta: Int) {
     val dist = player distanceTo me
     if (dist > 20) {
       me.movingDirection = Nowhere
@@ -36,7 +36,7 @@ class Attack(player: Player, damage: Int) extends Brain {
     
 class Chaser(player: Player) extends Brain {
   val eps = 2.0
-  def apply(me: Humanoid, delta: Int) {
+  def apply(me: Humanoid, scene: Scene, delta: Int) {
     val dist = player distanceTo me
     if (dist < 20) {
       me.attack

@@ -21,7 +21,7 @@ class Text(text: String, appear: Boolean = false) extends Renderable with Tickab
   def allShown = (!appear) || appeared == text.length
   
   private var lastTick = 0
-  def tick(delta: Int) {
+  def tick(scene: Scene, delta: Int) {
     if (appeared < text.length && delta - lastTick > 50) {
       appeared += 1
       lastTick = delta

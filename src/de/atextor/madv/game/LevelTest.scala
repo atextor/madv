@@ -32,6 +32,9 @@ import de.atextor.madv.engine.Player
 import de.atextor.madv.engine.GameEffects
 import de.atextor.madv.engine.Chaser
 import de.atextor.madv.engine.HealthDisplay
+import de.atextor.madv.engine.Vec2f
+import de.atextor.madv.engine.Projectile
+import de.atextor.madv.engine.Shooter
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -51,8 +54,12 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
 //    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
+    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.sparkle1, speed = 0.5f)
+    val spell = new Shooter(shooter, 500 millis)
+    
     val startCell = level.find(_.cell.properties contains Walkable).get
     player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
+    player.spell = Some(spell)
 //    addEntities(Entities.placeEntitiesInLevel(player, level))
 //    addEntities(entities)
     
@@ -120,8 +127,13 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
             if (!inventory.active) player.go(Right)
           }
 //        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
-        case Input.KEY_SPACE => orc.die
-          
+//        case Input.KEY_SPACE => orc.die
+        case Input.KEY_SPACE =>
+          if (pressedKeys contains Input.KEY_SPACE) {
+            player.attack
+          } else {
+            player.stop
+          }
         case Input.KEY_ESCAPE =>
           if (inventory.active) inventory.active = false else exitScene
         case Input.KEY_ENTER =>

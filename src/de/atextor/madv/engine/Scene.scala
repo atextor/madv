@@ -10,12 +10,11 @@ import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.game.Effect
 import org.newdawn.slick.Input
 
-abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
+abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState with HasEntities {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   var player: Player
   var running = true
-  val entities: ListBuffer[Entity] = ListBuffer()
   val pressedKeys = Queue[Int]()  
   val effects: ListBuffer[Effect] = ListBuffer()
   val overlays: ListBuffer[Overlay] = ListBuffer()
@@ -27,8 +26,6 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var drawAfterPlayer: Seq[Entity] = Seq()
   
   def inStoryMode = !(storyTexts.isEmpty)
-  def addEntity(e: Entity): ListBuffer[Entity] = entities += e
-  def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
   def addEffect(e: Effect): ListBuffer[Effect] = effects += e
   def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
   def addStoryText(t: StoryText) = storyTexts += t
@@ -48,20 +45,28 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     if (changed) actions = actions.sortWith(_._1 < _._1)
     
     if (!inventory.active) {
-      player.update(ticks)
+      player.update(this, ticks)
       player.move
+      addEntities(player.entities)
+      player.entities.clear
+      actions ++= player.delayedActions
+      player.delayedActions.clear
+      
+      addEntities(entities.flatMap(_.entities))
       entities.foreach { e =>
         e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
-        e.update(ticks)
+        e.update(this, ticks)
         e.move
         actions ++= e.delayedActions
         e.delayedActions.clear
+        e.entities.clear
       }
+      
       effects.foreach { e =>
-        e.update(ticks)
+        e.update(this, ticks)
         e.move
       }
-      storyTexts.headOption.foreach(_.update(ticks))
+      storyTexts.headOption.foreach(_.update(this, ticks))
       entities.filterNot(_.alive).foreach(entities -= _)
       effects.filterNot(_.alive).foreach(effects -= _)
       overlays.filterNot(_.alive).foreach(overlays -= _)

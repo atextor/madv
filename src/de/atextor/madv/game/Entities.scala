@@ -116,7 +116,7 @@ object Entities {
     import level.PlacedLevelCell
     
     val chestPos = Vec2d(10, 10)
-    val chest = new Chest(scene = scene, startPos = chestPos.toVec2f * 16,
+    val chest = new Chest(startPos = chestPos.toVec2f * 16,
       onTouch = { t =>
         val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
         scene.addOverlay(text)
@@ -135,11 +135,12 @@ object Entities {
   }
 }
 
-class Chest(scene: Scene, startPos: Vec2f, onTouch: Action) extends
+class Chest(startPos: Vec2f, onTouch: Action) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
   var activated = false
-  def tick(delta: Int) = {
+  val isTarget = false
+  def tick(scene: Scene, delta: Int) = {
     if (scene.player touches this) {
       if (!activated) {
         activated = true
@@ -154,7 +155,8 @@ class Chest(scene: Scene, startPos: Vec2f, onTouch: Action) extends
 
 class Collectible(player: Player, startPos: Vec2f, onTouch: Action, visual: Animation) extends 
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
-  def tick(delta: Int) = {
+  val isTarget = false
+  def tick(scene: Scene, delta: Int) = {
     if (player touches this) {
       alive = false
       onTouch(delta)
@@ -164,8 +166,9 @@ class Collectible(player: Player, startPos: Vec2f, onTouch: Action, visual: Anim
 
 class Effect(startPos: Vec2f, visual: Animation) extends
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
+  val isTarget = false
   visual.setLooping(false)
-  def tick(delta: Int) = {
+  def tick(scene: Scene, delta: Int) = {
     if (visual.getFrame == visual.getFrameCount - 1) {
       alive = false
     }

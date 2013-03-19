@@ -19,7 +19,7 @@ object UI {
 
 abstract class Overlay(var pos: Vec2d) extends Tickable {
   def draw
-  def tick(delta: Int) {}
+  def tick(scene: Scene, delta: Int) {}
   var alive = true
   var active = true
 }
@@ -85,8 +85,8 @@ class StoryText(storyText: String, portrait: Option[Renderable]) extends Overlay
     portrait.foreach(_.draw(pos.x + 10, pos.y + 20))
   } 
   
-  override def tick(delta: Int) {
-    text.tick(delta)
+  override def tick(scene: Scene, delta: Int) {
+    text.tick(scene, delta)
   }
   
   def trigger {

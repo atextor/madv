@@ -2,6 +2,7 @@ package de.atextor.madv.engine
 
 import scala.language.reflectiveCalls
 import scala.language.postfixOps
+import scala.util.control.Exception._
 import scala.concurrent.duration._
 import de.atextor.madv.engine.Util._
 import org.newdawn.slick.SpriteSheet
@@ -34,10 +35,8 @@ object SpriteAnimation extends ((SpriteSheet, SpriteAction, Int) => Option[Anima
 }
 
 case class Part(name: String) {
-  private def animation(d: Direction, a: SpriteAction): Option[Animation] =
-    if (!(name.startsWith("weapon")) || a == Slash) {
-      SpriteAnimation(new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64), a, a.spriteRow(d))
-    } else None
+  private def animation(d: Direction, a: SpriteAction): Option[Animation] = (catching(classOf[RuntimeException]) opt
+    new SpriteSheet(s"res/sprites/${a.toString.toLowerCase}/${name}.png", 64, 64)).flatMap(SpriteAnimation(_, a, a.spriteRow(d)))
   val getAnimation = Memoize.memoize(animation _)
   def draw(d: Direction, a: SpriteAction, position: Vec[Int]) = getAnimation(d, a).foreach(_.draw(position.x, position.y))
   def stopAnimation(d: Direction, a: SpriteAction) = getAnimation(d, a).foreach(_.stop)
@@ -60,9 +59,7 @@ case class EntitySkin(val size: Vec2d, actions: List[SpriteAction], parts: (Part
     m get belt foreach(_.foreach(_.draw(d, a, position)))
     m get head foreach(_.foreach(_.draw(d, a, position)))
     m get hands foreach(_.foreach(_.draw(d, a, position)))
-    if (a == Slash) {
-      m get weapon foreach(_.foreach(_.draw(d, a, position)))
-    }
+    m get weapon foreach(_.foreach(_.draw(d, a, position)))
   }
   
   def stopAnimation(d: Direction, a: SpriteAction) = m.values.foreach(_.foreach(_.stopAnimation(d, a)))

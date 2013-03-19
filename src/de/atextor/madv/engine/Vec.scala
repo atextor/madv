@@ -7,6 +7,7 @@ abstract class Vec[T: Numeric](val x: T, val y: T)
 sealed abstract class Direction(val id: Int, x: Int, y: Int) extends Vec[Int](x, y) {
   def +(v: Vec[Int]): Vec2d = Vec2d(x + v.x, y + v.y)
   def *(f: Int): Vec2d = Vec2d(x * f, y * f)
+  def *(f: Float): Vec2f = Vec2f(x * f, y * f)
 }
 case object Up    extends Direction(id = 0, x = 0,  y = -1)
 case object Left  extends Direction(id = 1, x = -1, y = 0)
