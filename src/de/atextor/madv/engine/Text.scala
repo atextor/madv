@@ -4,10 +4,14 @@ import org.newdawn.slick.Renderable
 import org.newdawn.slick.UnicodeFont
 import org.newdawn.slick.font.effects.ColorEffect
 import java.awt.Color
+import java.awt.Font
 
 object Text {
-  val unicodeFont = new UnicodeFont("res/fonts/cure.se.ttf", 11, false, false)
+  val unicodeFont = new UnicodeFont("res/fonts/cure.de.ttf", 11, false, false)
   unicodeFont.getEffects.asInstanceOf[java.util.List[AnyRef]].add(new ColorEffect(Color.white))
+  unicodeFont.addAsciiGlyphs
+  unicodeFont.addGlyphs("äöüÄÖÜ")
+  unicodeFont.loadGlyphs
   def getTextHeight(text: String) = 11 * (1 + text.count(_ == '\n'))
   def getTextWidth(text: String) = text.split("\n").map(unicodeFont.getWidth(_)).max
 }

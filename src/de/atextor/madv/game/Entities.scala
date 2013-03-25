@@ -2,10 +2,8 @@ package de.atextor.madv.game
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
-
 import org.newdawn.slick.Animation
 import org.newdawn.slick.SpriteSheet
-
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.Brain
 import de.atextor.madv.engine.Constants
@@ -27,7 +25,6 @@ import de.atextor.madv.engine.PartName.head
 import de.atextor.madv.engine.PartName.torso
 import de.atextor.madv.engine.PartName.weapon
 import de.atextor.madv.engine.Player
-import de.atextor.madv.engine.Potion
 import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Scene
 import de.atextor.madv.engine.SimpleSprite
@@ -43,6 +40,7 @@ import de.atextor.madv.engine.Walk
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Action
+import de.atextor.madv.engine.Inventory
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -84,6 +82,8 @@ object Entities {
   def shuriken = SpriteAnimation(shurikenSheet, new SimpleSprite(frames = 8, delay = 120 millis), 0).get
   lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
   def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0).get
+  lazy val snarlSheet = new SpriteSheet("res/effects/snarl.png", 31, 31)
+  def snarl = SpriteAnimation(snarlSheet, new SimpleSprite(frames = 8, delay = 120 millis), 0).get
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
@@ -128,7 +128,7 @@ object Entities {
         val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
         scene.addOverlay(text)
         scene.at(t.milliseconds + 5.seconds, (_ => text.alive = false))
-        scene.inventory.addItem(new Potion())
+        Inventory.addItem(new Potion())
       })
     scene.addEntity(chest)
     

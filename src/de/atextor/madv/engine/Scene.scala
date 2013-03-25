@@ -5,23 +5,25 @@ import scala.collection.mutable.Queue
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
 import org.newdawn.slick.GameContainer
+import org.newdawn.slick.Input
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
 import de.atextor.madv.game.Effect
-import org.newdawn.slick.Input
 
 abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
   var player: Player
   var running = true
+  var currentMenu: Option[Menu] = None
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
   val overlays: ListBuffer[Overlay] = ListBuffer()
   val storyTexts: ListBuffer[StoryText] = ListBuffer()
-  val inventory = new Inventory
-  addOverlay(inventory)
+  
+  val menus = List(Inventory, SpellSelection)
+  menus.foreach(addOverlay(_))
   
   var drawBeforePlayer: Seq[Entity] = Seq()
   var drawAfterPlayer: Seq[Entity] = Seq()
@@ -32,6 +34,19 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   def addStoryText(t: StoryText) = storyTexts += t
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
+  def setMenu(m: Option[Menu]) = m match {
+    case Some(target) =>
+      currentMenu.foreach(_.active = false)
+      if (m == currentMenu) {
+        currentMenu = None
+      } else {
+        currentMenu = m
+        currentMenu.foreach(_.active = true)
+      }
+    case None =>
+      currentMenu.foreach(_.active = false)
+      currentMenu = None
+  }
   
   def at(ticks: Duration, f: Action) { actions += ((ticks.toMillis.toInt, f)) }
   
@@ -47,7 +62,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     }
     if (changed) actions = actions.sortWith(_._1 < _._1)
     
-    if (!inventory.active) {
+    if (currentMenu.isEmpty) {
       player.update(this, ticks)
       player.move
       

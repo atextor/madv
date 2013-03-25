@@ -22,11 +22,9 @@ import de.atextor.madv.engine.Vec2d
 import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
-import de.atextor.madv.engine.Potion
 import de.atextor.madv.engine.Dumb
 import de.atextor.madv.engine.Humanoid
-import de.atextor.madv.engine.InventoryItem
-import de.atextor.madv.engine.MagicMapScroll
+import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.StoryText
 import de.atextor.madv.engine.Player
 import de.atextor.madv.engine.GameEffects
@@ -36,6 +34,7 @@ import de.atextor.madv.engine.Vec2f
 import de.atextor.madv.engine.Projectile
 import de.atextor.madv.engine.Shooter
 import de.atextor.madv.engine.Audio
+import de.atextor.madv.engine.SpellSelection
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -55,7 +54,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
 //    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
-    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.shuriken, speed = 2.5f, damage = 20, directional = true)
+    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.snarl, speed = 2.5f, damage = 20, directional = true)
     val spell = new Shooter(shooter, 500 millis, Audio.shoot _)
     
     val startCell = level.find(_.cell.properties contains Walkable).get
@@ -109,32 +108,35 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     super.processKeys
     if (gameMap.isDefined) {
       if (!pressedKeys.isEmpty) pressedKeys.last match {
-        case Input.KEY_I =>
-          if (!inStoryMode) inventory.active = !inventory.active
+        case Input.KEY_I => if (!inStoryMode) setMenu(Some(Inventory))
         case Input.KEY_UP =>
           if (!inStoryMode) {
-            if (inventory.active) inventory.changeSelection(Up) else player.go(Up)
+            currentMenu.getOrElse(player).go(Up)
           }
         case Input.KEY_DOWN =>
           if (!inStoryMode) {
-            if (inventory.active) inventory.changeSelection(Down) else player.go(Down)
+            currentMenu.getOrElse(player).go(Down)
           }
         case Input.KEY_LEFT =>
           if (!inStoryMode) {
-            if (!inventory.active) player.go(Left)
+            currentMenu.getOrElse(player).go(Left)
           }
         case Input.KEY_RIGHT =>
           if (!inStoryMode) {
-            if (!inventory.active) player.go(Right)
+            currentMenu.getOrElse(player).go(Right)
           }
-//        case Input.KEY_SPACE => addEffect(new Explosion(player.pos))
-//        case Input.KEY_SPACE => orc.die
+        case Input.KEY_S =>
+          if (!inStoryMode) {
+            setMenu(Some(SpellSelection))
+          }
         case Input.KEY_SPACE => player.attack
         case Input.KEY_ESCAPE =>
-          if (inventory.active) inventory.active = false else exitScene
+          if (currentMenu.isEmpty) exitScene else setMenu(None)
         case Input.KEY_ENTER =>
-          if (inventory.active) {
-            inventory.activateSelected.foreach(item => GameEffects.apply(item.effect, gameMap.get, automap, None, player))
+          currentMenu.foreach { menu =>
+              menu.activateSelected.foreach { item =>
+              item.effect.foreach(e => GameEffects.apply(e, gameMap.get, automap, None, player))
+            }
           }
         case _ =>
       } else {

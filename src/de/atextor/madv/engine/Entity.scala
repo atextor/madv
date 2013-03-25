@@ -14,6 +14,10 @@ trait Tickable {
   def tick(scene: Scene, delta: Int)
 }
 
+trait CanGo {
+  def go(d: Direction)
+}
+
 abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable {
   var lookingDirection: Direction = Down
   var movingDirection: Vec2f = Nowhere
@@ -42,7 +46,7 @@ class Humanoid (
     val onHurt: () => Unit,
     val onDie: () => Unit,
     val onBeginAttack: () => Unit,
-    val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) {
+    val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) with CanGo {
   
 //  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
   val shadow = UI.image("res/sprites/humanoid_shadow.png")
