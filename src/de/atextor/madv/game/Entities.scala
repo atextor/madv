@@ -68,15 +68,22 @@ object Entities {
      (torso -> ("female_plate_mail" :: "female_plate_shoulders" :: Nil)),
      (feet  -> ("female_plate_boots" :: "female_plate_greaves" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)))
+     
+  // Shared between all using entities
   lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val chestSprite = animation(sheet = "res/items/chest.png", sizeX = 32, frames = 2, delay = 1 second).get
   lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis).get
-  lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
-  def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0).get
+  lazy val star1 = animation(sheet = "res/effects/star1.png", sizeX = 31, frames = 8, delay = 120 millis).get
   lazy val muffinPortrait = UI.image("res/portraits/muffin.png")
   lazy val heroPortrait = UI.image("res/portraits/hero.png")
+  
+  // Each entity has their own sprite animation
+  lazy val shurikenSheet = new SpriteSheet("res/effects/shuriken.png", 31, 31)
+  def shuriken = SpriteAnimation(shurikenSheet, new SimpleSprite(frames = 8, delay = 120 millis), 0).get
+  lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
+  def explosion = SpriteAnimation(explosionSheet, new SimpleSprite(frames = 10, delay = 100 millis), 0).get
   
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell

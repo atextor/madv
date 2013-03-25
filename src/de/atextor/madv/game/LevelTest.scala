@@ -55,7 +55,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
 //    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
-    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.sparkle1, speed = 0.5f, damage = 20)
+    val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.shuriken, speed = 2.5f, damage = 20, directional = true)
     val spell = new Shooter(shooter, 500 millis, Audio.shoot _)
     
     val startCell = level.find(_.cell.properties contains Walkable).get

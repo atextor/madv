@@ -70,10 +70,20 @@ class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit
   }
 }
 
-class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int) extends
+class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, directional: Boolean = false) extends
     Entity(size = OnePixelSize, visual = Some(visual), pos = spawner.pos + Vec2d(4, 0)) {
   val isTarget = false
   movingDirection = spawner.lookingDirection * speed
+  
+  if (directional) {
+    visual.stop
+    spawner.lookingDirection match {
+      case Up => visual.setCurrentFrame(0)
+      case Right => visual.setCurrentFrame(2)
+      case Down => visual.setCurrentFrame(4)
+      case Left => visual.setCurrentFrame(6)
+    }
+  }
   
   def tick(scene: Scene, delta: Int) {
     if (distanceTo(spawner) > 100) {
