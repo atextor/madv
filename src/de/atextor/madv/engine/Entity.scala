@@ -83,6 +83,7 @@ class Humanoid (
   }
   
   def die {
+    onEndAttack()
     onDie()
     isTarget = false
     movingDirection = movingDirection(Down)
