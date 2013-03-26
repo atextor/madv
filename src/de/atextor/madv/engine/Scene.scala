@@ -48,11 +48,11 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       currentMenu = None
   }
   
-  def at(ticks: Duration, f: Action) { actions += ((ticks.toMillis.toInt, f)) }
+  def at(t: Duration, f: Action) { actions += ((t.toMillis.toInt, f)) }
+  def in(t: Duration, f: Action) { actions += ((t.toMillis.toInt + ticks, f)) }
   
   def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
     if (!running) gc.exit
-    Text.unicodeFont.loadGlyphs
     
     ticks += delta
     var changed = false

@@ -18,13 +18,20 @@ trait CanGo {
   def go(d: Direction)
 }
 
+trait EntityProperty
+case object IsMonster extends EntityProperty
+case object IsGoodRearmable extends EntityProperty
+case object IsCollectible extends EntityProperty
+case object IsTarget extends EntityProperty
+
 abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, override var pos: Vec2f) extends Movable with Tickable with Renderable {
   var lookingDirection: Direction = Down
   var movingDirection: Vec2f = Nowhere
   var alive = true
-  def isTarget: Boolean
+  var armed = true
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
   def hurt(damage: Int) {}
+  def properties: List[EntityProperty]
   
   def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
@@ -40,7 +47,7 @@ class Humanoid (
     val defaultBehavior: Brain = Dumb,
     var spriteAction: SpriteAction = Walk,
     startPosition: Vec2f,
-    val speed: Float,
+    var speed: Float,
     var hp: Int,
     val damage: Int,
     val onHurt: () => Unit,
@@ -48,10 +55,9 @@ class Humanoid (
     val onBeginAttack: () => Unit,
     val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) with CanGo {
   
-//  val shadow = new SpriteSheet("res/sprites/humanoid_shadow.png", 64, 64).getSprite(0, 0)
+  var properties: List[EntityProperty] = List(IsMonster, IsTarget)
   val shadow = UI.image("res/sprites/humanoid_shadow.png")
   var behavior = defaultBehavior
-  var isTarget = true
   
   def tick(scene: Scene, delta: Int) = behavior(this, scene, delta)
   
@@ -89,7 +95,7 @@ class Humanoid (
   def die {
     onEndAttack()
     onDie()
-    isTarget = false
+    properties = properties.filter(_ != IsTarget)
     movingDirection = movingDirection(Down)
     lookingDirection = Down
     spriteAction = Hurt

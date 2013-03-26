@@ -41,6 +41,8 @@ import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.noArg2intArg
 import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
+import de.atextor.madv.engine.IsGoodRearmable
+import de.atextor.madv.engine.IsCollectible
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -67,17 +69,18 @@ object Entities {
      (feet  -> ("female_plate_boots" :: "female_plate_greaves" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)))
      
-  // Shared between all using entities
+  // Shared between all entities using this visual
   lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis).get
-  lazy val chestSprite = animation(sheet = "res/items/chest.png", sizeX = 32, frames = 2, delay = 1 second).get
   lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis).get
   lazy val star1 = animation(sheet = "res/effects/star1.png", sizeX = 31, frames = 8, delay = 120 millis).get
   lazy val muffinPortrait = UI.image("res/portraits/muffin.png")
   lazy val heroPortrait = UI.image("res/portraits/hero.png")
   
-  // Each entity has their own sprite animation
+  // Each entity has its own visual
+  lazy val chestSheet = new SpriteSheet("res/items/chest.png", 32, 32)
+  def chestSprite = SpriteAnimation(chestSheet, new SimpleSprite(frames = 2, delay = 1 second), 0).get
   lazy val shurikenSheet = new SpriteSheet("res/effects/shuriken.png", 31, 31)
   def shuriken = SpriteAnimation(shurikenSheet, new SimpleSprite(frames = 8, delay = 120 millis), 0).get
   lazy val explosionSheet = new SpriteSheet("res/effects/explosion.png", 57, 57)
@@ -145,12 +148,11 @@ object Entities {
 class Chest(startPos: Vec2f, onTouch: Action) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
-  var activated = false
-  val isTarget = false
+  val properties = List(IsGoodRearmable)
   def tick(scene: Scene, delta: Int) = {
     if (scene.player touches this) {
-      if (!activated) {
-        activated = true
+      if (armed) {
+        armed = false
         Audio.chestopen.play
         visual.get.setCurrentFrame(1)
         onTouch(delta)
@@ -162,7 +164,7 @@ class Chest(startPos: Vec2f, onTouch: Action) extends
 
 class Collectible(player: Player, startPos: Vec2f, onTouch: Action, visual: Animation) extends 
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
-  val isTarget = false
+  val properties = List(IsCollectible)
   def tick(scene: Scene, delta: Int) = {
     if (player touches this) {
       alive = false
@@ -173,7 +175,7 @@ class Collectible(player: Player, startPos: Vec2f, onTouch: Action, visual: Anim
 
 class Effect(startPos: Vec2f, visual: Animation) extends
     Entity(size = Vec2d(visual.getWidth, visual.getHeight), visual = Some(visual), pos = startPos) {
-  val isTarget = false
+  val properties = Nil
   visual.setLooping(false)
   def tick(scene: Scene, delta: Int) = {
     if (visual.getFrame == visual.getFrameCount - 1) {

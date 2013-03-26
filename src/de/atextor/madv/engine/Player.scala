@@ -1,7 +1,8 @@
 package de.atextor.madv.engine
 
-import scala.concurrent.duration.DurationInt
 import scala.concurrent.duration.Duration
+import scala.concurrent.duration.DurationInt
+
 import org.newdawn.slick.Animation
 
 class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
@@ -19,8 +20,9 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     onEndAttack = DoNothing
 ) {
   val staticRenderPos = Vec2d(168, 80)
-  var armed = true
   var spell: Option[Spell] = None
+  var cooldownBoost = 1
+  var armor = 0
   
   override def draw(x: Float, y: Float) = {
     shadow.draw(x, y + 5)
@@ -37,7 +39,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   }
   
   override def hurt(damage: Int) {
-    super.hurt(damage)
+    super.hurt(Math.abs(damage - armor))
     if (hp <= 0) {
       alive = false
     }
@@ -48,7 +50,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
       val s = spell.get
       armed = false
       scene.addEntities(s(pos))
-      scene.at((delta millis) + s.cooldown, {_ => armed = true})
+      scene.at((delta millis) + s.cooldown - (s.cooldown / cooldownBoost) , {_ => armed = true})
     }
   }
   
@@ -63,7 +65,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
 
 abstract class Spell(val cooldown: Duration, onFire: () => Unit = () => ()) extends (Vec2f => Seq[Entity])
 
-class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit = () => ()) extends Spell(cooldown, onFire) {
+class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit = DoNothing) extends Spell(cooldown, onFire) {
   def apply(pos: Vec2f) = {
     onFire()
     shoot(pos) :: Nil
@@ -72,7 +74,7 @@ class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit
 
 class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, directional: Boolean = false) extends
     Entity(size = OnePixelSize, visual = Some(visual), pos = spawner.pos + Vec2d(4, 0)) {
-  val isTarget = false
+  val properties = Nil
   movingDirection = spawner.lookingDirection * speed
   
   if (directional) {
@@ -90,7 +92,7 @@ class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, 
       alive = false
     }
     
-    scene.entities.filter(_.isTarget).foreach {e =>
+    scene.entities.filter(_.properties contains IsTarget).foreach {e =>
       val dist = distanceTo(e)
       if (dist < 7) {
         e.hurt(damage)

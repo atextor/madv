@@ -135,7 +135,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
         case Input.KEY_ENTER =>
           currentMenu.foreach { menu =>
               menu.activateSelected.foreach { item =>
-              item.effect.foreach(e => GameEffects.apply(e, gameMap.get, automap, None, player))
+              item.effect.foreach(e => GameEffects.apply(this, e, gameMap.get, automap, player))
             }
           }
         case _ =>
