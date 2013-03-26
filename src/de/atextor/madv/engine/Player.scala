@@ -21,7 +21,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
 ) {
   val staticRenderPos = Vec2d(168, 80)
   var spell: Option[Spell] = None
-  var cooldownBoost = 1
+  var cooldownBoost = 0
   var armor = 0
   
   override def draw(x: Float, y: Float) = {
@@ -39,7 +39,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   }
   
   override def hurt(damage: Int) {
-    super.hurt(Math.abs(damage - armor))
+    super.hurt(if (damage < 0) damage else Math.abs(damage - armor))
     if (hp <= 0) {
       alive = false
     }
@@ -50,7 +50,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
       val s = spell.get
       armed = false
       scene.addEntities(s(pos))
-      scene.at((delta millis) + s.cooldown - (s.cooldown / cooldownBoost) , {_ => armed = true})
+      scene.at((delta millis) + s.cooldown - (s.cooldown * cooldownBoost / 100), {_ => armed = true})
     }
   }
   
@@ -63,7 +63,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   }
 }
 
-abstract class Spell(val cooldown: Duration, onFire: () => Unit = () => ()) extends (Vec2f => Seq[Entity])
+abstract class Spell(val cooldown: Duration, onFire: () => Unit = DoNothing) extends (Vec2f => Seq[Entity])
 
 class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit = DoNothing) extends Spell(cooldown, onFire) {
   def apply(pos: Vec2f) = {

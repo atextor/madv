@@ -63,9 +63,9 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    addEntities(Entities.placeEntitiesInLevel(player, level))
 //    addEntities(entities)
     
-    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
-    orc = new FemaleOrc(level, player, new Chaser(player), orcStart.pos * 16)
-    addEntity(orc)
+//    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
+//    orc = new FemaleOrc(level, player, new Chaser(player), orcStart.pos * 16)
+//    addEntity(orc)
     
     automap = new AutoMap(level, player) 
     
@@ -80,6 +80,15 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     
     lazy val updateAm: Action = { t => automap.update(player); at(t.millis + 300.millis, updateAm) }
     at(0 millis, updateAm)
+    
+    Inventory.addItem(RearmChestsScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(SmallHealthPotion())
+    Inventory.addItem(AttackScroll())
+    Inventory.addItem(DefenseScroll())
+    Inventory.addItem(SpeedPotion())
+    Inventory.addItem(RandomTeleportScroll())
+    Inventory.addItem(SpawnMonsterScroll())
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {

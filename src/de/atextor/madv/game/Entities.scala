@@ -131,7 +131,7 @@ object Entities {
         val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
         scene.addOverlay(text)
         scene.at(t.milliseconds + 5.seconds, (_ => text.alive = false))
-        Inventory.addItem(new Potion())
+        Inventory.addItem(new SmallHealthPotion())
       })
     scene.addEntity(chest)
     
@@ -159,6 +159,11 @@ class Chest(startPos: Vec2f, onTouch: Action) extends
       }
       scene.player.goBack
     } 
+  }
+  
+  override def rearm {
+    super.rearm
+    visual.get.setCurrentFrame(0)
   }
 }
 

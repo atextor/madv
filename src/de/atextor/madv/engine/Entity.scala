@@ -32,6 +32,7 @@ abstract class Entity(var size: Vec2d, val visual: Option[Animation] = None, ove
   def draw(x: Float, y: Float) = visual.foreach(_.draw(x, y))
   def hurt(damage: Int) {}
   def properties: List[EntityProperty]
+  def rearm = armed = true
   
   def relativeDraw(base: Vec[Float], staticOffset: Vec[Int]) {
     if (enabled) {
