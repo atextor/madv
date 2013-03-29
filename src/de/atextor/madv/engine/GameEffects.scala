@@ -8,8 +8,10 @@ import de.atextor.madv.engine.Util.pipelineSyntax
 sealed trait GameEffect
 
 // Increase player stats
+case class PlayerSpell(name: String, spell: Player => Spell) extends GameEffect
 case class PlayerHealth(amount: Int) extends GameEffect
-case class PlayerMaxHealth(amount: Int) extends GameEffect
+case object PlayerMaxHealth extends GameEffect
+case class PlayerMaxHealthIncrease(amount: Int) extends GameEffect
 case class PlayerSpeed(amount: Float) extends GameEffect
 case class PlayerCastSpeed(amount: Int) extends GameEffect
 case class PlayerArmor(amount: Int) extends GameEffect
@@ -30,11 +32,19 @@ object GameEffects {
   }
   
   def apply(scene: Scene, ge: GameEffect, level: Level, automap: AutoMap, player: Player) = ge match {
+    case PlayerSpell(name, spell) =>
+      player.spell = Some(spell(player))
+      say(s"${name} aktiviert.", scene)
     case PlayerHealth(a) =>
       player.hurt(-a)
       say(s"${a} Lebenspunkte geheilt.", scene)
-    case PlayerMaxHealth(a) =>
-      // TODO
+    case PlayerMaxHealth =>
+      player.hp = player.maxHp
+      say("Lebenspunkte voll geheilt.", scene)
+    case PlayerMaxHealthIncrease(a) =>
+      player.maxHp += a
+      player.hurt(-a)
+      say("Maximale Lebenspunkte erhöht.", scene)
     case PlayerSpeed(a) =>
       player.speed += a
       scene.in(30 seconds, (_ => player.speed -= a))

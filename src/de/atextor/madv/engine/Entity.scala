@@ -49,13 +49,14 @@ class Humanoid (
     var spriteAction: SpriteAction = Walk,
     startPosition: Vec2f,
     var speed: Float,
-    var hp: Int,
+    var maxHp: Int,
     val damage: Int,
     val onHurt: () => Unit,
     val onDie: () => Unit,
     val onBeginAttack: () => Unit,
     val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) with CanGo {
   
+  var hp = maxHp
   var properties: List[EntityProperty] = List(IsMonster, IsTarget)
   val shadow = UI.image("res/sprites/humanoid_shadow.png")
   var behavior = defaultBehavior
