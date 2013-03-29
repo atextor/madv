@@ -1,9 +1,10 @@
 package de.atextor.madv.engine
 
 import scala.concurrent.duration.DurationInt
+import de.atextor.madv.engine.Util.pipelineSyntax
 import de.atextor.madv.game.CenteredTextBox
 import de.atextor.madv.game.FemaleOrc
-import de.atextor.madv.engine.Util.pipelineSyntax
+import de.atextor.madv.game.Entities
 
 sealed trait GameEffect
 
@@ -19,6 +20,7 @@ case class PlayerArmor(amount: Int) extends GameEffect
 // Other player centric effects
 case object RandomTeleport extends GameEffect
 case object ExitTeleport extends GameEffect
+case object TalkToMuffin extends GameEffect
 
 // Global game effects
 case object SlowMonsters extends GameEffect
@@ -64,13 +66,17 @@ object GameEffects {
     case SlowMonsters =>
       // TODO
     case RandomTeleport =>
+      val oldpos = player.pos.toVec2d
       player.pos = level.find(_.cell.properties contains Walkable).get.pos * 16
+      automap.update(oldpos)
       Audio.teleport.play
       say("Du findest dich woanders wieder.", scene)
     case ExitTeleport =>
       level.find(_.cell.properties contains Exit).foreach { e =>
+        val oldpos = player.pos.toVec2d
         player.pos = (e.pos + Down * 2) * 16
-      Audio.teleport.play
+        automap.update(oldpos)
+        Audio.teleport.play
         say("Du findest dich woanders wieder.", scene)
       }
     case MagicMapping =>
@@ -86,6 +92,10 @@ object GameEffects {
         (new FemaleOrc(level, player, new Chaser(player), _)) |>
         (scene.addEntity(_))
       say("Ein weiteres Monster wurde erschaffen.", scene)
+    case TalkToMuffin =>
+      scene.setMenu(None)
+      scene.addStoryText(new StoryText("Ich könnte dir etwas verkaufen", Some(Entities.muffinPortrait),
+          onClose = { () => scene.setMenu(Some(Shop)) }))
   }
   
 }

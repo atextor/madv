@@ -22,7 +22,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   val overlays: ListBuffer[Overlay] = ListBuffer()
   val storyTexts: ListBuffer[StoryText] = ListBuffer()
   
-  val menus = List(Inventory, SpellSelection)
+  val menus = List(Inventory, SpellSelection, Shop)
   menus.foreach(addOverlay(_))
   
   var drawBeforePlayer: Seq[Entity] = Seq()
@@ -80,7 +80,6 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       entities.filterNot(_.alive).foreach(entities -= _)
       effects.filterNot(_.alive).foreach(effects -= _)
       overlays.filterNot(_.alive).foreach(overlays -= _)
-      storyTexts.filterNot(_.alive).foreach(storyTexts -= _)
       
       if (!player.alive) {
         addStoryText(new StoryText("You Die.", None))
@@ -91,6 +90,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       drawBeforePlayer = parted._1
       drawAfterPlayer = parted._2
     }
+    storyTexts.filterNot(_.alive).foreach(storyTexts -= _)
   }
   
   def processKeys {

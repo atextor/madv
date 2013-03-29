@@ -31,5 +31,4 @@ class Text(var text: String, appear: Boolean = false) extends Renderable with Ti
       lastTick = delta
     }
   }
-  override def toString = "Text(" + text + ")"
 }

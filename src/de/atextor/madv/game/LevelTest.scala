@@ -35,6 +35,8 @@ import de.atextor.madv.engine.Projectile
 import de.atextor.madv.engine.Shooter
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.SpellSelection
+import de.atextor.madv.engine.Shop
+import de.atextor.madv.engine.GameItem
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -82,21 +84,30 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     lazy val updateAm: Action = { t => automap.update(player.pos.toVec2d); at(t.millis + 300.millis, updateAm) }
     at(0 millis, updateAm)
     
-    Inventory.addItem(RearmChestsScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(SmallHealthPotion())
-    Inventory.addItem(SmallHealthPotion())
-    Inventory.addItem(SmallHealthPotion())
-    Inventory.addItem(AttackScroll())
-    Inventory.addItem(DefenseScroll())
-    Inventory.addItem(SpeedPotion())
-    Inventory.addItem(RandomTeleportScroll())
-    Inventory.addItem(SpawnMonsterScroll())
+    Inventory.addItem(Muffin())
+//    Inventory.addItem(RearmChestsScroll())
+//    Inventory.addItem(MagicMapScroll())
+//    Inventory.addItem(SmallHealthPotion())
+//    Inventory.addItem(SmallHealthPotion())
+//    Inventory.addItem(SmallHealthPotion())
+//    Inventory.addItem(AttackScroll())
+//    Inventory.addItem(DefenseScroll())
+//    Inventory.addItem(SpeedPotion())
+//    Inventory.addItem(RandomTeleportScroll())
+//    Inventory.addItem(SpawnMonsterScroll())
+//    Inventory.addItem(ExitTeleportScroll())
     
-    SpellSelection.addItem(ShurikenSpell())
-    SpellSelection.addItem(BallLightningSpell())
-    SpellSelection.addItem(SpiralSpell())
-    SpellSelection.addItem(JumpSpell())
+//    SpellSelection.addItem(ShurikenSpell())
+//    SpellSelection.addItem(BallLightningSpell())
+//    SpellSelection.addItem(SpiralSpell())
+//    SpellSelection.addItem(JumpSpell())
+    
+    Shop.addItem(ShurikenSpell())
+    Shop.addItem(BallLightningSpell())
+    Shop.addItem(SpiralSpell())
+    Shop.addItem(JumpSpell())
+    Shop.addItem(ExitTeleportScroll())
+    
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
@@ -146,14 +157,16 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
           if (!inStoryMode) {
             setMenu(Some(SpellSelection))
           }
-        case Input.KEY_SPACE => player.attack
+        case Input.KEY_SPACE => if (!inStoryMode) {
+          player.attack
+        }
         case Input.KEY_ESCAPE =>
           if (currentMenu.isEmpty) exitScene else setMenu(None)
         case Input.KEY_ENTER =>
           currentMenu.foreach { menu =>
-              menu.activateSelected.foreach { item =>
-              item.effect.foreach(e => GameEffects.apply(this, e, gameMap.get, automap, player))
-            }
+            menu.activate ( (i: GameItem) => {
+              i.effect.foreach(e => GameEffects.apply(this, e, gameMap.get, automap, player))
+            })
           }
         case _ =>
       } else {

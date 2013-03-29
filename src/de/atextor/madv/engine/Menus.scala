@@ -2,17 +2,26 @@ package de.atextor.madv.engine
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.DurationInt
-
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
+import de.atextor.madv.game.Muffin
 
-abstract class GameItem(name: String, description: String, val effect: Option[GameEffect]) extends Renderable {
+sealed trait GameItemType
+case object SpellGameItem extends GameItemType
+case object ItemGameItem extends GameItemType
+
+abstract class GameItem(val itemType: GameItemType, name: String, description: String, price: Int, val effect: Option[GameEffect]) extends Renderable {
   val text = new Text(name)
+  val priceText = new Text(price.toString)
   val desc = new Text(description)
   val tbox = new TextBox(180, description, Vec2d(300, 100))
   
   def draw(x: Float, y: Float) {
     text.draw(x, y)
+  }
+  
+  def drawPrice(x: Float, y: Float) {
+    priceText.draw(x, y)
   }
   
   def drawDescription(x: Float, y: Float) {
@@ -21,7 +30,7 @@ abstract class GameItem(name: String, description: String, val effect: Option[Ga
   }
 }
 
-class Menu(title: String, itemsStackable: Boolean) extends Overlay(pos = Vec2d(100, 50)) with CanGo {
+abstract class Menu(title: String, val itemsStackable: Boolean, drawPrices: Boolean = false) extends Overlay(pos = Vec2d(100, 50)) with CanGo {
   val size = Vec2d(200, 200)
   val box = new FrameBox(size)
   val text = new Text(title)
@@ -29,8 +38,7 @@ class Menu(title: String, itemsStackable: Boolean) extends Overlay(pos = Vec2d(1
   var selection = -1
   active = false
   val sizeMap = scala.collection.mutable.Map[String, Text]()
-  
-  private val stuff: ListBuffer[GameItem] = new ListBuffer()
+  val stuff: ListBuffer[GameItem] = new ListBuffer()
   
   def addItem(i: GameItem) = {
     if (stuff.isEmpty) selection = 0
@@ -55,8 +63,14 @@ class Menu(title: String, itemsStackable: Boolean) extends Overlay(pos = Vec2d(1
       if (itemsStackable) {
         sizeMap.get(s._1.toString).foreach(_.draw(pos.x + 25, pos.y + 20 + s._2 * 10))
         s._1.draw(pos.x + 40, pos.y + 20 + s._2 * 10)
+        if (drawPrices) {
+          s._1.drawPrice(pos.x + size.x - 30, pos.y + 20 + s._2 * 10)
+        }
       } else {
         s._1.draw(pos.x + 25, pos.y + 20 + s._2 * 10)
+        if (drawPrices) {
+          s._1.drawPrice(pos.x + size.x - 30, pos.y + 20 + s._2 * 10)
+        }
       }
     }
     
@@ -82,14 +96,38 @@ class Menu(title: String, itemsStackable: Boolean) extends Overlay(pos = Vec2d(1
     case _ =>
   }
   
-  def activateSelected: Option[GameItem] = {
+  def activate(processItem: GameItem => Unit)
+}
+
+object Inventory extends Menu("Inventar", itemsStackable = true) {
+  def activate(processItem: GameItem => Unit) {
     val item: Option[GameItem] = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
-    if (itemsStackable) {
-      item.foreach(removeItem(_))
+    item.foreach { i =>
+      if (i != Muffin()) {
+        removeItem(i)
+      }
+      processItem(i)
     }
-    item
   }
 }
 
-object Inventory extends Menu("Inventar", itemsStackable = true)
-object SpellSelection extends Menu("Zaubersprüche", itemsStackable = false)
+object SpellSelection extends Menu("Zaubersprüche", itemsStackable = false) {
+  def activate(processItem: GameItem => Unit) {
+    val item = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
+    item.foreach(processItem(_))
+  }
+}
+
+object Shop extends Menu("Muffin Shop", itemsStackable = false, drawPrices = true) {
+  def activate(processItem: GameItem => Unit) {
+    val item: Option[GameItem] = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
+    item.foreach { i =>
+      Audio.cashregister.play
+      if (i.itemType == SpellGameItem) {
+        SpellSelection.addItem(i)
+      } else if (i.itemType == ItemGameItem) {
+        Inventory.addItem(i)
+      }
+    }
+  }
+}

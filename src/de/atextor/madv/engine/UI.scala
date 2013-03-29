@@ -69,7 +69,7 @@ class FrameBox(size: Vec2d) extends Renderable {
   }
 }
 
-class StoryText(storyText: String, portrait: Option[Renderable]) extends Overlay(pos = Vec2d(80, 200)) {
+class StoryText(storyText: String, portrait: Option[Renderable], onClose: () => Unit = DoNothing) extends Overlay(pos = Vec2d(80, 200)) {
   val size = Vec2d(240, 80)
   val box = new FrameBox(size)
   val text = new Text(storyText, appear = true)
@@ -86,6 +86,7 @@ class StoryText(storyText: String, portrait: Option[Renderable]) extends Overlay
   
   def trigger {
     if (text.allShown) {
+      onClose()
       alive = false
     } else {
       text.showAll
