@@ -152,7 +152,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
         case Input.KEY_U =>
           startNewLevel
         case Input.KEY_SPACE => if (!inStoryMode) {
-          player.attack
+          if (currentMenu.isEmpty) player.attack else setMenu(None)
         }
         case Input.KEY_ESCAPE =>
           if (currentMenu.isEmpty) exitScene else setMenu(None)
