@@ -16,7 +16,7 @@ object Text {
   def getTextWidth(text: String) = text.split("\n").map(unicodeFont.getWidth(_)).max
 }
 
-class Text(text: String, appear: Boolean = false) extends Renderable with Tickable {
+class Text(var text: String, appear: Boolean = false) extends Renderable with Tickable {
   var appeared = if (appear) 0 else text.length
   def draw(x: Float, y: Float) = Text.unicodeFont.drawString(x, y, text.substring(0, appeared))
   def showAll = appeared = text.length
@@ -31,4 +31,5 @@ class Text(text: String, appear: Boolean = false) extends Renderable with Tickab
       lastTick = delta
     }
   }
+  override def toString = "Text(" + text + ")"
 }
