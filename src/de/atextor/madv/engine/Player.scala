@@ -12,7 +12,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
     spriteAction = Walk,
     startPosition = startPosition.toVec2f,
     speed = (if (Constants.debug) 5 else 1),
-    hp = 100,
+    maxHp = 100,
     damage = 0,
     onHurt = DoNothing,
     onDie = DoNothing,

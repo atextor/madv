@@ -195,7 +195,7 @@ class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Colle
 class Explosion(startPos: Vec2d) extends Effect(startPos.toVec2f, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 12))
 
-class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid(
+class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
     level = level,
     player = player,
     skin = Entities.femaleOrcSkin,
@@ -203,9 +203,11 @@ class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) ext
     spriteAction = Walk,
     startPosition = startPos.toVec2f,
     speed = 0.3f,
-    hp = 100,
+    maxHp = 100,
     damage = 3,
     onHurt = Audio.grunt.play _,
     onDie = Audio.growl.play _,
     onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _)
+    onEndAttack = Audio.slash.stop _
+)
+

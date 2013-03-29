@@ -89,6 +89,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     Inventory.addItem(SpeedPotion())
     Inventory.addItem(RandomTeleportScroll())
     Inventory.addItem(SpawnMonsterScroll())
+    
+    SpellSelection.addItem(ShurikenSpell())
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
