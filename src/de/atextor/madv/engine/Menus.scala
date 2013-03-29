@@ -5,6 +5,7 @@ import scala.concurrent.duration.DurationInt
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 import de.atextor.madv.game.Muffin
+import de.atextor.madv.game.GameEffect
 
 sealed trait GameItemType
 case object SpellGameItem extends GameItemType

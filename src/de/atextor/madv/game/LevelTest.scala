@@ -27,7 +27,6 @@ import de.atextor.madv.engine.Humanoid
 import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.StoryText
 import de.atextor.madv.engine.Player
-import de.atextor.madv.engine.GameEffects
 import de.atextor.madv.engine.Chaser
 import de.atextor.madv.engine.HealthDisplay
 import de.atextor.madv.engine.Vec2f

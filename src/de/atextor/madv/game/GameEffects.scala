@@ -1,10 +1,21 @@
-package de.atextor.madv.engine
+package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
 import de.atextor.madv.engine.Util.pipelineSyntax
-import de.atextor.madv.game.CenteredTextBox
-import de.atextor.madv.game.FemaleOrc
-import de.atextor.madv.game.Entities
+import de.atextor.madv.engine.Audio
+import de.atextor.madv.engine.AutoMap
+import de.atextor.madv.engine.Chaser
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.Exit
+import de.atextor.madv.engine.IsGoodRearmable
+import de.atextor.madv.engine.Level
+import de.atextor.madv.engine.Player
+import de.atextor.madv.engine.Scene
+import de.atextor.madv.engine.Shop
+import de.atextor.madv.engine.Spell
+import de.atextor.madv.engine.StoryText
+import de.atextor.madv.engine.Walkable
+import de.atextor.madv.engine.vec2d2vec2f
 
 sealed trait GameEffect
 

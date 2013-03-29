@@ -1,35 +1,23 @@
 package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
+
 import de.atextor.madv.engine.Audio
-import de.atextor.madv.engine.ExitTeleport
-import de.atextor.madv.engine.GameItem
-import de.atextor.madv.engine.MagicMapping
-import de.atextor.madv.engine.Player
-import de.atextor.madv.engine.PlayerArmor
-import de.atextor.madv.engine.PlayerCastSpeed
-import de.atextor.madv.engine.PlayerHealth
-import de.atextor.madv.engine.PlayerMaxHealth
-import de.atextor.madv.engine.PlayerMaxHealthIncrease
-import de.atextor.madv.engine.PlayerSpeed
-import de.atextor.madv.engine.PlayerSpell
-import de.atextor.madv.engine.Projectile
-import de.atextor.madv.engine.RandomTeleport
-import de.atextor.madv.engine.RearmChests
-import de.atextor.madv.engine.Shooter
-import de.atextor.madv.engine.SpawnMonster
-import de.atextor.madv.engine.Vec2f
-import de.atextor.madv.engine.Spell
-import de.atextor.madv.engine.Up
-import de.atextor.madv.engine.Down
-import de.atextor.madv.engine.Left
-import de.atextor.madv.engine.Right
-import de.atextor.madv.engine.Vec2d
-import de.atextor.madv.engine.Walkable
 import de.atextor.madv.engine.DoNothing
-import de.atextor.madv.engine.TalkToMuffin
+import de.atextor.madv.engine.GameItem
 import de.atextor.madv.engine.ItemGameItem
+import de.atextor.madv.engine.Player
+import de.atextor.madv.engine.Projectile
+import de.atextor.madv.engine.Shooter
+import de.atextor.madv.engine.Spell
 import de.atextor.madv.engine.SpellGameItem
+import de.atextor.madv.engine.Vec2d
+import de.atextor.madv.engine.Vec2f
+import de.atextor.madv.engine.Up
+import de.atextor.madv.engine.Right
+import de.atextor.madv.engine.Left
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.Walkable
 
 // Inventory items
 case class Muffin extends GameItem(ItemGameItem, "Magischer Muffin",
