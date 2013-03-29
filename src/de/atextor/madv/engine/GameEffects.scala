@@ -37,6 +37,7 @@ object GameEffects {
   def apply(scene: Scene, ge: GameEffect, level: Level, automap: AutoMap, player: Player) = ge match {
     case PlayerSpell(name, spell) =>
       player.spell = Some(spell(player))
+      scene.setMenu(None)
       say(s"${name} aktiviert.", scene)
     case PlayerHealth(a) =>
       player.hurt(-a)
