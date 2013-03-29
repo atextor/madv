@@ -9,6 +9,7 @@ import de.atextor.madv.engine.PlayerCastSpeed
 import de.atextor.madv.engine.PlayerArmor
 import de.atextor.madv.engine.RandomTeleport
 import de.atextor.madv.engine.SpawnMonster
+import de.atextor.madv.engine.ExitTeleport
 
 case class SmallHealthPotion() extends GameItem("Kleiner Heiltrank",
     "Regeneriert 5 Lebenspunkte", Some(PlayerHealth(5)))
@@ -36,6 +37,9 @@ case class DefenseScroll() extends GameItem("Schriftrolle der Defensive",
 
 case class RandomTeleportScroll() extends GameItem("Schriftrolle des Chaos",
     "Teleportiert an eine\nzufällige Stelle", Some(RandomTeleport))
+
+case class ExitTeleportScroll() extends GameItem("Schriftrolle der Faulheit",
+    "Teleportiert direkt\nzum Ausgang", Some(ExitTeleport))
 
 case class SpawnMonsterScroll() extends GameItem("Schriftrolle des Monsters",
     "Lässt ein Monster entstehen.", Some(SpawnMonster))

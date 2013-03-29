@@ -14,9 +14,12 @@ case class PlayerSpeed(amount: Float) extends GameEffect
 case class PlayerCastSpeed(amount: Int) extends GameEffect
 case class PlayerArmor(amount: Int) extends GameEffect
 
+// Other player centric effects
+case object RandomTeleport extends GameEffect
+case object ExitTeleport extends GameEffect
+
 // Global game effects
 case object SlowMonsters extends GameEffect
-case object RandomTeleport extends GameEffect
 case object MagicMapping extends GameEffect
 case object RearmChests extends GameEffect
 case object MuffinDizzy extends GameEffect
@@ -52,6 +55,11 @@ object GameEffects {
     case RandomTeleport =>
       player.pos = level.find(_.cell.properties contains Walkable).get.pos * 16
       say("Du findest dich woanders wieder.", scene)
+    case ExitTeleport =>
+      level.find(_.cell.properties contains Exit).foreach { e =>
+        player.pos = (e.pos + Down * 2) * 16
+        say("Du findest dich woanders wieder.", scene)
+      }
     case MagicMapping =>
       automap.uncoverMap(player)
       say("Die Karte ist kein Geheimnis mehr.", scene)
@@ -61,7 +69,7 @@ object GameEffects {
     case MuffinDizzy =>
       // TODO
     case SpawnMonster => 
-      level.find(c => c.cell.properties contains Walkable).get.pos * 16 |>
+      level.find(_.cell.properties contains Walkable).get.pos * 16 |>
         (new FemaleOrc(level, player, new Chaser(player), _)) |>
         (scene.addEntity(_))
       say("Ein weiteres Monster wurde erschaffen.", scene)
