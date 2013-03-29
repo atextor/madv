@@ -65,10 +65,12 @@ object GameEffects {
       // TODO
     case RandomTeleport =>
       player.pos = level.find(_.cell.properties contains Walkable).get.pos * 16
+      Audio.teleport.play
       say("Du findest dich woanders wieder.", scene)
     case ExitTeleport =>
       level.find(_.cell.properties contains Exit).foreach { e =>
         player.pos = (e.pos + Down * 2) * 16
+      Audio.teleport.play
         say("Du findest dich woanders wieder.", scene)
       }
     case MagicMapping =>

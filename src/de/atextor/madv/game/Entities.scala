@@ -74,6 +74,7 @@ object Entities {
   lazy val silverCoinSprite = animation(sheet = "res/items/coin_silver.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val copperCoinSprite = animation(sheet = "res/items/coin_copper.png", sizeX = 32, frames = 8, delay = 60 millis).get
   lazy val sparkle1 = animation(sheet = "res/effects/sparkle1.png", sizeX = 31, frames = 8, delay = 120 millis).get
+  lazy val spiral = animation(sheet = "res/effects/spiral.png", sizeX = 31, frames = 16, delay = 70 millis).get
   lazy val star1 = animation(sheet = "res/effects/star1.png", sizeX = 31, frames = 8, delay = 120 millis).get
   lazy val muffinPortrait = UI.image("res/portraits/muffin.png")
   lazy val heroPortrait = UI.image("res/portraits/hero.png")

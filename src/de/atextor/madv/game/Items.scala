@@ -1,7 +1,6 @@
 package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
-
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.ExitTeleport
 import de.atextor.madv.engine.GameItem
@@ -20,6 +19,15 @@ import de.atextor.madv.engine.RearmChests
 import de.atextor.madv.engine.Shooter
 import de.atextor.madv.engine.SpawnMonster
 import de.atextor.madv.engine.Vec2f
+import de.atextor.madv.engine.Spell
+import de.atextor.madv.engine.Up
+import de.atextor.madv.engine.Down
+import de.atextor.madv.engine.Left
+import de.atextor.madv.engine.Right
+import de.atextor.madv.engine.Vec2d
+import de.atextor.madv.engine.Walkable
+import de.atextor.madv.engine.DoNothing
+import com.sun.media.sound.AutoClosingClip
 
 // Inventory items
 case class SmallHealthPotion() extends GameItem("Kleiner Heiltrank",
@@ -63,7 +71,60 @@ case class SpawnMonsterScroll() extends GameItem("Schriftrolle des Monsters",
 
 // Spell items
 case class ShurikenSpell() extends GameItem("Shuriken",
-    "Feuert gefährliche Shuriken.", effect = Some(PlayerSpell("Shuriken", { player: Player =>
-      val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.shuriken, speed = 2.5f, damage = 20, directional = true)
-      new Shooter(shooter, 500 millis, Audio.shoot _)
-    })))
+  "Feuert scharfkantige Ninjasterne.", effect = Some(PlayerSpell("Shuriken", { player: Player =>
+    val shooter = (pos: Vec2f) => new Projectile(
+      spawner = player,
+      visual = Entities.shuriken,
+      speed = 3.5f,
+      damage = 10,
+      directional = true)
+    new Shooter(shooter, 500 millis, Audio.shoot _)
+  })))
+
+case class BallLightningSpell() extends GameItem("Kugelblitz",
+  "Feuert einen langsamen, aber\ngefährlichen elektrischen Blitz", effect = Some(PlayerSpell("Kugelblitz", { player: Player =>
+    val shooter = (pos: Vec2f) => new Projectile(
+      spawner = player,
+      visual = Entities.sparkle1,
+      speed = 1.8f,
+      damage = 25,
+      directional = false)
+    new Shooter(shooter, 1 seconds, Audio.shoot _)
+  })))
+
+case class SpiralSpell() extends GameItem("Wirbel",
+  "Feuert einen Wirbel aus Energie.", effect = Some(PlayerSpell("Wirbel", { player: Player =>
+    val shooter = (pos: Vec2f) => new Projectile(
+      spawner = player,
+      visual = Entities.spiral,
+      speed = 1.0f,
+      damage = 30,
+      directional = false)
+    new Shooter(shooter, 500 millis, Audio.shoot _)
+  })))
+
+case class JumpSpell() extends GameItem("Sprung",
+  "Teleportiert auf die nächste\nbetretbare Stelle in Blickrichtung", effect = Some(PlayerSpell("Sprung", { player: Player =>
+     new Spell(cooldown = 1 seconds, onFire = DoNothing) {
+       def apply(pos: Vec2f) = {
+         val dir = player.lookingDirection
+         val cur = player.pos.toVec2d
+         val coords = dir match {
+           case Up => (1 to cur.y - 8 by 8).toList.reverse.map(Vec2d(cur.x, _))
+           case Right => (cur.x + 8 to player.level.width * 16 - 1 by 8).toList.map(Vec2d(_, cur.y))
+           case Down => (cur.y + 8 to player.level.height * 16 - 1 by 8).toList.map(Vec2d(cur.x, _))
+           case Left => (1 to cur.x - 8 by 8).toList.reverse.map(Vec2d(_, cur.y))
+         }
+         val target = coords.find(player.level.cellAt(_).properties contains Walkable)
+         target.foreach { t =>
+           val oldpos = player.pos.toVec2d
+           player.pos = t
+           player.autoMap.foreach(_.update(oldpos))
+           Audio.teleport.play
+         }
+         
+         // This spell does not create new entities
+         Nil
+       }
+     } 
+  })))

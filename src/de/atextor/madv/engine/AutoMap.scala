@@ -50,10 +50,10 @@ class AutoMap(level: Level, player: Player) extends Renderable {
     setLargePixel(player.pos.toVec2d / 16, RGBA(255, 0, 0, 255))
   }
   
-  def update(p: Player) {
+  def update(playerPos: Vec2d) {
     level.placedCells.filter { pc =>
-      val a = pc.pos.x.toInt - (p.pos.x.toInt / 16)
-      val b = pc.pos.y.toInt - (p.pos.y.toInt / 16)
+      val a = pc.pos.x.toInt - (playerPos.x.toInt / 16)
+      val b = pc.pos.y.toInt - (playerPos.y.toInt / 16)
       math.sqrt(a * a + b * b) < 10
     } foreach { pc =>
       val rgba = cellToPixel(pc)

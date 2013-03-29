@@ -51,8 +51,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    implicit val caveDef = BlackCave
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
-    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-//    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
+//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
     
     val shooter = (pos: Vec2f) => new Projectile(spawner = player, visual = Entities.snarl, speed = 2.5f, damage = 20, directional = true)
     val spell = new Shooter(shooter, 500 millis, Audio.shoot _)
@@ -67,7 +67,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    orc = new FemaleOrc(level, player, new Chaser(player), orcStart.pos * 16)
 //    addEntity(orc)
     
-    automap = new AutoMap(level, player) 
+    automap = new AutoMap(level, player)
+    player.autoMap = Some(automap)
     
 //    val startCell = m.exitLocation
 //    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
@@ -78,11 +79,13 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     gameMap = Some(level)
     at(0 millis, t => player.stop)
     
-    lazy val updateAm: Action = { t => automap.update(player); at(t.millis + 300.millis, updateAm) }
+    lazy val updateAm: Action = { t => automap.update(player.pos.toVec2d); at(t.millis + 300.millis, updateAm) }
     at(0 millis, updateAm)
     
     Inventory.addItem(RearmChestsScroll())
     Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(SmallHealthPotion())
+    Inventory.addItem(SmallHealthPotion())
     Inventory.addItem(SmallHealthPotion())
     Inventory.addItem(AttackScroll())
     Inventory.addItem(DefenseScroll())
@@ -91,6 +94,9 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     Inventory.addItem(SpawnMonsterScroll())
     
     SpellSelection.addItem(ShurikenSpell())
+    SpellSelection.addItem(BallLightningSpell())
+    SpellSelection.addItem(SpiralSpell())
+    SpellSelection.addItem(JumpSpell())
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {

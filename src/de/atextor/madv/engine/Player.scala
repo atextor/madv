@@ -5,7 +5,7 @@ import scala.concurrent.duration.DurationInt
 
 import org.newdawn.slick.Animation
 
-class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
+class Player(val level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
     player = null,
     level = level,
     skin = entitySkin,
@@ -23,6 +23,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   var spell: Option[Spell] = None
   var cooldownBoost = 0
   var armor = 0
+  var autoMap: Option[AutoMap] = None
   
   override def draw(x: Float, y: Float) = {
     shadow.draw(x, y + 5)
@@ -35,7 +36,7 @@ class Player(level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends
   override def move {
     pos += movingDirection * speed
     if (Constants.debug) return
-//    if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
+    if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
   }
   
   override def hurt(damage: Int) {
