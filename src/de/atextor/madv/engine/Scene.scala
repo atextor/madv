@@ -13,9 +13,14 @@ import de.atextor.madv.game.Effect
 abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var ticks: Int = 0
   var actions = ListBuffer[TimedAction]()
-  var player: Player
   var running = true
   var currentMenu: Option[Menu] = None
+  var player: Player = null
+  var level: Option[Level] = None
+  var automap: AutoMap = null
+  
+  val playerSkin: EntitySkin
+  
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
   val effects: ListBuffer[Effect] = ListBuffer()
@@ -23,7 +28,6 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   val storyTexts: ListBuffer[StoryText] = ListBuffer()
   
   val menus = List(Inventory, SpellSelection, Shop)
-  menus.foreach(addOverlay(_))
   
   var drawBeforePlayer: Seq[Entity] = Seq()
   var drawAfterPlayer: Seq[Entity] = Seq()
@@ -91,6 +95,39 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       drawAfterPlayer = parted._2
     }
     storyTexts.filterNot(_.alive).foreach(storyTexts -= _)
+  }
+  
+  def levelTransformations(l: Level): Level
+  
+  def startNewLevel {
+//    implicit val caveDef = LavaCave
+    implicit val caveDef = BlueCave
+//    implicit val caveDef = BlackCave
+//    val level = Level generateCoherentLevel
+//    val level = Level generateStaticSmallLevel
+//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
+    val map = Level.generateCoherentLevel
+    
+    val startCell = map.find(_.cell.properties contains Walkable).get
+    if (player == null) {
+      player = new Player(level = map, startPosition = startCell.pos * 16, entitySkin = playerSkin, nextLevel = startNewLevel _)
+    } else {
+      player.level = map
+      player.pos = startCell.pos * 16
+    }
+    
+    automap = new AutoMap(map, player)
+    player.autoMap = Some(automap)
+    level = Some(map)
+    
+    overlays.clear
+    menus.foreach(addOverlay(_))
+    addOverlay(new HealthDisplay(player))
+    
+    actions.clear
+    
+    lazy val updateAm: Action = { t => automap.update(player.pos.toVec2d); at(t.millis + 300.millis, updateAm) }
+    at(0 millis, updateAm)
   }
   
   def processKeys {

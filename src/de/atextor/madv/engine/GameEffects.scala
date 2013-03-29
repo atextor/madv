@@ -74,7 +74,7 @@ object GameEffects {
     case ExitTeleport =>
       level.find(_.cell.properties contains Exit).foreach { e =>
         val oldpos = player.pos.toVec2d
-        player.pos = (e.pos + Down * 2) * 16
+        player.pos = (e.pos + Down) * 16
         automap.update(oldpos)
         Audio.teleport.play
         say("Du findest dich woanders wieder.", scene)

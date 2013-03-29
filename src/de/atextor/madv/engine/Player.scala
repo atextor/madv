@@ -5,7 +5,7 @@ import scala.concurrent.duration.DurationInt
 
 import org.newdawn.slick.Animation
 
-class Player(val level: Level, startPosition: Vec2d, entitySkin: EntitySkin) extends Humanoid(
+class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nextLevel: () => Unit) extends Humanoid(
     player = null,
     level = level,
     skin = entitySkin,
@@ -36,7 +36,9 @@ class Player(val level: Level, startPosition: Vec2d, entitySkin: EntitySkin) ext
   override def move {
     pos += movingDirection * speed
     if (Constants.debug) return
-    if (!(level.cellAt(pos.toVec2d).properties contains Walkable)) goBack
+    val p = level.cellAt(pos.toVec2d).properties
+    if (!(p contains Walkable)) goBack
+    if (p contains Exit) nextLevel()
   }
   
   override def hurt(damage: Int) {
