@@ -39,9 +39,6 @@ import de.atextor.madv.engine.GameItem
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
-  
-  var orc: FemaleOrc = null
-  
   val playerSkin = Entities.playerSkin
   
   def levelTransformations(l: Level): Level = {
@@ -49,32 +46,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   }
   
   def init(gc: GameContainer, game: StateBasedGame) {
-//    level.map(l => Entities.placeChestInLevel(l, this))
-    
-//    val level = Entities.placeChestInLevel(Level generateCoherentLevel, this)
-    
-//    val startCell = level.find(_.cell.properties contains Walkable).get
-//    player = new Player(level = level, startPosition = startCell.pos * 16, entitySkin = Entities.playerSkin)
-//    addEntities(Entities.placeEntitiesInLevel(player, level))
-//    addEntities(entities)
-    
-//    val orcStart = level.find(_.cell.properties contains Walkable, randomize = false).get
-//    orc = new FemaleOrc(level, player, new Chaser(player), orcStart.pos * 16)
-//    addEntity(orc)
-    
-//    automap = new AutoMap(level, player)
-//    player.autoMap = Some(automap)
-    
-//    val startCell = m.exitLocation
-//    player = new Player(level = m, startPosition = startCell + Down * 20, entitySkin = Entities.playerSkin)
-    
     startNewLevel
-    
-//    gameMap = Some(level)
     at(0 millis, t => player.stop)
-    
-//    lazy val updateAm: Action = { t => automap.update(player.pos.toVec2d); at(t.millis + 300.millis, updateAm) }
-//    at(0 millis, updateAm)
     
     Inventory.addItem(Muffin())
 //    Inventory.addItem(RearmChestsScroll())
