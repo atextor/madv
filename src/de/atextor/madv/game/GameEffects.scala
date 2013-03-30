@@ -105,7 +105,7 @@ object GameEffects {
       say("Ein weiteres Monster wurde erschaffen.", scene)
     case TalkToMuffin =>
       scene.setMenu(None)
-      scene.addStoryText(new StoryText("Ich könnte dir etwas verkaufen", Some(Entities.muffinPortrait),
+      scene.addStoryText(new StoryText("Brauchst du mehr Magie?\nIch hätte da was...\nEs hat allerdings seinen Preis.", Some(Entities.muffinPortrait),
           onClose = { () => scene.setMenu(Some(Shop)) }))
   }
   

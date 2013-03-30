@@ -46,12 +46,11 @@ import de.atextor.madv.engine.IslandGreen
 import de.atextor.madv.engine.CoherentGreen
 import de.atextor.madv.engine.TextBox
 
-class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
-  override val getID = 1
+class LevelScene(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
+  override val getID = 2
   val playerSkin = Entities.playerSkin
   
   val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
-//  val levelSettings = List(IslandBlack)
   val currentLevelSetting = levelSettings.iterator
   
   def win {
@@ -62,14 +61,16 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
         in((i * 3) seconds, { t => addOverlay(text) })
         in(((i + 1) * 3) seconds, { t => text.alive = false })
       }
-//      in((lines.size + 2) * 3 seconds, t => exitScene)
     }
     
     val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\nEinen Bandring")
     addOverlay(text)
     in(5 seconds, (_ => text.alive = false))
-    addStoryText(new StoryText("Geschafft", Some(Entities.muffinPortrait)))
-    addStoryText(new StoryText("Foobar ", Some(Entities.muffinPortrait), onClose = () => {
+    addStoryText(new StoryText("Siehst du! War doch gar nicht so schwer.\nAuch wenn ich nicht erwartet hätte,\ndass du das schaffst", Some(Entities.muffinPortrait)))
+    addStoryText(new StoryText("Wolltest du etwa, dass ich es\nnicht schaffe?\nWusstest du was hier auf\nuns wartet?", Some(Entities.heroPortrait)))
+    addStoryText(new StoryText("Na klar! Hauptsache ich hatte\nmeinen Spass!", Some(Entities.muffinPortrait)))
+    addStoryText(new StoryText("Den mach ich mir jetzt auch...\n*leckerer Muffin*\n*mampf*", Some(Entities.heroPortrait)))
+    addStoryText(new StoryText("Ahhhh!", Some(Entities.muffinPortrait), onClose = () => {
       in(0 seconds, { t => outro(t) })
     }))
   }
@@ -78,12 +79,33 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     Audio.slash.stop
     val setting = currentLevelSetting.next
     setting match {
-      case CoherentGreen => Audio.music2.loop
+      case CoherentGreen => 
       case CoherentBlue => 
-      case CoherentLava => Audio.music2.stop; Audio.music3.loop
+        in(2 seconds, { t =>
+          addStoryText(new StoryText("Es könnte sein, dass der Widerstand\nstärker wird. Pass auf!", Some(Entities.muffinPortrait)))
+        })
+      case CoherentLava =>
+        Audio.music2.stop
+        Audio.music3.loop
+        in(2 seconds, { t =>
+          addStoryText(new StoryText("Hier wird es heiss...", Some(Entities.heroPortrait)))
+          addStoryText(new StoryText("Pass auf, dass ich nicht schmelze!", Some(Entities.muffinPortrait)))
+        })
       case IslandGreen => 
-      case IslandLava => Audio.music3.stop; Audio.music4.loop
+        in(2 seconds, { t =>
+          addStoryText(new StoryText("Hmm.. der Boden sieht hier\nziemlich zerklüftet aus.", Some(Entities.muffinPortrait)))
+          addStoryText(new StoryText("Aber mit dem Sprung-Zauberspruch kein Problem!\nIch hoffe du hast noch genug Gold übrig\nHihihi!", Some(Entities.muffinPortrait)))
+        })
+      case IslandLava =>
+        Audio.music3.stop
+        Audio.music4.loop
       case IslandBlack => 
+        in(2 seconds, { t =>
+          addStoryText(new StoryText("Wir nähern uns dem Ende der Höhlen!\nHier ist ein grosser Schatz versteckt.\nDu musst nur zuerst die Untoten\nerledigen.", Some(Entities.muffinPortrait)))
+          addStoryText(new StoryText("Und du schaust schön zu...", Some(Entities.heroPortrait)))
+          addStoryText(new StoryText("Ja! Ist das nicht herrlich?", Some(Entities.muffinPortrait)))
+          addStoryText(new StoryText("Pass auf, dass ich dich nicht esse.", Some(Entities.heroPortrait)))
+        })
     }
     setting
   }
@@ -103,38 +125,31 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     at(0 millis, t => player.stop)
     
     Inventory.addItem(Muffin())
-//    Inventory.addItem(RearmChestsScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(MagicMapScroll())
-    Inventory.addItem(MagicMapScroll())
-//    Inventory.addItem(SmallHealthPotion())
-//    Inventory.addItem(SmallHealthPotion())
-//    Inventory.addItem(SmallHealthPotion())
-//    Inventory.addItem(AttackScroll())
-//    Inventory.addItem(DefenseScroll())
-//    Inventory.addItem(SpeedPotion())
-//    Inventory.addItem(RandomTeleportScroll())
-    Inventory.addItem(SpawnMonsterScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    
     SpellSelection.addItem(ShurikenSpell())
-    SpellSelection.addItem(BallLightningSpell())
-    SpellSelection.addItem(SpiralSpell())
-//    SpellSelection.addItem(JumpSpell())
+    
+    in(2 seconds, { t =>
+      addStoryText(new StoryText("Ich habe dir die Fähigkeit verliehen,\ngefährliche Shurikens zu feuern.", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("Du kannst sie einfach aus deinen\nHänden beschwören.", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("Drücke 'S' um deine Zaubersprüche\nauszuwählen, und 'I' um\ndein Inventar zu öffnen.", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("Warum hilfst du mir?", Some(Entities.heroPortrait)))
+      addStoryText(new StoryText("Ich wollte einfach mal was anderes\nsehen. Dummerweise habe ich...", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("keine Beine um die Höhlen\nselbst zu erforschen.", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("OK... schauen wir uns die Höhlen an.", Some(Entities.heroPortrait)))
+      addStoryText(new StoryText("Und nicht vergessen: Mit der\nLeertaste zaubern!", Some(Entities.muffinPortrait)))
+      addStoryText(new StoryText("Wenn du mich brauchst, ich bin\nin deinem Inventar.", Some(Entities.muffinPortrait)))
+    })
+    
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
     
     Shop.addItem(ShurikenSpell())
     Shop.addItem(BallLightningSpell())
     Shop.addItem(SpiralSpell())
     Shop.addItem(JumpSpell())
     Shop.addItem(ExitTeleportScroll())
+    Shop.addItem(SmallHealthPotion())
     
   }
   

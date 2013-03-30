@@ -27,7 +27,7 @@ object Audio {
   def shoot = randomShootSound.play
   
   private def music(name: String) = new Music(s"res/audio/${name}.ogg", true);
-  lazy val music1 = music("01-theme")
+  lazy val music1 = music("03-theme")
   lazy val music2 = music("04-caves")
   lazy val music3 = music("01-caves2")
   lazy val music4 = music("02-caves3")

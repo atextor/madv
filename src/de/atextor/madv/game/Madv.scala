@@ -6,6 +6,10 @@ import org.newdawn.slick.Input
 import org.newdawn.slick.state.StateBasedGame
 import org.newdawn.slick.SpriteSheet
 import de.atextor.madv.engine.Text
+import org.newdawn.slick.state.transition.CrossStateTransition
+import org.newdawn.slick.state.GameState
+import org.newdawn.slick.state.transition.EmptyTransition
+import de.atextor.madv.engine.Audio
 
 class Madv extends StateBasedGame("Madv") {
   var container: AppGameContainer = null
@@ -16,9 +20,17 @@ class Madv extends StateBasedGame("Madv") {
   }
   
   def initStatesList(gc: GameContainer) {
-//    container = gc
-//    addState(new TitleScreen)
-    addState(new LevelTest(toggleFullscreen _))
+    val target = new LevelScene(toggleFullscreen _)
+    addState(new TitleScreen(toggleFullscreen _, startGame = { () =>
+      Audio.music1.stop
+      Audio.music2.loop
+      val transition = new CrossStateTransition(target) {
+        def isComplete = true
+        def init(firstState: GameState, secondState: GameState) {}
+      }
+      enterState(2, transition, new EmptyTransition());
+    }))
+    addState(target)
   }
 }
 
