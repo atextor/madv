@@ -48,8 +48,13 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
   val playerSkin = Entities.playerSkin
   
-  val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
+//  val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
+  val levelSettings = List(IslandBlack)
   val currentLevelSetting = levelSettings.iterator
+  
+  def win {
+    
+  }
   
   def nextLevelSetting = {
     Audio.slash.stop
@@ -61,7 +66,9 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   }
   
   def levelDecorations(l: Level): Seq[Entity] = {
-    Entities.placeEntitiesInLevel(player, l)
+    val ents = Entities.placeEntitiesInLevel(player, l)
+    numMonsters = ents._1
+    ents._2
   }
   
   def init(gc: GameContainer, game: StateBasedGame) {

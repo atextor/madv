@@ -68,12 +68,26 @@ object Entities {
   lazy val femaleArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_chainmail" :: "female_plate_shoulders" :: Nil)),
-     (belt  -> ("female_ironbelt" :: Nil)))
+     (belt  -> ("female_ironbelt" :: Nil)),
+     (weapon -> ("dagger" :: Nil)))
   lazy val femaleHeavyArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_plate_mail" :: "female_plate_shoulders" :: Nil)),
      (feet  -> ("female_plate_boots" :: "female_plate_greaves" :: Nil)),
+     (weapon -> ("dagger" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)))
+  lazy val skeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+     (body  -> ("skeleton" :: Nil)),
+     (weapon -> ("dagger" :: Nil)))
+  lazy val armoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+     (body  -> ("skeleton" :: Nil)),
+     (torso -> ("plate_armor_torso" :: "leather_armor_torso" :: Nil)),
+     (head  -> ("robe_hood" :: Nil)),
+     (weapon -> ("dagger" :: Nil)))
+  lazy val heavyArmoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+     (body  -> ("skeleton" :: Nil)),
+     (torso -> ("plate_armor_torso" :: "plate_armor_arms_shoulders" :: Nil)),
+     (weapon -> ("dagger" :: Nil)))
      
   // Shared between all entities using this visual
   lazy val goldCoinSprite = animation(sheet = "res/items/coin_gold.png", sizeX = 32, frames = 8, delay = 60 millis).get
@@ -95,7 +109,7 @@ object Entities {
   lazy val snarlSheet = new SpriteSheet("res/effects/snarl.png", 31, 31)
   def snarl = SpriteAnimation(snarlSheet, new SimpleSprite(frames = 8, delay = 120 millis), 0).get
   
-  def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
+  def placeEntitiesInLevel(player: Player, level: Level): (Int, Seq[Entity]) = {
     import level.PlacedLevelCell
     
     // Place a bunch of coins at the end of land
@@ -124,13 +138,13 @@ object Entities {
       case Easy => 0.007f
       case Medium => 0.02f
       case Hard => 0.03f
-      case Boss => 0f
+      case Boss => 0.02f
     }
-    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).flatMap { c =>
+    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).map { c =>
       GameProgress.randomMonster(level, player, c.pos * 16)
     }
     
-    coins ++ monsters
+    (monsters.size, coins ++ monsters)
   }
   
   def placeChestsInLevel(level: Level, scene: Scene): Level = {
@@ -157,15 +171,35 @@ object Entities {
       case Boss => 0f
     }
     
-    val chests = Random.shuffle(chestPositions).take((chestPositions.size * rate).toInt).map { pc =>
-      (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
-        onTouch = { t =>
-          val item = GameProgress.randomItem(level.setting)
-          val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\n" + item.name)
-          scene.addOverlay(text)
-          scene.in(5 seconds, (_ => text.alive = false))
-          Inventory.addItem(item)
-        }))
+    val chests: IndexedSeq[(Vec2d, Chest)] = if (level.setting.difficulty != Boss) {
+      // Normal chests
+      Random.shuffle(chestPositions).take((chestPositions.size * rate).toInt).map { pc =>
+        (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
+          onTouch = { scene =>
+            val item = GameProgress.randomItem(level.setting)
+            val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\n" + item.name)
+            scene.addOverlay(text)
+            scene.in(5 seconds, (_ => text.alive = false))
+            Inventory.addItem(item)
+            true
+          }))
+      }
+    } else {
+      // Endgame chest
+      Random.shuffle(chestPositions).take(1).map { pc =>
+        (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
+          onTouch = { scene =>
+            if (scene.numMonsters == 0) {
+              scene.win
+              true
+            } else {
+              val text = new CenteredTextBox(width = 250, text = "Die Kiste bleibt verschlossen,\nes leben noch Monster...")
+              scene.addOverlay(text)
+              scene.in(5 seconds, (_ => text.alive = false))
+              false
+            }
+          }))
+      }
     }
     
     scene.addEntities(chests.map(_._2))
@@ -182,17 +216,16 @@ object Entities {
   }
 }
 
-class Chest(startPos: Vec2f, onTouch: Action) extends
+class Chest(startPos: Vec2f, onTouch: Scene => Boolean) extends
     Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
   val properties = List(IsGoodRearmable)
   def tick(scene: Scene, delta: Int) = {
     if (scene.player touches this) {
-      if (armed) {
+      if (armed && onTouch(scene)) {
         armed = false
         Audio.chestopen.play
         visual.get.setCurrentFrame(1)
-        onTouch(delta)
       }
       scene.player.goBack
     } 
@@ -257,6 +290,22 @@ class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) ext
     startPosition = startPos.toVec2f,
     speed = 0.3f,
     maxHp = 100,
+    damage = 2,
+    onHurt = Audio.grunt.play _,
+    onDie = Audio.growl.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _
+)
+
+class FemaleArmoredOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
+    level = level,
+    player = player,
+    skin = Entities.femaleArmoredOrcSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.28f,
+    maxHp = 150,
     damage = 3,
     onHurt = Audio.grunt.play _,
     onDie = Audio.growl.play _,
@@ -264,3 +313,66 @@ class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) ext
     onEndAttack = Audio.slash.stop _
 )
 
+class FemaleHeavyArmoredOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
+    level = level,
+    player = player,
+    skin = Entities.femaleHeavyArmoredOrcSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.25f,
+    maxHp = 180,
+    damage = 4,
+    onHurt = Audio.grunt.play _,
+    onDie = Audio.growl.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _
+)
+
+class Skeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
+    level = level,
+    player = player,
+    skin = Entities.skeletonSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.5f,
+    maxHp = 130,
+    damage = 2,
+    onHurt = Audio.bonecrack.play _,
+    onDie = Audio.bonecrack2.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _
+)
+
+class ArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
+    level = level,
+    player = player,
+    skin = Entities.armoredSkeletonSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.45f,
+    maxHp = 180,
+    damage = 4,
+    onHurt = Audio.bonecrack.play _,
+    onDie = Audio.bonecrack2.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _
+)
+
+class HeavyArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
+    level = level,
+    player = player,
+    skin = Entities.heavyArmoredSkeletonSkin,
+    defaultBehavior = brain,
+    spriteAction = Walk,
+    startPosition = startPos.toVec2f,
+    speed = 0.50f,
+    maxHp = 220,
+    damage = 6,
+    onHurt = Audio.bonecrack.play _,
+    onDie = Audio.bonecrack2.play _,
+    onBeginAttack = Audio.slash.loop _,
+    onEndAttack = Audio.slash.stop _
+)

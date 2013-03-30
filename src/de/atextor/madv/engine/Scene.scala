@@ -18,6 +18,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var player: Player = null
   var level: Option[Level] = None
   var automap: AutoMap = null
+  var numMonsters = 0
   
   val playerSkin: EntitySkin
   
@@ -101,6 +102,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   def levelTransformations(l: Level): Level
   def levelDecorations(l: Level): Seq[Entity]
   def nextLevelSetting: LevelSetting
+  def win
   
   def startNewLevel {
     actions.clear

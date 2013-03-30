@@ -11,7 +11,7 @@ object Dumb extends Brain {
 object Dying extends Brain {
   def apply(me: Humanoid, scene: Scene, delta: Int) {
     scene.at(delta + 700 millis, {_ => me.movingDirection = Nowhere})
-    scene.at(delta + 5000 millis, {_ => me.alive = false})
+    scene.at(delta + 5000 millis, {_ => me.alive = false; scene.numMonsters -= 1})
     me.behavior = Dumb
   }
 }

@@ -22,11 +22,32 @@ object GameProgress {
   val PremiumItems = List(LargeHealthPotion(), MaxHealthPotion(), IncreaseMaxHealthPotion(), MagicMapScroll(),
       RearmChestsScroll(), SpeedPotion(), AttackScroll(), DefenseScroll(), ExitTeleportScroll())
       
-  def randomMonster(level: Level, player: Player, startPos: Vec2d): Option[Entity] = level.setting.difficulty match {
-    case Easy => Some(new FemaleOrc(level, player, new Chaser(player), startPos))
-    case Medium => None
-    case Hard => None
-    case Boss => None
+  def randomMonster(level: Level, player: Player, startPos: Vec2d): Entity = level.setting.difficulty match {
+    case Easy =>
+      val rand = Random.nextInt(100)
+      if (rand < 80) {
+        new FemaleOrc(level, player, new Chaser(player), startPos)
+      } else {
+        new FemaleArmoredOrc(level, player, new Chaser(player), startPos)
+      }
+    case Medium =>
+      val rand = Random.nextInt(100)
+      if (rand < 25) {
+        new FemaleOrc(level, player, new Chaser(player), startPos)
+      } else if (rand < 60) {
+        new FemaleArmoredOrc(level, player, new Chaser(player), startPos)
+      } else {
+        new FemaleHeavyArmoredOrc(level, player, new Chaser(player), startPos)
+      }
+    case Hard =>
+      val rand = Random.nextInt(100)
+      if (rand < 65) {
+        new Skeleton(level, player, new Chaser(player), startPos)
+      } else {
+        new ArmoredSkeleton(level, player, new Chaser(player), startPos)
+      }
+    case Boss => 
+      new HeavyArmoredSkeleton(level, player, new Chaser(player), startPos)
   }
       
   def randomItem(ls: LevelSetting): GameItem = ls.difficulty match {
