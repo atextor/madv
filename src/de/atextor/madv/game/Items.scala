@@ -75,7 +75,7 @@ case class ShurikenSpell() extends GameItem(SpellGameItem, "Shuriken",
   })))
 
 case class BallLightningSpell() extends GameItem(SpellGameItem, "Kugelblitz",
-  "Feuert einen langsamen, aber\ngefährlichen elektrischen Blitz", price = 1500, effect = Some(PlayerSpell("Kugelblitz", { player: Player =>
+  "Feuert einen langsamen, aber\ngefährlichen elektrischen Blitz.", price = 1500, effect = Some(PlayerSpell("Kugelblitz", { player: Player =>
     val shooter = (pos: Vec2f) => new Projectile(
       spawner = player,
       visual = Entities.sparkle1,
@@ -86,13 +86,17 @@ case class BallLightningSpell() extends GameItem(SpellGameItem, "Kugelblitz",
   })))
 
 case class SpiralSpell() extends GameItem(SpellGameItem, "Wirbel",
-  "Feuert einen Wirbel aus Energie.", price = 1600, effect = Some(PlayerSpell("Wirbel", { player: Player =>
+  "Feuert einen Wirbel aus Energie,\nder bei Einschlag explodiert.", price = 1600, effect = Some(PlayerSpell("Wirbel", { player: Player =>
     val shooter = (pos: Vec2f) => new Projectile(
       spawner = player,
       visual = Entities.spiral,
       speed = 1.0f,
       damage = 30,
-      directional = false)
+      directional = false,
+      onHit = { p: Vec2f => 
+        Audio.explosion.play
+        new Explosion(p) :: Nil
+      })
     new Shooter(shooter, 500 millis, Audio.shoot _)
   })))
 

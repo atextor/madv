@@ -59,7 +59,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    Inventory.addItem(DefenseScroll())
 //    Inventory.addItem(SpeedPotion())
 //    Inventory.addItem(RandomTeleportScroll())
-//    Inventory.addItem(SpawnMonsterScroll())
+    Inventory.addItem(SpawnMonsterScroll())
 //    Inventory.addItem(ExitTeleportScroll())
     
 //    SpellSelection.addItem(ShurikenSpell())

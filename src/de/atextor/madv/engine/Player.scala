@@ -2,8 +2,8 @@ package de.atextor.madv.engine
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
-
 import org.newdawn.slick.Animation
+import de.atextor.madv.game.Effect
 
 class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nextLevel: () => Unit) extends Humanoid(
     player = null,
@@ -75,7 +75,7 @@ class Shooter(shoot: Vec2f => Projectile, cooldown: Duration, onFire: () => Unit
   }
 }
 
-class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, directional: Boolean = false) extends
+class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, directional: Boolean = false, onHit: Vec2f => Seq[Effect] = {Nowhere => Nil}) extends
     Entity(size = OnePixelSize, visual = Some(visual), pos = spawner.pos + Vec2d(4, 0)) {
   val properties = Nil
   movingDirection = spawner.lookingDirection * speed
@@ -99,6 +99,7 @@ class Projectile(spawner: Entity, visual: Animation, speed: Float, damage: Int, 
       val dist = distanceTo(e)
       if (dist < 7) {
         e.hurt(damage)
+        scene.addEffects(onHit(pos))
         alive = false
         return
       }

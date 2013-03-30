@@ -34,6 +34,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   
   def inStoryMode = !(storyTexts.isEmpty)
   def addEffect(e: Effect): ListBuffer[Effect] = effects += e
+  def addEffects(e: Seq[Effect]): ListBuffer[Effect] = effects ++= e
   def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
   def addStoryText(t: StoryText) = storyTexts += t
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
@@ -106,7 +107,8 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
 //    val level = Level generateCoherentLevel
 //    val level = Level generateStaticSmallLevel
 //    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-    val map = Level.generateCoherentLevel
+    val map = levelTransformations(Level.generateStaticSmallLevel)
+//    val map = Level.generateCoherentLevel
     
     val startCell = map.find(_.cell.properties contains Walkable).get
     if (player == null) {

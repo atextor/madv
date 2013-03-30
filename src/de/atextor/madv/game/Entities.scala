@@ -193,7 +193,7 @@ class Effect(startPos: Vec2f, visual: Animation) extends
 class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.goldCoinSprite)
 class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.silverCoinSprite)
 class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.copperCoinSprite)
-class Explosion(startPos: Vec2d) extends Effect(startPos.toVec2f, Entities.explosion)
+class Explosion(startPos: Vec2f) extends Effect(startPos, Entities.explosion)
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 12))
 
 class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
