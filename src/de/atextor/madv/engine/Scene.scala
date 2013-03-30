@@ -89,7 +89,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
         overlays.filterNot(_.alive).foreach(overlays -= _)
       
         if (!player.alive) {
-          addStoryText(new StoryText("You Die.", None))
+          addStoryText(new StoryText("Du stirbst...\nBeim nächsten Mal mehr Erfolg...", None, onClose = () => exitScene))
         }
     
         // do Z ordering for all entities that need to be drawn

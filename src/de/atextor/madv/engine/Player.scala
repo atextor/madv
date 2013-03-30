@@ -11,7 +11,7 @@ class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nex
     skin = entitySkin,
     spriteAction = Walk,
     startPosition = startPosition.toVec2f,
-    speed = 5,//1,
+    speed = 1,
     maxHp = 100,
     damage = 0,
     onHurt = DoNothing,

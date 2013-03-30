@@ -140,10 +140,9 @@ object Entities {
       case Hard => 0.03f
       case Boss => 0.02f
     }
-//    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).map { c =>
-//      GameProgress.randomMonster(level, player, c.pos * 16)
-//    }
-    val monsters = Nil
+    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).map { c =>
+      GameProgress.randomMonster(level, player, c.pos * 16)
+    }
     
     (monsters.size, coins ++ monsters)
   }
