@@ -37,13 +37,26 @@ import de.atextor.madv.engine.SpellSelection
 import de.atextor.madv.engine.Shop
 import de.atextor.madv.engine.GameItem
 import de.atextor.madv.engine.Entity
+import de.atextor.madv.engine.CoherentBlue
+import de.atextor.madv.engine.IslandBlack
+import de.atextor.madv.engine.IslandLava
+import de.atextor.madv.engine.CoherentLava
+import de.atextor.madv.engine.IslandGreen
+import de.atextor.madv.engine.CoherentGreen
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
   val playerSkin = Entities.playerSkin
   
+  val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
+  val currentLevelSetting = levelSettings.iterator
+  
+  def nextLevelSetting = {
+    currentLevelSetting.next
+  }
+  
   def levelTransformations(l: Level): Level = {
-    Entities.placeChestInLevel(l, this)
+    Entities.placeChestsInLevel(l, this)
   }
   
   def levelDecorations(l: Level): Seq[Entity] = {
@@ -56,7 +69,12 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     
     Inventory.addItem(Muffin())
 //    Inventory.addItem(RearmChestsScroll())
-//    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
+    Inventory.addItem(MagicMapScroll())
 //    Inventory.addItem(SmallHealthPotion())
 //    Inventory.addItem(SmallHealthPotion())
 //    Inventory.addItem(SmallHealthPotion())
@@ -65,7 +83,12 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
 //    Inventory.addItem(SpeedPotion())
 //    Inventory.addItem(RandomTeleportScroll())
     Inventory.addItem(SpawnMonsterScroll())
-//    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
+    Inventory.addItem(ExitTeleportScroll())
     
 //    SpellSelection.addItem(ShurikenSpell())
 //    SpellSelection.addItem(BallLightningSpell())
@@ -81,13 +104,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   }
   
   def render(gc: GameContainer, game: StateBasedGame, g: Graphics) {
-    if (Constants.debug) {
-      g.scale(2, 2)
-      g.translate(90, 60)
-    } else {
-      g.scale(4, 4)
-    }
-    
+    g.scale(4, 4)
     level.foreach(_.draw(player.pos.toVec2d, layer = 0))
     g.scale(0.5f, 0.5f)
     drawBeforePlayer.foreach(_.relativeDraw(player.pos, player.staticRenderPos))

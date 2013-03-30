@@ -43,6 +43,7 @@ import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.IsGoodRearmable
 import de.atextor.madv.engine.IsCollectible
+import scala.util.Random
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -104,7 +105,6 @@ object Entities {
             ((c + Left * 2).cell.properties.contains(Walkable)),
             ((c + Right * 2).cell.properties.contains(Walkable))).filter(identity).size == 1)
     }
-    /*
     val coins = level.placedCells.filter(landsEndProperty).flatMap { pc =>
       new GoldCoin(player, pc.pos * 16) ::
       new SilverCoin(player, (pc.pos + Up) * 16) ::
@@ -112,35 +112,48 @@ object Entities {
       new SilverCoin(player, (pc.pos + Right) * 16) ::
       new SilverCoin(player, (pc.pos + Left) * 16) :: Nil
     }
-    */
     
-    // Coins on every walkable cell
-    val coins = level.placedCells.filter(_.cell.properties contains Walkable).map { pc =>
-      new GoldCoin(player, pc.pos * 16)
-    }
     coins
   }
   
-  def placeChestInLevel[L <: Level](level: L, scene: Scene): Level = {
+  def placeChestsInLevel(level: Level, scene: Scene): Level = {
     import level.PlacedLevelCell
     
-    val chestPos = Vec2d(10, 10)
-    val chest = new Chest(startPos = chestPos.toVec2f * 16,
-      onTouch = { t =>
-        val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
-        scene.addOverlay(text)
-        scene.at(t.milliseconds + 5.seconds, (_ => text.alive = false))
-        Inventory.addItem(new SmallHealthPotion())
-      })
-    scene.addEntity(chest)
+    val chestPositionProperty: PlacedLevelCell => Boolean = { c =>
+      (c.cell.properties.contains(Walkable)) &&
+      ((c + Up).cell.properties.contains(Walkable)) &&
+      ((c + Down).cell.properties.contains(Walkable)) &&
+      ((c + Left).cell.properties.contains(Walkable)) &&
+      ((c + Right).cell.properties.contains(Walkable)) &&
+      ((c + Up * 2).cell.properties.contains(Walkable)) &&
+      ((c + Down * 2).cell.properties.contains(Walkable)) &&
+      ((c + Left * 2).cell.properties.contains(Walkable)) &&
+      ((c + Right * 2).cell.properties.contains(Walkable))
+    }
+    val chestPositions = level.placedCells.filter(chestPositionProperty)
     
-    val updatedCells = level.placedCells.map { _ match {
-      case p if p.pos == chestPos => {
-        LevelCell(layer0 = p.cell.layer0, layer1 = p.cell.layer1)(properties = (p.cell.properties.toList diff List(Walkable)): _*)
-      }
-      case p => p.cell
-    }}
-    level.copy(cells = updatedCells)
+    // 2 percent of possible positions will be chests
+    val chests = Random.shuffle(chestPositions).take((chestPositions.size * 0.02f).toInt).map { pc =>
+      (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
+        onTouch = { t =>
+          val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
+          scene.addOverlay(text)
+          scene.at(t.milliseconds + 5.seconds, (_ => text.alive = false))
+          Inventory.addItem(new SmallHealthPotion())
+        }))
+    }
+    
+    scene.addEntities(chests.map(_._2))
+    
+    chests.foldLeft(level) { case (l, c) =>
+      val updatedCells = l.placedCells.map { _ match {
+        case p if p.pos == c._1 => {
+          LevelCell(layer0 = p.cell.layer0, layer1 = p.cell.layer1)(properties = (p.cell.properties.toList diff List(Walkable)): _*)
+        }
+        case p => p.cell
+      }}
+      level.copy(cells = updatedCells)
+    }
   }
 }
 

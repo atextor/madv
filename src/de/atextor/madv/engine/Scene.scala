@@ -100,16 +100,22 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   
   def levelTransformations(l: Level): Level
   def levelDecorations(l: Level): Seq[Entity]
+  def nextLevelSetting: LevelSetting
   
   def startNewLevel {
-//    implicit val caveDef = LavaCave
-    implicit val caveDef = BlueCave
-//    implicit val caveDef = BlackCave
-//    val level = Level generateCoherentLevel
-//    val level = Level generateStaticSmallLevel
-//    val level = Entities.placeChestInLevel(Level generateStaticSmallLevel, this)
-    val map = levelTransformations(Level.generateStaticSmallLevel)
-//    val map = Level.generateCoherentLevel
+    actions.clear
+    entities.clear
+    effects.clear
+    overlays.clear
+    
+    val setting = nextLevelSetting
+    val l = if (setting.island) {
+      Level.generateIslandLevel(setting.caveDef, withExit = setting.hasExit)
+    } else {
+      Level.generateCoherentLevel(setting.caveDef, withExit = setting.hasExit)
+    }
+    
+    val map = levelTransformations(l)
     
     val startCell = map.find(_.cell.properties contains Walkable).get
     if (player == null) {
@@ -124,12 +130,9 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     player.autoMap = Some(automap)
     level = Some(map)
     
-    overlays.clear
     menus.foreach(addOverlay(_))
     addOverlay(new HealthDisplay(player))
     addOverlay(new GoldDisplay(player))
-    
-    actions.clear
     
     lazy val updateAm: Action = { t => automap.update(player.pos.toVec2d); at(t.millis + 300.millis, updateAm) }
     at(0 millis, updateAm)

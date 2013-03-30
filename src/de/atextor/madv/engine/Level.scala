@@ -15,6 +15,15 @@ case object Walkable extends CellProperty
 case object Exit extends CellProperty
 case object IslandBorder extends CellProperty
 
+sealed abstract class LevelSetting(val caveDef: CaveDefinition, val island: Boolean, val hasExit: Boolean = true)
+case object CoherentBlue extends LevelSetting(BlueCave, island = false)
+case object CoherentGreen extends LevelSetting(GreenCave, island = false)
+case object CoherentLava extends LevelSetting(LavaCave, island = false)
+case object IslandBlue extends LevelSetting(BlueCave, island = true)
+case object IslandGreen extends LevelSetting(GreenCave, island = true)
+case object IslandLava extends LevelSetting(LavaCave, island = true)
+case object IslandBlack extends LevelSetting(BlackCave, island = true, hasExit = false)
+
 case class LevelCell(
   val layer0: Option[Renderable] = None,
   val layer1: Option[Renderable] = None)(
@@ -142,7 +151,7 @@ case object StairsEntry extends SpriteSheetHelper {
 }
   
 object Level {
-  val scale = if (Constants.debug) 2 else 1
+  val scale = 1//if (Constants.debug) 2 else 1
   
   private def cellularAutomatonToLevel(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
     val alive = ca.isAlive _
@@ -247,17 +256,17 @@ object Level {
   val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
   val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
   
-  def generateCoherentLevel = {
+  def generateCoherentLevel(implicit cd: CaveDefinition, withExit: Boolean = true) = {
     CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes.
       |> (ca => ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)).
       |> (cellularAutomatonToLevel(_)).
-      |> (placeExit(_))
+      |> (l => if (withExit) placeExit(l) else l)
   }
   
-  def generateIslandLevel(implicit cd: CaveDefinition) = {
-    CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth)(smooth).upscale(smooth).fixPotholes.
+  def generateIslandLevel(implicit cd: CaveDefinition, withExit: Boolean = true) = {
+    CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth)(smooth).upscale(smooth).addDeadBorder.fixPotholes.
       |> (cellularAutomatonToLevel(_)).
-      |> (placeExit(_))
+      |> (l => if (withExit) placeExit(l) else l)
   }
   
   def generateStaticSmallLevel(implicit cd: CaveDefinition) = {
