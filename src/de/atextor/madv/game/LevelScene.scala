@@ -50,8 +50,8 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
   val playerSkin = Entities.playerSkin
   
-//  val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
-  val levelSettings = List(IslandBlack)
+  val levelSettings = List(CoherentGreen, CoherentBlue, CoherentLava, IslandGreen, IslandLava, IslandBlack)
+//  val levelSettings = List(IslandBlack)
   val currentLevelSetting = levelSettings.iterator
   
   def win {
@@ -76,7 +76,16 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   
   def nextLevelSetting = {
     Audio.slash.stop
-    currentLevelSetting.next
+    val setting = currentLevelSetting.next
+    setting match {
+      case CoherentGreen => Audio.music2.loop
+      case CoherentBlue => 
+      case CoherentLava => Audio.music2.stop; Audio.music3.loop
+      case IslandGreen => 
+      case IslandLava => Audio.music3.stop; Audio.music4.loop
+      case IslandBlack => 
+    }
+    setting
   }
   
   def levelTransformations(l: Level): Level = {

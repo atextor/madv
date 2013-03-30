@@ -4,6 +4,8 @@ import org.newdawn.slick.openal.AudioLoader
 import org.newdawn.slick.util.ResourceLoader
 import org.newdawn.slick.Sound
 import scala.util.Random
+import de.atextor.madv.game.Madv
+import org.newdawn.slick.Music
 
 object Audio {
   private def sound(name: String) = new Sound(s"res/audio/${name}.wav")
@@ -24,15 +26,9 @@ object Audio {
   private def randomShootSound = Random shuffle shoots head
   def shoot = randomShootSound.play
   
-//  val stream = classOf[Audio].getClassLoader.getResourceAsStream("sample.ogg")
-  
-//  val ogg = new OggClip(stream);
-//  ogg.setBalance(0f);
-//  ogg.setGain(1.0f);
-//  ogg.loop
-//  ogg.pause
-//  ogg.resume
-//  ogg.stop
-//  ogg.setGain(1.0f) 
-  
+  private def music(name: String) = new Music(s"res/audio/${name}.ogg", true);
+  lazy val music1 = music("01-theme")
+  lazy val music2 = music("04-caves")
+  lazy val music3 = music("01-caves2")
+  lazy val music4 = music("02-caves3")
 }
