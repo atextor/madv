@@ -96,8 +96,8 @@ class StoryText(storyText: String, portrait: Option[Renderable], onClose: () => 
   
   def trigger {
     if (text.allShown) {
-      onClose()
       alive = false
+      onClose()
     } else {
       text.showAll
     }

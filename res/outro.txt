@@ -1,0 +1,28 @@
+Muffin Adventure|Ein Spiel von Andreas Textor
+Font: Cure by Youngjin Hahn und Alec Zapka (artwiz)|Erweitert um deutsche Zeichen von Andreas Textor
+Cave Tileset|MrBeast|http://opengameart.org/content/cave-tileset-0
+Female Orc Sprite|madmarcel|http://opengameart.org/content/lpc-female-orcogregoblintroll-base-walkcycle
+Female Sprites|makrohn|http://opengameart.org/content/lpc-ladies
+Medieval Fantasy Characters|wulax|http://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+Skeleton Sprites|wulax|http://opengameart.org/content/lpc-skeleton
+Chest Sprite|Blarumyrran|http://opengameart.org/content/modified-32x32-treasure-chest
+Explosion|Jetrel|http://opengameart.org/content/explosion-animations
+UI Box|pennomi, Buch, cemkalyoncu|http://opengameart.org/content/lpc-pennomis-ui-elements
+Muffin Icon|Breakfast Icons|http://www.cutelittlefactory.com
+Shuriken, Snarl, Sparkle, Spiral Spells|David E. Gervais|http://opengameart.org/content/roguelike-tiles-large-collection
+Coins|Clint Bellanger|http://opengameart.org/content/animated-coins
+pling Sound|bradwesson|http://www.freesound.org/people/bradwesson/sounds/135936/
+success Sound|grunz|http://www.freesound.org/people/grunz/sounds/109662/
+keypickup Sound|wildweasel|http://www.freesound.org/people/wildweasel/sounds/39026/
+dooropen Sound|Free SFX|http://www.freesfx.co.uk
+doggrunt Sound|Tails1942|http://freesound.org/people/Tails1942/sounds/163282/
+growl Sound|Hamface|http://freesound.org/people/Hamface/sounds/98668/
+shoot Sound|qubodup|http://freesound.org/people/qubodup/sounds/159725/
+slash Sound|lmbubec|http://freesound.org/people/lmbubec/sounds/118792/
+teleport Sound|fins|http://freesound.org/people/fins/sounds/172207/
+cashregister Sound|jobro|http://freesound.org/people/jobro/sounds/180894/
+explosion Sound|tcpp|http://freesound.org/people/tcpp/sounds/77339/
+bad Sound|willy_ineedthatapp_com|http://freesound.org/people/willy_ineedthatapp_com/sounds/167328/
+bonecrack Sound|anemicrose|http://freesound.org/people/anemicrose/sounds/94244/
+bonecrack2 Sound|DalomarGrimm|http://freesound.org/people/DalomarGrimm/sounds/7720/
+Vielen Dank fürs Spielen!

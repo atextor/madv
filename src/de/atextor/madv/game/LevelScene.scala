@@ -2,6 +2,7 @@ package de.atextor.madv.game
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
+import scala.io.Source
 import org.newdawn.slick.Color
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Graphics
@@ -43,6 +44,7 @@ import de.atextor.madv.engine.IslandLava
 import de.atextor.madv.engine.CoherentLava
 import de.atextor.madv.engine.IslandGreen
 import de.atextor.madv.engine.CoherentGreen
+import de.atextor.madv.engine.TextBox
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -53,7 +55,23 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   val currentLevelSetting = levelSettings.iterator
   
   def win {
+    val outro: Action = { ticks =>
+      val lines = Source.fromFile("res/outro.txt").getLines.map(_.replace("|", "\n"))
+      lines.zipWithIndex.foreach { case (l, i) =>
+        val text = new TextBox(350, l, Vec2d(20, 180))
+        in((i * 3) seconds, { t => addOverlay(text) })
+        in(((i + 1) * 3) seconds, { t => text.alive = false })
+      }
+//      in((lines.size + 2) * 3 seconds, t => exitScene)
+    }
     
+    val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\nEinen Bandring")
+    addOverlay(text)
+    in(5 seconds, (_ => text.alive = false))
+    addStoryText(new StoryText("Geschafft", Some(Entities.muffinPortrait)))
+    addStoryText(new StoryText("Foobar ", Some(Entities.muffinPortrait), onClose = () => {
+      in(0 seconds, { t => outro(t) })
+    }))
   }
   
   def nextLevelSetting = {
@@ -153,7 +171,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
             setMenu(Some(SpellSelection))
           }
         case Input.KEY_U =>
-          startNewLevel
+          Audio.slash.stop
         case Input.KEY_SPACE => if (!inStoryMode) {
           if (currentMenu.isEmpty) player.attack else setMenu(None)
         }

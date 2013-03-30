@@ -69,32 +69,34 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     if (changed) actions = actions.sortWith(_._1 < _._1)
     
     if (currentMenu.isEmpty) {
-      player.update(this, ticks)
-      player.move
-      
-      entities.foreach { e =>
-        e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
-        e.update(this, ticks)
-        e.move
-      }
-      
-      effects.foreach { e =>
-        e.update(this, ticks)
-        e.move
-      }
       storyTexts.headOption.foreach(_.update(this, ticks))
-      entities.filterNot(_.alive).foreach(entities -= _)
-      effects.filterNot(_.alive).foreach(effects -= _)
-      overlays.filterNot(_.alive).foreach(overlays -= _)
+      if (!inStoryMode) {
+        player.update(this, ticks)
+        player.move
       
-      if (!player.alive) {
-        addStoryText(new StoryText("You Die.", None))
-      }
+        entities.foreach { e =>
+          e.enabled = e.distanceTo(player) < Constants.inactiveEntityDistance
+          e.update(this, ticks)
+          e.move
+        }
+      
+        effects.foreach { e =>
+          e.update(this, ticks)
+          e.move
+        }
+        entities.filterNot(_.alive).foreach(entities -= _)
+        effects.filterNot(_.alive).foreach(effects -= _)
+        overlays.filterNot(_.alive).foreach(overlays -= _)
+      
+        if (!player.alive) {
+          addStoryText(new StoryText("You Die.", None))
+        }
     
-      // do Z ordering for all entities that need to be drawn
-      val parted = entities.filter(_.enabled).sortWith(_.pos.y < _.pos.y).partition(_.pos.y < player.pos.y)
-      drawBeforePlayer = parted._1
-      drawAfterPlayer = parted._2
+        // do Z ordering for all entities that need to be drawn
+        val parted = entities.filter(_.enabled).sortWith(_.pos.y < _.pos.y).partition(_.pos.y < player.pos.y)
+        drawBeforePlayer = parted._1
+        drawAfterPlayer = parted._2
+      }
     }
     storyTexts.filterNot(_.alive).foreach(storyTexts -= _)
   }

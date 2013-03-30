@@ -140,9 +140,10 @@ object Entities {
       case Hard => 0.03f
       case Boss => 0.02f
     }
-    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).map { c =>
-      GameProgress.randomMonster(level, player, c.pos * 16)
-    }
+//    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).map { c =>
+//      GameProgress.randomMonster(level, player, c.pos * 16)
+//    }
+    val monsters = Nil
     
     (monsters.size, coins ++ monsters)
   }
@@ -193,7 +194,7 @@ object Entities {
               scene.win
               true
             } else {
-              val text = new CenteredTextBox(width = 250, text = "Die Kiste bleibt verschlossen,\nes leben noch Monster...")
+              val text = new CenteredTextBox(width = 250, text = "Die Kiste bleibt verschlossen,\nes leben noch " + scene.numMonsters + " Monster...")
               scene.addOverlay(text)
               scene.in(5 seconds, (_ => text.alive = false))
               false
