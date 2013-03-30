@@ -21,21 +21,8 @@ import de.atextor.madv.engine.LevelSetting
 import de.atextor.madv.engine.Easy
 import de.atextor.madv.engine.Medium
 import de.atextor.madv.engine.Hard
+import de.atextor.madv.engine.Boss
 import scala.util.Random
-
-object Items {
-  val BasicItems = List(SmallHealthPotion(), MediumHealthPotion(), SpeedPotion(), DefenseScroll(), RandomTeleportScroll())
-  val MediumItems = List(MediumHealthPotion(), LargeHealthPotion(), SpeedPotion(), DefenseScroll(), AttackScroll(),
-      MaxHealthPotion(), RearmChestsScroll(), MagicMapScroll(), RandomTeleportScroll(), IncreaseMaxHealthPotion())
-  val PremiumItems = List(LargeHealthPotion(), MaxHealthPotion(), IncreaseMaxHealthPotion(), MagicMapScroll(),
-      RearmChestsScroll(), SpeedPotion(), AttackScroll(), DefenseScroll(), ExitTeleportScroll())
-      
-  def random(ls: LevelSetting): GameItem = ls.difficulty match {
-    case Easy => Random shuffle BasicItems head
-    case Medium => Random shuffle MediumItems head
-    case Hard => Random shuffle PremiumItems head
-  }
-}
 
 // Inventory items
 case class Muffin extends GameItem(ItemGameItem, "Magischer Muffin",

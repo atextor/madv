@@ -43,7 +43,12 @@ import de.atextor.madv.engine.Action
 import de.atextor.madv.engine.Inventory
 import de.atextor.madv.engine.IsGoodRearmable
 import de.atextor.madv.engine.IsCollectible
+import de.atextor.madv.engine.Easy
+import de.atextor.madv.engine.Medium
+import de.atextor.madv.engine.Hard
+import de.atextor.madv.engine.Boss
 import scala.util.Random
+import de.atextor.madv.engine.Chaser
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -113,7 +118,19 @@ object Entities {
       new SilverCoin(player, (pc.pos + Left) * 16) :: Nil
     }
     
-    coins
+    // Place monsters
+    val possibleMonsterCells = level.placedCells.filter(_.cell.properties contains Walkable)
+    val monsterRate = level.setting.difficulty match {
+      case Easy => 0.007f
+      case Medium => 0.02f
+      case Hard => 0.03f
+      case Boss => 0f
+    }
+    val monsters = Random.shuffle(possibleMonsterCells).take((possibleMonsterCells.size * monsterRate).toInt).flatMap { c =>
+      GameProgress.randomMonster(level, player, c.pos * 16)
+    }
+    
+    coins ++ monsters
   }
   
   def placeChestsInLevel(level: Level, scene: Scene): Level = {
@@ -132,11 +149,18 @@ object Entities {
     }
     val chestPositions = level.placedCells.filter(chestPositionProperty)
     
-    // 2 percent of possible positions will be chests
-    val chests = Random.shuffle(chestPositions).take((chestPositions.size * 0.02f).toInt).map { pc =>
+    // Some percent of possible positions will be chests
+    val rate = level.setting.difficulty match {
+      case Easy => 0.02f
+      case Medium => 0.015f
+      case Hard => 0.01f
+      case Boss => 0f
+    }
+    
+    val chests = Random.shuffle(chestPositions).take((chestPositions.size * rate).toInt).map { pc =>
       (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
         onTouch = { t =>
-          val item = Items.random(level.setting)
+          val item = GameProgress.randomItem(level.setting)
           val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\n" + item.name)
           scene.addOverlay(text)
           scene.in(5 seconds, (_ => text.alive = false))

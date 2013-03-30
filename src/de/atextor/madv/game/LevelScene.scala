@@ -52,6 +52,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   val currentLevelSetting = levelSettings.iterator
   
   def nextLevelSetting = {
+    Audio.slash.stop
     currentLevelSetting.next
   }
   
@@ -90,9 +91,9 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
     Inventory.addItem(ExitTeleportScroll())
     Inventory.addItem(ExitTeleportScroll())
     
-//    SpellSelection.addItem(ShurikenSpell())
-//    SpellSelection.addItem(BallLightningSpell())
-//    SpellSelection.addItem(SpiralSpell())
+    SpellSelection.addItem(ShurikenSpell())
+    SpellSelection.addItem(BallLightningSpell())
+    SpellSelection.addItem(SpiralSpell())
 //    SpellSelection.addItem(JumpSpell())
     
     Shop.addItem(ShurikenSpell())

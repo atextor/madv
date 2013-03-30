@@ -19,15 +19,16 @@ sealed trait Difficulty
 case object Easy extends Difficulty
 case object Medium extends Difficulty
 case object Hard extends Difficulty
+case object Boss extends Difficulty
 
 sealed abstract class LevelSetting(val caveDef: CaveDefinition, val island: Boolean, val hasExit: Boolean = true, val difficulty: Difficulty)
 case object CoherentBlue extends LevelSetting(BlueCave, island = false, difficulty = Easy)
-case object CoherentGreen extends LevelSetting(GreenCave, island = false, difficulty = Medium)
+case object CoherentGreen extends LevelSetting(GreenCave, island = false, difficulty = Easy)
 case object CoherentLava extends LevelSetting(LavaCave, island = false, difficulty = Medium)
+case object IslandGreen extends LevelSetting(GreenCave, island = true, difficulty = Medium)
 case object IslandBlue extends LevelSetting(BlueCave, island = true, difficulty = Hard)
-case object IslandGreen extends LevelSetting(GreenCave, island = true, difficulty = Hard)
 case object IslandLava extends LevelSetting(LavaCave, island = true, difficulty = Hard)
-case object IslandBlack extends LevelSetting(BlackCave, island = true, difficulty = Hard, hasExit = false)
+case object IslandBlack extends LevelSetting(BlackCave, island = true, difficulty = Boss, hasExit = false)
 
 case class LevelCell(
   val layer0: Option[Renderable] = None,

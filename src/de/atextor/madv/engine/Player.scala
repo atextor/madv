@@ -11,7 +11,7 @@ class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nex
     skin = entitySkin,
     spriteAction = Walk,
     startPosition = startPosition.toVec2f,
-    speed = 1,
+    speed = 5,//1,
     maxHp = 100,
     damage = 0,
     onHurt = DoNothing,
@@ -36,10 +36,10 @@ class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nex
   
   override def move {
     pos += movingDirection * speed
-//    if (Constants.debug) return
     val p = level.cellAt(pos.toVec2d).properties
-    if (!(p contains Walkable)) goBack
     if (p contains Exit) nextLevel()
+    if (Constants.debug) return
+    if (!(p contains Walkable)) goBack
   }
   
   override def hurt(damage: Int) {
