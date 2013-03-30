@@ -1,5 +1,6 @@
 Muffin Adventure|Ein Spiel von Andreas Textor
-Font: Cure by Youngjin Hahn und Alec Zapka (artwiz)|Erweitert um deutsche Zeichen von Andreas Textor
+Musik|Eric Skiff|http://ericskiff.com/music/
+Schriftart|Cure von Youngjin Hahn und Alec Zapka (artwiz)|Erweitert um deutsche Zeichen von Andreas Textor
 Cave Tileset|MrBeast|http://opengameart.org/content/cave-tileset-0
 Female Orc Sprite|madmarcel|http://opengameart.org/content/lpc-female-orcogregoblintroll-base-walkcycle
 Female Sprites|makrohn|http://opengameart.org/content/lpc-ladies
