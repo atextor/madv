@@ -110,9 +110,9 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     
     val setting = nextLevelSetting
     val l = if (setting.island) {
-      Level.generateIslandLevel(setting.caveDef, withExit = setting.hasExit)
+      Level.generateIslandLevel(setting)
     } else {
-      Level.generateCoherentLevel(setting.caveDef, withExit = setting.hasExit)
+      Level.generateCoherentLevel(setting)
     }
     
     val map = levelTransformations(l)

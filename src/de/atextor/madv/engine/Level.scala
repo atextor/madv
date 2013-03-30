@@ -15,14 +15,19 @@ case object Walkable extends CellProperty
 case object Exit extends CellProperty
 case object IslandBorder extends CellProperty
 
-sealed abstract class LevelSetting(val caveDef: CaveDefinition, val island: Boolean, val hasExit: Boolean = true)
-case object CoherentBlue extends LevelSetting(BlueCave, island = false)
-case object CoherentGreen extends LevelSetting(GreenCave, island = false)
-case object CoherentLava extends LevelSetting(LavaCave, island = false)
-case object IslandBlue extends LevelSetting(BlueCave, island = true)
-case object IslandGreen extends LevelSetting(GreenCave, island = true)
-case object IslandLava extends LevelSetting(LavaCave, island = true)
-case object IslandBlack extends LevelSetting(BlackCave, island = true, hasExit = false)
+sealed trait Difficulty
+case object Easy extends Difficulty
+case object Medium extends Difficulty
+case object Hard extends Difficulty
+
+sealed abstract class LevelSetting(val caveDef: CaveDefinition, val island: Boolean, val hasExit: Boolean = true, val difficulty: Difficulty)
+case object CoherentBlue extends LevelSetting(BlueCave, island = false, difficulty = Easy)
+case object CoherentGreen extends LevelSetting(GreenCave, island = false, difficulty = Medium)
+case object CoherentLava extends LevelSetting(LavaCave, island = false, difficulty = Medium)
+case object IslandBlue extends LevelSetting(BlueCave, island = true, difficulty = Hard)
+case object IslandGreen extends LevelSetting(GreenCave, island = true, difficulty = Hard)
+case object IslandLava extends LevelSetting(LavaCave, island = true, difficulty = Hard)
+case object IslandBlack extends LevelSetting(BlackCave, island = true, difficulty = Hard, hasExit = false)
 
 case class LevelCell(
   val layer0: Option[Renderable] = None,
@@ -153,7 +158,8 @@ case object StairsEntry extends SpriteSheetHelper {
 object Level {
   val scale = 1//if (Constants.debug) 2 else 1
   
-  private def cellularAutomatonToLevel(ca: CellularAutomaton)(implicit cd: CaveDefinition): Level = {
+  private def cellularAutomatonToLevel(ca: CellularAutomaton, setting: LevelSetting): Level = {
+    implicit val cd = setting.caveDef
     val alive = ca.isAlive _
     val dead = ca.isDead _
     val levelCells = ca.allCells.map (_ match {
@@ -172,7 +178,7 @@ object Level {
       case c if alive(c + Up + Left)                                 => LevelCell(layer0 = Some(cd.bottomRight))(IslandBorder)
       case c => LevelCell(layer0 = Some(cd.space))()
     })
-    Level(width = ca.width, height = ca.height, cells = levelCells)
+    Level(width = ca.width, height = ca.height, cells = levelCells, setting = setting)
   }
   
   private def placeExit[L <: Level](l: L): Level = {
@@ -256,30 +262,33 @@ object Level {
   val cave = new CellularAutomaton.Rule(born = Set(6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
   val smooth = new CellularAutomaton.Rule(born = Set(5, 6, 7, 8), survive = Set(3, 4, 5, 6, 7, 8))
   
-  def generateCoherentLevel(implicit cd: CaveDefinition, withExit: Boolean = true) = {
+  def generateCoherentLevel(setting: LevelSetting) = {
+    implicit val cd = setting.caveDef
     CellularAutomaton(40, 40).randomFill(0.4).upscale(smooth)(smooth)(smooth).addDeadBorder.fixPotholes.
       |> (ca => ca.copy(liveCells = ca.sortAreasBySize(ca.areas).last)).
-      |> (cellularAutomatonToLevel(_)).
-      |> (l => if (withExit) placeExit(l) else l)
+      |> (cellularAutomatonToLevel(_, setting)).
+      |> (l => if (setting.hasExit) placeExit(l) else l)
   }
   
-  def generateIslandLevel(implicit cd: CaveDefinition, withExit: Boolean = true) = {
+  def generateIslandLevel(setting: LevelSetting) = {
+    implicit val cd = setting.caveDef
     CellularAutomaton(50, 50).randomFill(0.5)(cave)(smooth)(smooth)(smooth).upscale(smooth).addDeadBorder.fixPotholes.
-      |> (cellularAutomatonToLevel(_)).
-      |> (l => if (withExit) placeExit(l) else l)
+      |> (cellularAutomatonToLevel(_, setting)).
+      |> (l => if (setting.hasExit) placeExit(l) else l)
   }
   
-  def generateStaticSmallLevel(implicit cd: CaveDefinition) = {
+  def generateStaticSmallLevel(setting: LevelSetting) = {
+    implicit val cd = setting.caveDef
     val allCells = CellularAutomaton(20, 20).allCells.toSet
     val island = ((for (x <- 0 until 20; y <- 0 until 20) yield (x, y)) collect {
       case (x, y) if (math.sqrt((x - 10) * (x - 10) + (y - 10) * (y - 10)) > 6) => Cell(x, y)
     }).toSet
     CellularAutomaton(width = 20, height = 20, liveCells = allCells -- island).
-      |> (cellularAutomatonToLevel(_))
+      |> (cellularAutomatonToLevel(_, setting))
   }
 }
   
-case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Vec2d(0, 0)) {
+case class Level(width: Int, height: Int, cells: IndexedSeq[LevelCell], exitLocation: Vec2d = Vec2d(0, 0), setting: LevelSetting) {
   lazy val placedCells = cells.zipWithIndex.map(c => PlacedLevelCell(indexToVec(c._2), c._1))
   
   // Path dependent type, as placed cells depend on this level's cells collection

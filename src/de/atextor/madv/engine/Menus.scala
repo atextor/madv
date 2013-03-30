@@ -11,7 +11,7 @@ sealed trait GameItemType
 case object SpellGameItem extends GameItemType
 case object ItemGameItem extends GameItemType
 
-abstract class GameItem(val itemType: GameItemType, name: String, description: String, val price: Int, val effect: Option[GameEffect]) extends Renderable {
+abstract class GameItem(val itemType: GameItemType, val name: String, description: String, val price: Int, val effect: Option[GameEffect]) extends Renderable {
   val text = new Text(name)
   val priceText = new Text(price.toString)
   val desc = new Text(description)

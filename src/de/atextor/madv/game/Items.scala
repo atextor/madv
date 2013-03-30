@@ -1,7 +1,6 @@
 package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
-
 import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.GameItem
@@ -18,6 +17,25 @@ import de.atextor.madv.engine.Right
 import de.atextor.madv.engine.Left
 import de.atextor.madv.engine.Down
 import de.atextor.madv.engine.Walkable
+import de.atextor.madv.engine.LevelSetting
+import de.atextor.madv.engine.Easy
+import de.atextor.madv.engine.Medium
+import de.atextor.madv.engine.Hard
+import scala.util.Random
+
+object Items {
+  val BasicItems = List(SmallHealthPotion(), MediumHealthPotion(), SpeedPotion(), DefenseScroll(), RandomTeleportScroll())
+  val MediumItems = List(MediumHealthPotion(), LargeHealthPotion(), SpeedPotion(), DefenseScroll(), AttackScroll(),
+      MaxHealthPotion(), RearmChestsScroll(), MagicMapScroll(), RandomTeleportScroll(), IncreaseMaxHealthPotion())
+  val PremiumItems = List(LargeHealthPotion(), MaxHealthPotion(), IncreaseMaxHealthPotion(), MagicMapScroll(),
+      RearmChestsScroll(), SpeedPotion(), AttackScroll(), DefenseScroll(), ExitTeleportScroll())
+      
+  def random(ls: LevelSetting): GameItem = ls.difficulty match {
+    case Easy => Random shuffle BasicItems head
+    case Medium => Random shuffle MediumItems head
+    case Hard => Random shuffle PremiumItems head
+  }
+}
 
 // Inventory items
 case class Muffin extends GameItem(ItemGameItem, "Magischer Muffin",
@@ -125,3 +143,7 @@ case class JumpSpell() extends GameItem(SpellGameItem, "Sprung",
        }
      } 
   })))
+
+
+
+

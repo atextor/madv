@@ -136,10 +136,11 @@ object Entities {
     val chests = Random.shuffle(chestPositions).take((chestPositions.size * 0.02f).toInt).map { pc =>
       (pc.pos, new Chest(startPos = pc.pos.toVec2f * 16,
         onTouch = { t =>
-          val text = new CenteredTextBox(width = 150, text = "Opened chest\nFound a potion!")
+          val item = Items.random(level.setting)
+          val text = new CenteredTextBox(width = 250, text = "Die Kiste enthielt:\n" + item.name)
           scene.addOverlay(text)
-          scene.at(t.milliseconds + 5.seconds, (_ => text.alive = false))
-          Inventory.addItem(new SmallHealthPotion())
+          scene.in(5 seconds, (_ => text.alive = false))
+          Inventory.addItem(item)
         }))
     }
     
