@@ -4,11 +4,11 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
+
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.BasicGameState
 import org.newdawn.slick.state.StateBasedGame
-import de.atextor.madv.game.Effect
 
 abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var ticks: Int = 0
@@ -23,7 +23,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   
   val pressedKeys = Queue[Int]()  
   val entities: ListBuffer[Entity] = ListBuffer()
-  val effects: ListBuffer[Effect] = ListBuffer()
+  val effects: ListBuffer[Entity] = ListBuffer()
   val overlays: ListBuffer[Overlay] = ListBuffer()
   val storyTexts: ListBuffer[StoryText] = ListBuffer()
   
@@ -33,8 +33,8 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   var drawAfterPlayer: Seq[Entity] = Seq()
   
   def inStoryMode = !(storyTexts.isEmpty)
-  def addEffect(e: Effect): ListBuffer[Effect] = effects += e
-  def addEffects(e: Seq[Effect]): ListBuffer[Effect] = effects ++= e
+  def addEffect(e: Entity): ListBuffer[Entity] = effects += e
+  def addEffects(e: Seq[Entity]): ListBuffer[Entity] = effects ++= e
   def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
   def addStoryText(t: StoryText) = storyTexts += t
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
@@ -99,6 +99,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   }
   
   def levelTransformations(l: Level): Level
+  def levelDecorations(l: Level): Seq[Entity]
   
   def startNewLevel {
 //    implicit val caveDef = LavaCave
@@ -118,6 +119,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
       player.pos = startCell.pos * 16
     }
     
+    addEntities(levelDecorations(map))
     automap = new AutoMap(map, player)
     player.autoMap = Some(automap)
     level = Some(map)
@@ -125,6 +127,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     overlays.clear
     menus.foreach(addOverlay(_))
     addOverlay(new HealthDisplay(player))
+    addOverlay(new GoldDisplay(player))
     
     actions.clear
     

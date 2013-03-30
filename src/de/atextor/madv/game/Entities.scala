@@ -92,8 +92,6 @@ object Entities {
   def placeEntitiesInLevel(player: Player, level: Level): Seq[Entity] = {
     import level.PlacedLevelCell
     
-    val playPling: Action = if (Constants.debug) NoAction else (Audio.pling.play _)
-    
     // Place a bunch of coins at the end of land
     val landsEndProperty: PlacedLevelCell => Boolean = { c =>
       (c.cell.properties.contains(Walkable)) &&
@@ -106,20 +104,20 @@ object Entities {
             ((c + Left * 2).cell.properties.contains(Walkable)),
             ((c + Right * 2).cell.properties.contains(Walkable))).filter(identity).size == 1)
     }
-    val coins = level.placedCells.filter(landsEndProperty).flatMap { pc =>
-      new GoldCoin(player, pc.pos * 16, onTouch = playPling) ::
-      new SilverCoin(player, (pc.pos + Up) * 16, onTouch = playPling) ::
-      new SilverCoin(player, (pc.pos + Down) * 16, onTouch = playPling) ::
-      new SilverCoin(player, (pc.pos + Right) * 16, onTouch = playPling) ::
-      new SilverCoin(player, (pc.pos + Left) * 16, onTouch = playPling) :: Nil
-    }
-    
     /*
-    // Coins on every walkable cell
-    val coins = level.placedCells.filter(_.cell.properties contains Walkable).map { pc =>
-      new GoldCoin(player, pc.pos * 16, onTouch = playPling)
+    val coins = level.placedCells.filter(landsEndProperty).flatMap { pc =>
+      new GoldCoin(player, pc.pos * 16) ::
+      new SilverCoin(player, (pc.pos + Up) * 16) ::
+      new SilverCoin(player, (pc.pos + Down) * 16) ::
+      new SilverCoin(player, (pc.pos + Right) * 16) ::
+      new SilverCoin(player, (pc.pos + Left) * 16) :: Nil
     }
     */
+    
+    // Coins on every walkable cell
+    val coins = level.placedCells.filter(_.cell.properties contains Walkable).map { pc =>
+      new GoldCoin(player, pc.pos * 16)
+    }
     coins
   }
   
@@ -190,10 +188,26 @@ class Effect(startPos: Vec2f, visual: Animation) extends
   } 
 }
 
-class GoldCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.goldCoinSprite)
-class SilverCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.silverCoinSprite)
-class CopperCoin(player: Player, startPos: Vec2d, onTouch: Action) extends Collectible(player, startPos.toVec2f, onTouch, Entities.copperCoinSprite)
+class GoldCoin(player: Player, startPos: Vec2d) extends
+  Collectible(player = player, startPos = startPos.toVec2f, visual = Entities.goldCoinSprite, onTouch = { () => 
+    Audio.pling.play
+    player.gold += 10
+})
+
+class SilverCoin(player: Player, startPos: Vec2d) extends
+  Collectible(player = player, startPos = startPos.toVec2f, visual = Entities.silverCoinSprite, onTouch = { () =>
+    Audio.pling.play
+    player.gold += 5
+})
+
+class CopperCoin(player: Player, startPos: Vec2d) extends
+  Collectible(player = player, startPos = startPos.toVec2f, visual = Entities.copperCoinSprite, onTouch = { () =>
+    Audio.pling.play
+    player.gold += 1
+})
+
 class Explosion(startPos: Vec2f) extends Effect(startPos, Entities.explosion)
+
 class CenteredTextBox(width: Int, text: String) extends TextBox(width, text, Vec2d(200 - width / 2, 12))
 
 class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (

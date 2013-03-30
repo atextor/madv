@@ -24,6 +24,7 @@ class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nex
   var cooldownBoost = 0
   var armor = 0
   var autoMap: Option[AutoMap] = None
+  var gold: Int = 0
   
   override def draw(x: Float, y: Float) = {
     shadow.draw(x, y + 5)

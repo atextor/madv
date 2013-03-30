@@ -28,6 +28,7 @@ object Madv {
     val madv = new Madv
     val container = new AppGameContainer(madv)
     madv.container = container 
+    container.setShowFPS(false)
     container.setDisplayMode(800, 600, false)
     container.setTargetFrameRate(60)
     container.start

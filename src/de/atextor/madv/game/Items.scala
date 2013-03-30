@@ -24,19 +24,19 @@ case class Muffin extends GameItem(ItemGameItem, "Magischer Muffin",
     "Ein seltsamer sprechender\nMuffin.", price = 0, effect = Some(TalkToMuffin))
 
 case class SmallHealthPotion() extends GameItem(ItemGameItem, "Kleiner Heiltrank",
-    "Regeneriert 5 Lebenspunkte", price = 10, effect = Some(PlayerHealth(5)))
+    "Regeneriert 5 Lebenspunkte.", price = 10, effect = Some(PlayerHealth(5)))
 
 case class MediumHealthPotion() extends GameItem(ItemGameItem, "Mittlerer Heiltrank",
-    "Regeneriert 20 Lebenspunkte", price = 20, effect = Some(PlayerHealth(10)))
+    "Regeneriert 20 Lebenspunkte.", price = 20, effect = Some(PlayerHealth(10)))
 
 case class LargeHealthPotion() extends GameItem(ItemGameItem, "Starker Heiltrank",
-    "Regeneriert 50 Lebenspunkte", price = 80, effect = Some(PlayerHealth(50)))
+    "Regeneriert 50 Lebenspunkte.", price = 80, effect = Some(PlayerHealth(50)))
 
 case class MaxHealthPotion() extends GameItem(ItemGameItem, "Maximal-Heiltrank",
-    "Regeneriert die vollen Lebenspunkte", price = 150, effect = Some(PlayerMaxHealth))
+    "Regeneriert die vollen Lebenspunkte.", price = 150, effect = Some(PlayerMaxHealth))
 
 case class IncreaseMaxHealthPotion() extends GameItem(ItemGameItem, "Lebenspunkte-Trank",
-    "Erhöht dauerthaft die\nmaximalen Lebenspunkte", price = 250, effect = Some(PlayerMaxHealthIncrease(10)))
+    "Erhöht dauerthaft die\nmaximalen Lebenspunkte.", price = 250, effect = Some(PlayerMaxHealthIncrease(10)))
 
 case class MagicMapScroll() extends GameItem(ItemGameItem, "Schriftrolle der Kartographie",
     "Warum selbst erkunden, was Magie\nfür einen erledigen kann?", price = 400, effect = Some(MagicMapping))
@@ -45,19 +45,19 @@ case class RearmChestsScroll() extends GameItem(ItemGameItem, "Schriftrolle des 
     "Verspricht ungeahnte Reichtümer.", price = 800, effect = Some(RearmChests))
 
 case class SpeedPotion() extends GameItem(ItemGameItem, "Energy Drink",
-    "Beschleunigt dich für\n30 Sekunden", price = 70, effect = Some(PlayerSpeed(0.5f)))
+    "Beschleunigt dich für\n30 Sekunden.", price = 70, effect = Some(PlayerSpeed(0.5f)))
 
 case class AttackScroll() extends GameItem(ItemGameItem, "Schriftrolle der Offensive",
-    "Erhöht die Angriffs-\ngeschwindigkeit um 10%", price = 150, effect = Some(PlayerCastSpeed(50)))
+    "Erhöht die Angriffs-\ngeschwindigkeit um 10%.", price = 150, effect = Some(PlayerCastSpeed(50)))
 
 case class DefenseScroll() extends GameItem(ItemGameItem, "Schriftrolle der Defensive",
     "Absorbiert erlittenen Schaden\n2 Minuten lang.", price = 150, effect = Some(PlayerArmor(1)))
 
 case class RandomTeleportScroll() extends GameItem(ItemGameItem, "Schriftrolle des Chaos",
-    "Teleportiert an eine\nzufällige Stelle", price = 50, effect = Some(RandomTeleport))
+    "Teleportiert an eine\nzufällige Stelle.", price = 50, effect = Some(RandomTeleport))
 
 case class ExitTeleportScroll() extends GameItem(ItemGameItem, "Schriftrolle der Faulheit",
-    "Teleportiert direkt\nzum Ausgang", price = 200, Some(ExitTeleport))
+    "Teleportiert direkt\nzum Ausgang.", price = 200, Some(ExitTeleport))
 
 case class SpawnMonsterScroll() extends GameItem(ItemGameItem, "Schriftrolle des Monsters",
     "Lässt ein Monster entstehen.", price = 30, effect = Some(SpawnMonster))
@@ -101,7 +101,7 @@ case class SpiralSpell() extends GameItem(SpellGameItem, "Wirbel",
   })))
 
 case class JumpSpell() extends GameItem(SpellGameItem, "Sprung",
-  "Teleportiert auf die nächste\nbetretbare Stelle in Blickrichtung", price = 1000, effect = Some(PlayerSpell("Sprung", { player: Player =>
+  "Teleportiert auf die nächste\nbetretbare Stelle in Blickrichtung.", price = 1000, effect = Some(PlayerSpell("Sprung", { player: Player =>
      new Spell(cooldown = 1 seconds, onFire = DoNothing) {
        def apply(pos: Vec2f) = {
          val dir = player.lookingDirection

@@ -11,7 +11,7 @@ sealed trait GameItemType
 case object SpellGameItem extends GameItemType
 case object ItemGameItem extends GameItemType
 
-abstract class GameItem(val itemType: GameItemType, name: String, description: String, price: Int, val effect: Option[GameEffect]) extends Renderable {
+abstract class GameItem(val itemType: GameItemType, name: String, description: String, val price: Int, val effect: Option[GameEffect]) extends Renderable {
   val text = new Text(name)
   val priceText = new Text(price.toString)
   val desc = new Text(description)
@@ -97,11 +97,11 @@ abstract class Menu(title: String, val itemsStackable: Boolean, drawPrices: Bool
     case _ =>
   }
   
-  def activate(processItem: GameItem => Unit)
+  def activate(player: Player, processItem: GameItem => Unit)
 }
 
 object Inventory extends Menu("Inventar", itemsStackable = true) {
-  def activate(processItem: GameItem => Unit) {
+  def activate(player: Player, processItem: GameItem => Unit) {
     val item: Option[GameItem] = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
     item.foreach { i =>
       if (i != Muffin()) {
@@ -113,21 +113,26 @@ object Inventory extends Menu("Inventar", itemsStackable = true) {
 }
 
 object SpellSelection extends Menu("Zaubersprüche", itemsStackable = false) {
-  def activate(processItem: GameItem => Unit) {
+  def activate(player: Player, processItem: GameItem => Unit) {
     val item = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
     item.foreach(processItem(_))
   }
 }
 
 object Shop extends Menu("Muffin Shop", itemsStackable = false, drawPrices = true) {
-  def activate(processItem: GameItem => Unit) {
+  def activate(player: Player, processItem: GameItem => Unit) {
     val item: Option[GameItem] = if (selection > -1) Some(stuff.groupBy(_.toString).toList(selection)._2.head) else None
     item.foreach { i =>
-      Audio.cashregister.play
-      if (i.itemType == SpellGameItem) {
-        SpellSelection.addItem(i)
-      } else if (i.itemType == ItemGameItem) {
-        Inventory.addItem(i)
+      if (i.price <= player.gold || Constants.debug) {
+        player.gold -= i.price
+        Audio.cashregister.play
+        if (i.itemType == SpellGameItem) {
+          SpellSelection.addItem(i)
+        } else if (i.itemType == ItemGameItem) {
+          Inventory.addItem(i)
+        }
+      } else {
+        Audio.bad.play
       }
     }
   }

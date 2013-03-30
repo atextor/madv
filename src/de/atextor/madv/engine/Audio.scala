@@ -16,6 +16,7 @@ object Audio {
   lazy val teleport = sound("teleport")
   lazy val cashregister = sound("cashregister")
   lazy val explosion = sound("explosion")
+  lazy val bad = sound("bad")
   
   private lazy val shoots = (1 to 5).toList.map(n => sound(s"shoot${n}"))
   private def randomShootSound = Random shuffle shoots head

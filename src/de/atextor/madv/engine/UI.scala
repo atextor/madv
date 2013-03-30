@@ -28,6 +28,16 @@ class HealthDisplay(player: Player) extends Overlay(pos = Vec2d(180, 2)) {
   }
 }
 
+class GoldDisplay(player: Player) extends Overlay(pos = Vec2d(30, 2)) {
+  val text = new Text("0")
+  
+  override def draw {
+    text.text = player.gold.toString + " Gold"
+    text.showAll 
+    text.draw(pos.x, pos.y)
+  }
+}
+
 class TextBox(width: Int, text: String, startPos: Vec2d) extends Overlay(pos = startPos) {
   val size = Vec2d(width, Text.getTextHeight(text) + 15)
   val box = new FrameBox(size)

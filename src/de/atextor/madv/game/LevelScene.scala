@@ -36,6 +36,7 @@ import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.SpellSelection
 import de.atextor.madv.engine.Shop
 import de.atextor.madv.engine.GameItem
+import de.atextor.madv.engine.Entity
 
 class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   override val getID = 1
@@ -43,6 +44,10 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
   
   def levelTransformations(l: Level): Level = {
     Entities.placeChestInLevel(l, this)
+  }
+  
+  def levelDecorations(l: Level): Seq[Entity] = {
+    Entities.placeEntitiesInLevel(player, l)
   }
   
   def init(gc: GameContainer, game: StateBasedGame) {
@@ -131,7 +136,7 @@ class LevelTest(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
           if (currentMenu.isEmpty) exitScene else setMenu(None)
         case Input.KEY_ENTER =>
           currentMenu.foreach { menu =>
-            menu.activate ( (i: GameItem) => {
+            menu.activate(player, (i: GameItem) => {
               i.effect.foreach(e => GameEffects.apply(this, e, level.get, automap, player))
             })
           }
