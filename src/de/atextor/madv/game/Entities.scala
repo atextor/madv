@@ -217,7 +217,7 @@ object Entities {
 }
 
 class Chest(startPos: Vec2f, onTouch: Scene => Boolean) extends
-    Entity(size = Vec2d(32, 32), visual = Some(Entities.chestSprite), pos = startPos) {
+    Entity(size = Vec2d(32, 35), visual = Some(Entities.chestSprite), pos = startPos) {
   visual.get.stop
   val properties = List(IsGoodRearmable)
   def tick(scene: Scene, delta: Int) = {
