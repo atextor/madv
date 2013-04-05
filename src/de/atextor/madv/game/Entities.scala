@@ -49,6 +49,7 @@ import de.atextor.madv.engine.Hard
 import de.atextor.madv.engine.Boss
 import scala.util.Random
 import de.atextor.madv.engine.Chaser
+import de.atextor.madv.engine.Container
 
 object Entities {
   private def animation(sheet: String, sizeX: Int, frames: Int, delay: Duration, sizeY: Int = 0) =
@@ -60,31 +61,31 @@ object Entities {
      (torso -> ("female_vest" :: "female_forestrobe" :: Nil)),
      (belt  -> ("female_blackbelt" :: "female_ironbuckle" :: Nil)),
      (feet  -> ("female_grayslippers" :: Nil)))
-  lazy val femaleOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def femaleOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_leather_torso" :: "female_leather_shoulders" :: Nil)),
      (belt  -> ("female_brownbelt" :: Nil)),
      (weapon -> ("dagger" :: Nil)))
-  lazy val femaleArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def femaleArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_chainmail" :: "female_plate_shoulders" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)),
      (weapon -> ("dagger" :: Nil)))
-  lazy val femaleHeavyArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def femaleHeavyArmoredOrcSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("female_orc" :: Nil)),
      (torso -> ("female_plate_mail" :: "female_plate_shoulders" :: Nil)),
      (feet  -> ("female_plate_boots" :: "female_plate_greaves" :: Nil)),
      (weapon -> ("dagger" :: Nil)),
      (belt  -> ("female_ironbelt" :: Nil)))
-  lazy val skeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def skeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("skeleton" :: Nil)),
      (weapon -> ("dagger" :: Nil)))
-  lazy val armoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def armoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("skeleton" :: Nil)),
      (torso -> ("plate_armor_torso" :: "leather_armor_torso" :: Nil)),
      (head  -> ("robe_hood" :: Nil)),
      (weapon -> ("dagger" :: Nil)))
-  lazy val heavyArmoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
+  def heavyArmoredSkeletonSkin = EntitySkin(Vec2d(64, 64), List(Hurt, Slash, Spellcast, Walk),
      (body  -> ("skeleton" :: Nil)),
      (torso -> ("plate_armor_torso" :: "plate_armor_arms_shoulders" :: Nil)),
      (weapon -> ("dagger" :: Nil)))
@@ -207,7 +208,7 @@ object Entities {
     chests.foldLeft(level) { case (l, c) =>
       val updatedCells = l.placedCells.map { _ match {
         case p if p.pos == c._1 => {
-          LevelCell(layer0 = p.cell.layer0, layer1 = p.cell.layer1)(properties = (p.cell.properties.toList diff List(Walkable)): _*)
+          LevelCell(layer0 = p.cell.layer0, layer1 = p.cell.layer1)(properties = (p.cell.properties.toList ++ List(Container) diff List(Walkable)): _*)
         }
         case p => p.cell
       }}
