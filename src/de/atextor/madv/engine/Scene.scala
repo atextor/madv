@@ -62,6 +62,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   
   def update(gc: GameContainer, game: StateBasedGame, delta: Int) {
     if (!running) gc.exit
+    if (!gc.hasFocus) pressedKeys.clear
     
     ticks += delta
     var changed = false
@@ -71,7 +72,7 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     }
     if (changed) actions = actions.sortWith(_._1 < _._1)
     
-    if (currentMenu.isEmpty) {
+    if (currentMenu.isEmpty && gc.hasFocus) {
       storyTexts.headOption.foreach(_.update(this, ticks))
       if (!inStoryMode) {
         player.update(this, ticks)
