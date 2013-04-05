@@ -4,7 +4,6 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.Queue
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
-
 import org.newdawn.slick.GameContainer
 import org.newdawn.slick.Input
 import org.newdawn.slick.state.BasicGameState
@@ -125,12 +124,20 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
     
     val map = levelTransformations(l)
     
-    val startCell = map.find(_.cell.properties contains Walkable).get
+    val startProperty: map.PlacedLevelCell => Boolean = { c =>
+      (c.cell.properties.contains(Walkable)) &&
+      ((c + Up).cell.properties.contains(Walkable)) &&
+      ((c + Down).cell.properties.contains(Walkable)) &&
+      ((c + Left).cell.properties.contains(Walkable)) &&
+      ((c + Right).cell.properties.contains(Walkable))
+    }
+    
+    val startCell = map.find(startProperty).get
     if (player == null) {
       player = new Player(level = map, startPosition = startCell.pos * 16, entitySkin = playerSkin, nextLevel = startNewLevel _)
     } else {
       player.level = map
-      player.pos = startCell.pos * 16
+      player.pos = startCell.pos.toVec2f * 16
     }
     
     addEntities(levelDecorations(map))
