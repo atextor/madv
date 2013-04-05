@@ -14,6 +14,7 @@ sealed abstract class CellProperty
 case object Walkable extends CellProperty
 case object Exit extends CellProperty
 case object IslandBorder extends CellProperty
+case object Container extends CellProperty
 
 sealed trait Difficulty
 case object Easy extends Difficulty

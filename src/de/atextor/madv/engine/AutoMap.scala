@@ -16,6 +16,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
   
   val exit = Color.green
   val islandBorder = Color.black
+  val chest = Color.darkGray
   val playerColor = Color.red
   val invisible = new Color(0.0f, 0.0f, 0.0f, 0.0f)
   val walkable = new Color(1.0f, 1.0f, 1.0f, 0.6f)
@@ -27,6 +28,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
     case c if (c + Up + Left).cell.properties contains Exit => exit
     case c if c.cell.properties contains Walkable => walkable
     case c if c.cell.properties contains IslandBorder => islandBorder
+    case c if c.cell.properties contains Container => chest
     case _ => null  // Faster than creating Some(color) for every pixel
   }
   
@@ -43,7 +45,7 @@ class AutoMap(level: Level, player: Player) extends Renderable {
     val g = image.getGraphics
     g.setColor(playerColor)
     val p = player.pos / 16
-    g.fillRect(p.x, p.y, 2, 2)
+    g.fillRect(p.x, p.y, 1, 1)
   }
   
   def draw(x: Float, y: Float) = image.draw(x, y)
