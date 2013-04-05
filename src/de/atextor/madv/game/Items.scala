@@ -1,7 +1,6 @@
 package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
-import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.DoNothing
 import de.atextor.madv.engine.GameItem
 import de.atextor.madv.engine.ItemGameItem
@@ -74,7 +73,7 @@ case class ShurikenSpell() extends GameItem(SpellGameItem, "Shuriken",
       spawner = player,
       visual = Entities.shuriken,
       speed = 3.5f,
-      damage = 10,
+      damage = 100,
       directional = true)
     new Shooter(shooter, 500 millis, Audio.shoot _)
   })))

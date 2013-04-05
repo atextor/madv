@@ -2,7 +2,6 @@ package de.atextor.madv.game
 
 import scala.concurrent.duration.DurationInt
 import de.atextor.madv.engine.Util.pipelineSyntax
-import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.AutoMap
 import de.atextor.madv.engine.Chaser
 import de.atextor.madv.engine.Down

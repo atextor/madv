@@ -4,7 +4,6 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
 import org.newdawn.slick.Animation
 import org.newdawn.slick.SpriteSheet
-import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.Brain
 import de.atextor.madv.engine.Constants
 import de.atextor.madv.engine.Direction

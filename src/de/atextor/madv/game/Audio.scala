@@ -1,11 +1,8 @@
-package de.atextor.madv.engine
+package de.atextor.madv.game
 
-import org.newdawn.slick.openal.AudioLoader
-import org.newdawn.slick.util.ResourceLoader
-import org.newdawn.slick.Sound
 import scala.util.Random
-import de.atextor.madv.game.Madv
 import org.newdawn.slick.Music
+import org.newdawn.slick.Sound
 
 object Audio {
   private def sound(name: String) = new Sound(s"res/audio/${name}.wav")

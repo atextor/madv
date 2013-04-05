@@ -6,6 +6,7 @@ import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
 import de.atextor.madv.game.Muffin
 import de.atextor.madv.game.GameEffect
+import de.atextor.madv.game.Audio
 
 sealed trait GameItemType
 case object SpellGameItem extends GameItemType

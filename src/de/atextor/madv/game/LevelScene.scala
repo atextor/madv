@@ -33,7 +33,6 @@ import de.atextor.madv.engine.HealthDisplay
 import de.atextor.madv.engine.Vec2f
 import de.atextor.madv.engine.Projectile
 import de.atextor.madv.engine.Shooter
-import de.atextor.madv.engine.Audio
 import de.atextor.madv.engine.SpellSelection
 import de.atextor.madv.engine.Shop
 import de.atextor.madv.engine.GameItem

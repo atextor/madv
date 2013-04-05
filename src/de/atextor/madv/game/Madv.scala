@@ -9,7 +9,6 @@ import de.atextor.madv.engine.Text
 import org.newdawn.slick.state.transition.CrossStateTransition
 import org.newdawn.slick.state.GameState
 import org.newdawn.slick.state.transition.EmptyTransition
-import de.atextor.madv.engine.Audio
 
 class Madv extends StateBasedGame("Madv") {
   var container: AppGameContainer = null
@@ -41,7 +40,7 @@ object Madv {
     val container = new AppGameContainer(madv)
     madv.container = container 
     container.setShowFPS(false)
-    container.setDisplayMode(800, 600, true)
+    container.setDisplayMode(800, 600, false)
     container.setTargetFrameRate(60)
     container.start
   }
