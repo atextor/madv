@@ -94,7 +94,7 @@ class LevelScene(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
       case IslandGreen => 
         in(2 seconds, { t =>
           addStoryText(new StoryText("Hmm.. der Boden sieht hier\nziemlich zerklüftet aus.", Some(Entities.muffinPortrait)))
-          addStoryText(new StoryText("Aber mit dem Sprung-Zauberspruch kein Problem!\nIch hoffe du hast noch genug Gold übrig\nHihihi!", Some(Entities.muffinPortrait)))
+          addStoryText(new StoryText("Aber mit dem Sprung-Zauberspruch\nkein Problem!\nIch hoffe du hast noch genug Gold\nübrig\nHihihi!", Some(Entities.muffinPortrait)))
         })
       case IslandLava =>
         Audio.music3.stop
@@ -138,11 +138,6 @@ class LevelScene(toggleFullscreen: () => Unit) extends Scene(toggleFullscreen) {
       addStoryText(new StoryText("Und nicht vergessen: Mit der\nLeertaste zaubern!", Some(Entities.muffinPortrait)))
       addStoryText(new StoryText("Wenn du mich brauchst, ich bin\nin deinem Inventar.", Some(Entities.muffinPortrait)))
     })
-    
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
-    Inventory.addItem(ExitTeleportScroll())
     
     Shop.addItem(ShurikenSpell())
     Shop.addItem(BallLightningSpell())
