@@ -291,10 +291,9 @@ class FemaleOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) ext
     speed = 0.3f,
     maxHp = 100,
     damage = 2,
-    onHurt = Audio.grunt.play _,
-    onDie = Audio.growl.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.grunt),
+    dieSound = Some(Audio.growl),
+    attackSound = Some(Audio.slash)
 )
 
 class FemaleArmoredOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
@@ -307,10 +306,9 @@ class FemaleArmoredOrc(level: Level, player: Player, brain: Brain, startPos: Vec
     speed = 0.28f,
     maxHp = 150,
     damage = 3,
-    onHurt = Audio.grunt.play _,
-    onDie = Audio.growl.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.grunt),
+    dieSound = Some(Audio.growl),
+    attackSound = Some(Audio.slash)
 )
 
 class FemaleHeavyArmoredOrc(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
@@ -323,10 +321,9 @@ class FemaleHeavyArmoredOrc(level: Level, player: Player, brain: Brain, startPos
     speed = 0.25f,
     maxHp = 180,
     damage = 4,
-    onHurt = Audio.grunt.play _,
-    onDie = Audio.growl.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.grunt),
+    dieSound = Some(Audio.growl),
+    attackSound = Some(Audio.slash)
 )
 
 class Skeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
@@ -339,10 +336,9 @@ class Skeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) exte
     speed = 0.5f,
     maxHp = 130,
     damage = 2,
-    onHurt = Audio.bonecrack.play _,
-    onDie = Audio.bonecrack2.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.bonecrack),
+    dieSound = Some(Audio.bonecrack2),
+    attackSound = Some(Audio.slash)
 )
 
 class ArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
@@ -355,10 +351,9 @@ class ArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos: Vec2
     speed = 0.45f,
     maxHp = 180,
     damage = 4,
-    onHurt = Audio.bonecrack.play _,
-    onDie = Audio.bonecrack2.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.bonecrack),
+    dieSound = Some(Audio.bonecrack2),
+    attackSound = Some(Audio.slash)
 )
 
 class HeavyArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos: Vec2d) extends Humanoid (
@@ -371,8 +366,7 @@ class HeavyArmoredSkeleton(level: Level, player: Player, brain: Brain, startPos:
     speed = 0.50f,
     maxHp = 220,
     damage = 6,
-    onHurt = Audio.bonecrack.play _,
-    onDie = Audio.bonecrack2.play _,
-    onBeginAttack = Audio.slash.loop _,
-    onEndAttack = Audio.slash.stop _
+    hurtSound = Some(Audio.bonecrack),
+    dieSound = Some(Audio.bonecrack2),
+    attackSound = Some(Audio.slash)
 )

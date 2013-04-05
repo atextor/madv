@@ -11,7 +11,7 @@ object Dumb extends Brain {
 object Dying extends Brain {
   def apply(me: Humanoid, scene: Scene, delta: Int) {
     scene.at(delta + 700 millis, {_ => me.movingDirection = Nowhere})
-    scene.at(delta + 5000 millis, {_ => me.alive = false; scene.numMonsters -= 1})
+    scene.at(delta + 5000 millis, {_ => me.alive = false; me.attackSound.foreach(_.stop()); scene.numMonsters -= 1})
     me.behavior = Dumb
   }
 }
@@ -22,7 +22,7 @@ class Attack(player: Player, damage: Int) extends Brain {
     val dist = player distanceTo me
     if (dist > 20) {
       me.movingDirection = Nowhere
-      scene.at(delta + 1000 millis, {_ => me.onEndAttack(); me.chase })
+      scene.at(delta + 1000 millis, {_ => me.attackSound.foreach(_.stop()); me.chase })
       return
     }
     

@@ -3,10 +3,10 @@ package de.atextor.madv.engine
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration.DurationInt
-
 import org.newdawn.slick.Animation
 import org.newdawn.slick.Renderable
 import org.newdawn.slick.SpriteSheet
+import org.newdawn.slick.Sound
 
 trait Tickable {
   var enabled = true
@@ -51,10 +51,9 @@ class Humanoid (
     var speed: Float,
     var maxHp: Int,
     val damage: Int,
-    val onHurt: () => Unit,
-    val onDie: () => Unit,
-    val onBeginAttack: () => Unit,
-    val onEndAttack: () => Unit) extends Entity(size = skin.size, pos = startPosition) with CanGo {
+    val hurtSound: Option[Sound],
+    val dieSound: Option[Sound],
+    val attackSound: Option[Sound]) extends Entity(size = skin.size, pos = startPosition) with CanGo {
   
   var hp = maxHp
   var properties: List[EntityProperty] = List(IsMonster, IsTarget)
@@ -95,8 +94,8 @@ class Humanoid (
   }
   
   def die {
-    onEndAttack()
-    onDie()
+    attackSound.foreach(_.stop())
+    dieSound.foreach(_.play())
     properties = properties.filter(_ != IsTarget)
     movingDirection = movingDirection(Down)
     lookingDirection = Down
@@ -106,7 +105,7 @@ class Humanoid (
   }
   
   def attack {
-    onBeginAttack()
+    attackSound.foreach(_.loop())
     movingDirection = Nowhere
     spriteAction = Slash
     behavior = new Attack(player, damage)
@@ -120,7 +119,7 @@ class Humanoid (
   
   override def hurt(damage: Int) {
     if (spriteAction == Hurt) return
-    onHurt()
+    hurtSound.foreach(_.play())
     hp -= damage
     if (hp <= 0) die
   }

@@ -14,10 +14,9 @@ class Player(var level: Level, startPosition: Vec2d, entitySkin: EntitySkin, nex
     speed = 1,
     maxHp = 100,
     damage = 0,
-    onHurt = DoNothing,
-    onDie = DoNothing,
-    onBeginAttack = DoNothing,
-    onEndAttack = DoNothing
+    hurtSound = None,
+    dieSound = None,
+    attackSound = None
 ) {
   val staticRenderPos = Vec2d(168, 80)
   var spell: Option[Spell] = None
