@@ -3,51 +3,55 @@ package de.atextor.madv.engine
 import org.newdawn.slick.Image
 import org.newdawn.slick.ImageBuffer
 import org.newdawn.slick.Renderable
-
 import de.atextor.madv.engine.Util.pipelineSyntax
+import org.newdawn.slick.Color
 
 class AutoMap(level: Level, player: Player) extends Renderable {
   import level.PlacedLevelCell
-  case class RGBA(r: Int, g: Int, b: Int, a: Int)
-  val imageBuffer = new ImageBuffer(level.width, level.height)
-  val image = new Image(imageBuffer, Image.FILTER_NEAREST)
-  val invis = RGBA(0, 0, 0, 0)
-//  update(player)
-  init
+  val image = {
+    val imageBuffer = new ImageBuffer(level.width, level.height)
+    level.placedCells.foreach(pc => imageBuffer.setRGBA(pc.pos.x, pc.pos.y, 0, 0, 0, 0))
+    new Image(imageBuffer, Image.FILTER_NEAREST)
+  } 
   
-  private def init {
-    level.placedCells.foreach { pc =>
-      val rgba = cellToPixel(pc)
-      imageBuffer.setRGBA(pc.pos.x, pc.pos.y, invis.r, invis.g, invis.b, invis.a)
+  val exit = Color.green
+  val islandBorder = Color.black
+  val playerColor = Color.red
+  val invisible = new Color(0.0f, 0.0f, 0.0f, 0.0f)
+  val walkable = new Color(1.0f, 1.0f, 1.0f, 0.6f)
+  
+  private def cellToPixel(pc: PlacedLevelCell): Color = pc match {
+    case c if c.cell.properties contains Exit => exit
+    case c if (c + Up).cell.properties contains Exit => exit
+    case c if (c + Left).cell.properties contains Exit => exit
+    case c if (c + Up + Left).cell.properties contains Exit => exit
+    case c if c.cell.properties contains Walkable => walkable
+    case c if c.cell.properties contains IslandBorder => islandBorder
+    case _ => null  // Faster than creating Some(color) for every pixel
+  }
+  
+  private def renderPixel(pc: PlacedLevelCell) {
+    val g = image.getGraphics
+    val rgba = cellToPixel(pc)
+    if (rgba != null) {
+      g.setColor(rgba)
+      g.fillRect(pc.pos.x.toFloat, pc.pos.y.toFloat, 1f, 1f)
     }
   }
   
-  private def setLargePixel(pos: Vec2d, rgba: RGBA) {
-    imageBuffer.setRGBA(pos.x, pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
-    imageBuffer.setRGBA(pos.x + 1, pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
-    imageBuffer.setRGBA(pos.x, pos.y + 1, rgba.r, rgba.g, rgba.b, rgba.a)
-    imageBuffer.setRGBA(pos.x + 1, pos.y + 1, rgba.r, rgba.g, rgba.b, rgba.a)
+  private def renderPlayer {
+    val g = image.getGraphics
+    g.setColor(playerColor)
+    val p = player.pos / 16
+    g.fillRect(p.x, p.y, 2, 2)
   }
   
-  private def cellToPixel(pc: PlacedLevelCell): RGBA = pc match {
-    case c if c.cell.properties contains Exit => RGBA(0, 255, 0, 255)
-    case c if (c + Up).cell.properties contains Exit => RGBA(0, 255, 0, 255)
-    case c if (c + Left).cell.properties contains Exit => RGBA(0, 255, 0, 255)
-    case c if (c + Up + Left).cell.properties contains Exit => RGBA(0, 255, 0, 255)
-    case c if c.cell.properties contains Walkable => RGBA(255, 255, 255, 150)
-    case c if c.cell.properties contains IslandBorder => RGBA(0, 0, 0, 255)
-    case _ => RGBA(0, 0, 0, 0)
-  }
-  
-  def draw(x: Float, y: Float) = new Image(imageBuffer, Image.FILTER_NEAREST).draw(x, y)
+  def draw(x: Float, y: Float) = image.draw(x, y)
   
   def uncoverMap(player: Player) = {
-    level.placedCells.foreach { pc =>
-      val rgba = cellToPixel(pc)
-      imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
-    }
-    // Add player
-    setLargePixel(player.pos.toVec2d / 16, RGBA(255, 0, 0, 255))
+    level.placedCells.foreach(renderPixel)
+    renderPlayer
+    image.getGraphics.flush()
   }
   
   def update(playerPos: Vec2d) {
@@ -55,12 +59,9 @@ class AutoMap(level: Level, player: Player) extends Renderable {
       val a = pc.pos.x.toInt - (playerPos.x.toInt / 16)
       val b = pc.pos.y.toInt - (playerPos.y.toInt / 16)
       math.sqrt(a * a + b * b) < 10
-    } foreach { pc =>
-      val rgba = cellToPixel(pc)
-      imageBuffer.setRGBA(pc.pos.x, pc.pos.y, rgba.r, rgba.g, rgba.b, rgba.a)
-    }
-    // Add player
-    setLargePixel(player.pos.toVec2d / 16, RGBA(255, 0, 0, 255))
+    } foreach(renderPixel)
+    renderPlayer
+    image.getGraphics.flush()
   }
 
 }
