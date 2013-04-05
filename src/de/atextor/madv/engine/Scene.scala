@@ -37,7 +37,10 @@ abstract class Scene(toggleFullscreen: () => Unit) extends BasicGameState {
   def addEffect(e: Entity): ListBuffer[Entity] = effects += e
   def addEffects(e: Seq[Entity]): ListBuffer[Entity] = effects ++= e
   def addOverlay(o: Overlay): ListBuffer[Overlay] = overlays += o
-  def addStoryText(t: StoryText) = storyTexts += t
+  def addStoryText(t: StoryText) = {
+    setMenu(None)
+    storyTexts += t
+  }
   def addEntity(e: Entity): ListBuffer[Entity] = entities += e
   def addEntities(e: Seq[Entity]): ListBuffer[Entity] = entities ++= e
   def setMenu(m: Option[Menu]) = m match {
