@@ -56,7 +56,7 @@ class TitleScreen(toggleFullscreen: () => Unit, startGame: () => Unit) extends B
     addOverlay(title)
     Audio.music1.loop
     
-    val intro = """|Eines Tages wollte Joan eine Wanderung machen.%Sie wollte wollte durch den Taunus nach Wiesbaden.
+    val intro = """|Eines Tages wollte Joan eine Wanderung machen.%Sie wollte durch den Taunus nach Wiesbaden.
                    |Im Alten Rathaus-Cafe in Hofheim kaufte sie einen Muffin.
                    |Plötzlich fing der Muffin an zu sprechen.
                    |"Hallo Joan!" sagte der Muffin.%Joan war baff. "Hallo Muffin."
