@@ -47,12 +47,14 @@ abstract class Menu(title: String, val itemsStackable: Boolean, drawPrices: Bool
     stuff += i
     val t = sizeMap.getOrElseUpdate(i.toString, new Text("0"))
     t.text = (t.text.toInt + 1).toString
+    t.showAll
   }
   
   def removeItem(i: GameItem) = {
     stuff -= i
     val t = sizeMap.get(i.toString).get
     t.text = (t.text.toInt - 1).toString
+    t.showAll
     if (selection > stuff.groupBy(_.toString).size - 1) selection = stuff.groupBy(_.toString).size - 1
     if (stuff.isEmpty) selection = -1
   }
